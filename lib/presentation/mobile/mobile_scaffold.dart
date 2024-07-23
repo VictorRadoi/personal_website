@@ -18,7 +18,7 @@ class MobileScaffold extends StatefulWidget {
 
 class _MobileScaffoldState extends State<MobileScaffold> {
   ScrollController scrollController = ScrollController();
-  bool showbtn = false;
+  bool showButton = false;
 
   final experienceKey = GlobalKey();
   final educationKey = GlobalKey();
@@ -28,16 +28,15 @@ class _MobileScaffoldState extends State<MobileScaffold> {
   @override
   void initState() {
     scrollController.addListener(() {
-      double showoffset =
-          10.0; //Back to top botton will show on scroll offset 10.0
+      double showOffset = 10.0;
 
-      if (scrollController.offset > showoffset) {
-        showbtn = true;
+      if (scrollController.offset > showOffset) {
+        showButton = true;
         setState(() {
           //update state
         });
       } else {
-        showbtn = false;
+        showButton = false;
         setState(() {
           //update state
         });
@@ -191,7 +190,7 @@ class _MobileScaffoldState extends State<MobileScaffold> {
       ),
       floatingActionButton: AnimatedOpacity(
         duration: const Duration(milliseconds: 0),
-        opacity: showbtn ? 1 : 0,
+        opacity: showButton ? 1 : 0,
         child: SizedBox(
           height: 50,
           width: 50,

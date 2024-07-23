@@ -18,11 +18,11 @@ class TabletScaffold extends StatefulWidget {
 
 class _TabletScaffoldState extends State<TabletScaffold> {
   ScrollController scrollController = ScrollController();
-  bool showbtn = false;
+  bool showButton = false;
 
   final homeKey = GlobalKey();
   final experienceKey = GlobalKey();
-  final educationeKey = GlobalKey();
+  final educationKey = GlobalKey();
   final projectsKey = GlobalKey();
   final achievementsKey = GlobalKey();
 
@@ -35,16 +35,15 @@ class _TabletScaffoldState extends State<TabletScaffold> {
   @override
   void initState() {
     scrollController.addListener(() {
-      double showoffset =
-          10.0; //Back to top botton will show on scroll offset 10.0
+      double showOffset = 10.0;
 
-      if (scrollController.offset > showoffset) {
-        showbtn = true;
+      if (scrollController.offset > showOffset) {
+        showButton = true;
         setState(() {
           //update state
         });
       } else {
-        showbtn = false;
+        showButton = false;
         setState(() {
           //update state
         });
@@ -109,11 +108,11 @@ class _TabletScaffoldState extends State<TabletScaffold> {
             ),
             ListTile(
               onTap: () {
-                Scrollable.ensureVisible(educationeKey.currentContext!);
+                Scrollable.ensureVisible(educationKey.currentContext!);
                 Navigator.pop(context);
               },
               leading: const Icon(FontAwesomeIcons.school),
-              title: const Text('Edcucation'),
+              title: const Text('Education'),
             ),
             ListTile(
               onTap: () {
@@ -153,7 +152,7 @@ class _TabletScaffoldState extends State<TabletScaffold> {
               height: 50,
             ),
             Container(
-                key: educationeKey,
+                key: educationKey,
                 child: const SectionHeader(text: 'Education')),
             const SizedBox(
               height: 50,
@@ -186,7 +185,7 @@ class _TabletScaffoldState extends State<TabletScaffold> {
       ),
       floatingActionButton: AnimatedOpacity(
         duration: const Duration(milliseconds: 0),
-        opacity: showbtn ? 1.0 : 0.0,
+        opacity: showButton ? 1.0 : 0.0,
         child: FloatingActionButton(
           onPressed: () {
             scrollController.animateTo(0,

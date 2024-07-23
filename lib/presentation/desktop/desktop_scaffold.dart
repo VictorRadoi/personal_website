@@ -15,25 +15,24 @@ class DesktopScaffold extends StatefulWidget {
 
 class _DesktopScaffoldState extends State<DesktopScaffold> {
   ScrollController scrollController = ScrollController();
-  bool showbtn = false;
+  bool showButton = false;
   final experienceKey = GlobalKey();
-  final educationeKey = GlobalKey();
+  final educationKey = GlobalKey();
   final projectsKey = GlobalKey();
   final achievementsKey = GlobalKey();
 
   @override
   void initState() {
     scrollController.addListener(() {
-      double showoffset =
-          10.0; //Back to top botton will show on scroll offset 10.0
+      double showOffset = 10.0;
 
-      if (scrollController.offset > showoffset) {
-        showbtn = true;
+      if (scrollController.offset > showOffset) {
+        showButton = true;
         setState(() {
           //update state
         });
       } else {
-        showbtn = false;
+        showButton = false;
         setState(() {
           //update state
         });
@@ -51,7 +50,7 @@ class _DesktopScaffoldState extends State<DesktopScaffold> {
           children: [
             AboutMeSection(
               experienceKey: experienceKey,
-              educationKey: educationeKey,
+              educationKey: educationKey,
               projectsKey: projectsKey,
               achievementsKey: achievementsKey,
             ),
@@ -72,7 +71,7 @@ class _DesktopScaffoldState extends State<DesktopScaffold> {
               height: 50,
             ),
             Container(
-              key: educationeKey,
+              key: educationKey,
               child: const SectionHeader(
                 text: 'Education',
               ),
@@ -118,7 +117,7 @@ class _DesktopScaffoldState extends State<DesktopScaffold> {
       ),
       floatingActionButton: AnimatedOpacity(
         duration: const Duration(milliseconds: 0),
-        opacity: showbtn ? 1.0 : 0.0,
+        opacity: showButton ? 1.0 : 0.0,
         child: FloatingActionButton(
           onPressed: () {
             scrollController.animateTo(0,
