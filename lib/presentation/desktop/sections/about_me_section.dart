@@ -123,7 +123,7 @@ class AboutMeSection extends StatelessWidget {
                       SizedBox(
                         width: 550,
                         child: SelectableText(
-                          """I am software professional with over 3 years of experience across diverse projects, ranging from mobile applications to specialized software solu‐ tions. As my career has progressed, I’ve increasingly taken on leadership responsibilities, discovering a natural aptitude for guiding teams, refining processes, and driving projects to success. With a solid foundation in technology and a growing passion for business and management, I’m eager to transition into roles where I have the opportunity to blend these skills effectively.""",
+                          """I am software professional with over 3 years of experience across diverse projects, ranging from mobile applications to specialized software solutions. As my career has progressed, I’ve increasingly taken on leadership responsibilities, discovering a natural aptitude for guiding teams, refining processes, and driving projects to success. With a solid foundation in technology and a growing passion for business and management, I’m eager to transition into roles where I have the opportunity to blend these skills effectively.""",
                           textAlign: TextAlign.left,
                           style: ubuntu14grey,
                         ),

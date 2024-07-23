@@ -83,7 +83,7 @@ class ExperienceSection extends StatelessWidget {
             height: 15,
           ),
           const TextTile(
-            text1: 'Evolution Labs, Romania - June 2021 - April 2022',
+            text1: 'Evolution Labs, Romania - June 2021 - May 2022',
             text2: 'JUNIOR APPLICATION DEVELOPER',
             text3:
                 """• Contributed to the development of the e-commerce application Carturesti, Romania’s largest online bookstore
