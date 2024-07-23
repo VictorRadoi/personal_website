@@ -18,7 +18,7 @@ class ResonsiveLayout extends StatelessWidget {
       builder: (context, constaints) {
         if (constaints.maxWidth < 500) {
           return mobileScaffold;
-        } else if (constaints.maxWidth < 1000) {
+        } else if (constaints.maxWidth < 1084) {
           return tabletScaffold;
         } else {
           return desktopScaffold;

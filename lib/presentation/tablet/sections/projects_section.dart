@@ -7,7 +7,7 @@ class ProjectsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isScreenWide = MediaQuery.of(context).size.width >= 1000;
+    bool isScreenWide = MediaQuery.of(context).size.width >= 1084;
     return Padding(
       padding: const EdgeInsets.only(left: 50, right: 50, top: 20),
       child: Flex(

@@ -16,15 +16,15 @@ class TextTile extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(text1, style: ubuntu17blackBold),
-        Text(
+        SelectableText(text1, style: ubuntu17blackBold),
+        SelectableText(
           text2,
           style: ubuntu14black,
         ),
         const SizedBox(
           height: 15,
         ),
-        Text(
+        SelectableText(
           text3,
           style: ubuntu14black,
         ),

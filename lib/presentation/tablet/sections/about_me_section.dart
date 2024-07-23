@@ -12,7 +12,7 @@ class AboutMeSection extends StatelessWidget {
     return Stack(
       children: [
         Container(
-          height: 500,
+          height: 550,
           color: const Color(0xff08346c),
         ),
         Padding(
@@ -28,14 +28,14 @@ class AboutMeSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Radoi Victor-Andrei',
+                        'Rădoi Victor-Andrei',
                         style: ubuntu25white,
                       ),
                       const SizedBox(
                         height: 30,
                       ),
                       Text(
-                        'Software Engineer & Flutter Developer',
+                        'Software Engineer',
                         style: ubuntu17white,
                       ),
                       const SizedBox(
@@ -44,7 +44,11 @@ class AboutMeSection extends StatelessWidget {
                       SizedBox(
                         width: isScreenWide ? 500 : 300,
                         child: Text(
-                          """I am a motivated software developer with over 2 years of industry experience. Throughout my career, I have worked on a variety of projects, ranging from small-scale applications to enterprise-level solutions. I am passionate about mobile development and I constantly strive to learn new technologies and keep up with the latest advancements in the field. This has led me to explore new domains such as data analytics and artificial intelligence, which I have studied and leveraged in my work. With a strong drive to learn and innovate, I am excited to take on new challenges and contribute to developing successful projects.""",
+                          """I am software professional with over 3 years of experience across diverse projects, ranging from mobile applications 
+                          to specialized software solutions. As my career has progressed, I’ve increasingly taken on leadership responsibilities, 
+                          discovering a natural aptitude for guiding teams, refining processes, and driving projects to success. With a solid foundation 
+                          in technology and a growing passion for business and management, I’m eager to transition into roles where I have the opportunity 
+                          to blend these skills effectively.""",
                           textAlign: TextAlign.left,
                           style: ubuntu14grey,
                         ),

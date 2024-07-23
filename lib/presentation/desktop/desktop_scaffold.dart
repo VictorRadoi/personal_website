@@ -93,7 +93,10 @@ class _DesktopScaffoldState extends State<DesktopScaffold> {
             const SizedBox(
               height: 50,
             ),
-            const ProjectsSection(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 150),
+              child: ProjectsSection(),
+            ),
             const SizedBox(
               height: 100,
             ),

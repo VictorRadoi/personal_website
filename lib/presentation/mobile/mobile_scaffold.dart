@@ -58,7 +58,7 @@ class _MobileScaffoldState extends State<MobileScaffold> {
       appBar: AppBar(
         elevation: 0,
         title: Text(
-          'Radoi Victor-Andrei',
+          'Rădoi Victor-Andrei',
           style: ubuntu17whiteBold,
         ),
         backgroundColor: const Color(0xff08346c),
@@ -78,7 +78,9 @@ class _MobileScaffoldState extends State<MobileScaffold> {
                     icon: const Icon(Icons.close)),
               ),
             ),
-            const DrawerHeader(child: Icon(Icons.favorite)),
+            const SizedBox(
+              height: 100,
+            ),
             const ListTile(
               leading: Icon(FontAwesomeIcons.house),
               title: Text('Home'),

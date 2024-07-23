@@ -18,7 +18,7 @@ class AboutMeSection extends StatelessWidget {
 
   void downloadFile(String url) {
     html.AnchorElement anchorElement = html.AnchorElement(href: url);
-    anchorElement.download = 'Radoi Victor-Andrei CV.pdf';
+    anchorElement.download = 'Rădoi Victor-Andrei CV.pdf';
     anchorElement.click();
   }
 
@@ -39,12 +39,12 @@ class AboutMeSection extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Radoi Victor-Andrei',
+                  SelectableText(
+                    'Rădoi Victor-Andrei',
                     style: ubuntu25white,
                   ),
                   SizedBox(
-                    width: 400,
+                    width: 500,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -106,15 +106,15 @@ class AboutMeSection extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Radoi Victor-Andrei',
+                      SelectableText(
+                        'Rădoi Victor-Andrei',
                         style: ubuntu35white,
                       ),
                       const SizedBox(
                         height: 30,
                       ),
-                      Text(
-                        'Software Engineer & Flutter Developer',
+                      SelectableText(
+                        'Software Engineer',
                         style: ubuntu17white,
                       ),
                       const SizedBox(
@@ -122,8 +122,8 @@ class AboutMeSection extends StatelessWidget {
                       ),
                       SizedBox(
                         width: 550,
-                        child: Text(
-                          """I am a motivated software developer with over 2 years of industry experience. Throughout my career, I have worked on a variety of projects, ranging from small-scale applications to enterprise-level solutions. I am passionate about mobile development and I constantly strive to learn new technologies and keep up with the latest advancements in the field. This has led me to explore new domains such as data analytics and artificial intelligence, which I have studied and leveraged in my work. With a strong drive to learn and innovate, I am excited to take on new challenges and contribute to developing successful projects.""",
+                        child: SelectableText(
+                          """I am software professional with over 3 years of experience across diverse projects, ranging from mobile applications to specialized software solu‐ tions. As my career has progressed, I’ve increasingly taken on leadership responsibilities, discovering a natural aptitude for guiding teams, refining processes, and driving projects to success. With a solid foundation in technology and a growing passion for business and management, I’m eager to transition into roles where I have the opportunity to blend these skills effectively.""",
                           textAlign: TextAlign.left,
                           style: ubuntu14grey,
                         ),
@@ -186,7 +186,7 @@ class AboutMeSection extends StatelessWidget {
                     height: 400,
                   ),
                   isScreenWide
-                      ? SizedBox(
+                      ? const SizedBox(
                           width: 100,
                         )
                       : const SizedBox(),

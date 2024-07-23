@@ -59,7 +59,7 @@ class _TabletScaffoldState extends State<TabletScaffold> {
       appBar: AppBar(
         elevation: 0,
         title: Text(
-          'Radoi Victor-Andrei',
+          'Rădoi Victor-Andrei',
           style: ubuntu25white,
         ),
         backgroundColor: const Color(0xff08346c),
@@ -88,7 +88,9 @@ class _TabletScaffoldState extends State<TabletScaffold> {
         backgroundColor: Colors.grey[300],
         child: Column(
           children: [
-            const DrawerHeader(child: Icon(Icons.favorite)),
+            const SizedBox(
+              height: 100,
+            ),
             ListTile(
               onTap: () {
                 Scrollable.ensureVisible(homeKey.currentContext!);

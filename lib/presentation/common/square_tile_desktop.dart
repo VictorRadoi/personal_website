@@ -35,14 +35,14 @@ class SquareTileDesktop extends StatelessWidget {
           const SizedBox(
             height: 20,
           ),
-          Text(
+          SelectableText(
             title,
             style: ubuntu17blackBold,
           ),
           const SizedBox(
             height: 10,
           ),
-          Text(
+          SelectableText(
             description,
             style: ubuntu14black,
           ),

@@ -52,26 +52,6 @@ calendars.""",
             icon: FontAwesomeIcons.shop,
             color: Colors.blue,
           ),
-          SizedBox(
-            width: 30,
-          ),
-          Column(
-            children: [
-              SizedBox(
-                height: 50,
-              ),
-              SquareTileDesktop(
-                title: 'Teamboard',
-                description:
-                    """Developed an application that enables sport clubs and teams to coordinate their sporting events. Designed features
-such as team chat, interactive calendar and custom player profiles. Cross-platform development using Flutter with a backend developed in NGINX, Flask, and SQL. Applied clean
-architecture principles and design patterns (BloC). Led end-to-end product development as part of a small team, engaging with clients and incorporating multiple project
-iterations to enhance user experience based on customer feedback.""",
-                icon: FontAwesomeIcons.personBiking,
-                color: Colors.green,
-              ),
-            ],
-          ),
         ],
       ),
     );
