@@ -99,7 +99,7 @@ class _MobileScaffoldState extends State<MobileScaffold> {
                 Navigator.of(context).pop();
               },
               leading: const Icon(FontAwesomeIcons.school),
-              title: const Text('Edcucation'),
+              title: const Text('Education'),
             ),
             ListTile(
               onTap: () {

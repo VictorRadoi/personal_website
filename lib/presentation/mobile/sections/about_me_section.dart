@@ -27,7 +27,7 @@ class AboutMeSection extends StatelessWidget {
                 height: 30,
               ),
               Text(
-                'Software Engineer',
+                'Software Developer | Technical Product Manager',
                 style: ubuntu17white,
               ),
               const SizedBox(
@@ -90,7 +90,7 @@ class AboutMeSection extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 30,
               ),
               Center(
@@ -99,7 +99,7 @@ class AboutMeSection extends StatelessWidget {
                   height: 300,
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 30,
               ),
             ],
