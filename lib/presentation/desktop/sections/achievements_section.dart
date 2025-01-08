@@ -65,7 +65,7 @@ class AchievementsSection extends StatelessWidget {
                       ),
                       Flexible(
                         child: SelectableText(
-                          'Agile Requirements Foundations',
+                          'Mobile Development with React Native (2024)',
                           style: ubuntu17blackBold,
                         ),
                       ),
@@ -84,7 +84,7 @@ class AchievementsSection extends StatelessWidget {
                       ),
                       Flexible(
                         child: SelectableText(
-                          'Requirements Elicitation and Analysis',
+                          'Google Software Engineering Program (2023)',
                           style: ubuntu17blackBold,
                         ),
                       ),

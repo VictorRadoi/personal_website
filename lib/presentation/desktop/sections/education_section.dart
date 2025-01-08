@@ -16,7 +16,7 @@ class EducationSection extends StatelessWidget {
                 'Dublin City University, Dublin, Ireland - September 2022 - June 2023',
             text2: """Master's Degree in Artifical Intelligence""",
             text3:
-                """• Core Modules: DataMining, DataVisualisation, Statistical Data Analysis, Machine Learning""",
+                """• Machine Learning, Artificial Intelligence, Data Analytics and Data Mining""",
           ),
           SizedBox(
             height: 15,
@@ -36,7 +36,7 @@ class EducationSection extends StatelessWidget {
                 """King's College London, London, United Kingdom - September 2018 - June 2021""",
             text2: """Bachelor's Degree in Computer Science""",
             text3:
-                """• Core Modules: Software Engineering, Database Systems, Object Oriented Design""",
+                """• Data Structures, Object Oriented Design, Databases, Software Engineering""",
           ),
         ],
       ),

@@ -16,7 +16,9 @@ class ProjectsSection extends StatelessWidget {
           SquareTileDesktop(
             title: 'GestureXR',
             description:
-                """Master thesis project consisting of a machine learning algorithm designed to recognize hand gestures in real time and facilitate freehand interaction with virtual objects. Researching and comparing the performance of different machine learning models for dynamic hand gesture recognition. Python implementation using ML libraries (PyTorch, TensorFlow) and integration within a simple mobile application that enables real time testing.""",
+                """• Developed a dynamic gesture recognition system for freehand interaction in AR applications
+    • Architected a two‑stream neural network based on CNN and RNN cells, combining RGB and skeletal input
+    • Implemented in Python (MediaPipe, TensorFlow)""",
             icon: FontAwesomeIcons.hand,
             color: Colors.red,
           ),
@@ -31,10 +33,9 @@ class ProjectsSection extends StatelessWidget {
               SquareTileDesktop(
                 title: 'AirQRunner',
                 description:
-                    """Undergraduate final year project consisting of an activity tracking application which makes recommendations for running routes by
-avoiding areas with high leveles of pollution. Developed the backend service using Python, Flask and Firebase. Implemented a custom path finding algorithm based on A* which
-calculates the route cost based on 2 options: a given running distance or a destination provided by the user. Implemented a cross-platform Flutter application, using Figma for mock-up design and several third-party libraries for the business
-logic implementation (OpenStreetMaps, Google Maps Location)""",
+                    """• Developed an activity tracking app that suggests optimal running routes by avoiding highly polluted areas
+    • Built the backend service using Flask, and Firebase, implementing a custom A*‑based pathfinding algorithm
+    • Flutter imlementation integrating OpenStreetMaps""",
                 icon: FontAwesomeIcons.personRunning,
                 color: Colors.orange,
               ),
@@ -43,14 +44,32 @@ logic implementation (OpenStreetMaps, Google Maps Location)""",
           SizedBox(
             width: 30,
           ),
+          Column(
+            children: [
+              SizedBox(
+                height: 50,
+              ),
+              SquareTileDesktop(
+                title: 'RezerWith',
+                description:
+                    """• Worked within a team of 4 volunteers to develop a mobile application aimed at connecting small businesses with customers during the pandemic
+                  • Used Dart and Flutter, with Google Firebase for managing user accounts and real‑time appointment updates""",
+                icon: FontAwesomeIcons.shop,
+                color: Colors.blue,
+              ),
+            ],
+          ),
+          SizedBox(
+            width: 30,
+          ),
           SquareTileDesktop(
-            title: 'RezerWith',
+            title: 'The Wine Shelf',
             description:
-                """As part of a team of 4 developers, designed an application with the purpose of connecting small businesses within our local
-community with potential customers. Worked on both the frontend and backend of the application, applying technologies such as Flutter, Firebase and Firestore. Implemented several UI components and features including authentication, business logic for appointment creation and custom
-calendars.""",
-            icon: FontAwesomeIcons.shop,
-            color: Colors.blue,
+                """• Developed a React Native app that provides detailed wine information and pairing suggestions
+              • Incorporated a label scanning feature for wine recognition
+              • Integrated Firebase for storing user preferences, reviews, and personalized wine recommendations""",
+            icon: FontAwesomeIcons.personRunning,
+            color: Colors.orange,
           ),
         ],
       ),

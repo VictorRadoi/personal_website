@@ -27,17 +27,18 @@ class AboutMeSection extends StatelessWidget {
                 height: 30,
               ),
               Text(
-                'Software Developer | Technical Product Manager',
+                'Mobile Developer | Technical Product Manager',
                 style: ubuntu17white,
               ),
               const SizedBox(
                 height: 30,
               ),
               Text(
-                """I am software professional with over 3 years of experience across diverse projects, ranging from mobile applications 
-                to specialized software solutions. As my career has progressed, I’ve increasingly taken on leadership responsibilities, 
-                discovering a natural aptitude for guiding teams, refining processes, and driving projects to success. With a solid foundation 
-                in technology and a growing passion for business and management, I’m eager to transition into roles where I have the opportunity to blend these skills effectively.""",
+                """My journey began as a cross‑platform mobile developer, and as I grew more invested in building innovative applications, I pursued a Master’s
+in AI to bring more intelligent features to my projects. During the past years, I’ve successfully launched 6 apps, including a large scale project
+with 50,000+ downloads and an app I co‑founded for the National Basketball Federation. Having worked in fast‑paced startup environments,
+I’ve played a key role in building several projects from the ground up, developing robust and scalable solutions with a strong focus on state
+management, responsive design, and performance optimization.""",
                 textAlign: TextAlign.justify,
                 style: ubuntu14grey,
               ),
