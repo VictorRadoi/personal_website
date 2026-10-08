@@ -19,6 +19,10 @@
   // Secret (not in this file): TURNSTILE_SECRET. Public site key: 0x4AAAAAAFRXSoXlNlwqquTv
   "observability": { "enabled": true },
   // Custom domains (Workers Custom Domains). Cloudflare manages their DNS records and certificates.
+  // Custom domains turn workers.dev off by default; keep it off (no duplicate of production) but
+  // keep preview URLs on, so PRs and shareable demos (versions upload --preview-alias) work.
+  "workers_dev": false,
+  "preview_urls": true,
   "routes": [
     { "pattern": "rvandrei.com", "custom_domain": true },
     { "pattern": "www.rvandrei.com", "custom_domain": true }
