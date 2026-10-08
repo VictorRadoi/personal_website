@@ -29,7 +29,6 @@ function selectText(btn: HTMLElement): void {
 async function copy(btn: HTMLElement): Promise<void> {
   const value = btn.dataset.copy ?? '';
   const status = statusOf(btn);
-  const label = btn.dataset.copyLabel ?? btn.textContent ?? '';
   let ok = false;
   try {
     if (navigator.clipboard?.writeText) {
@@ -42,19 +41,26 @@ async function copy(btn: HTMLElement): Promise<void> {
 
   window.clearTimeout(timers.get(btn));
   if (ok) {
-    btn.textContent = btn.dataset.copyDone ?? 'Copied';
-    if (status) status.textContent = btn.dataset.copyDone ?? 'Copied';
+    // Swap the visible label via data-state (both labels are always laid out, so width never changes).
+    btn.dataset.state = 'done';
+    if (status) {
+      delete status.dataset.tone;
+      status.textContent = btn.dataset.copyDone ?? 'Copied';
+    }
     track('email_copy', { location: btn.dataset.copyLocation });
     timers.set(
       btn,
       window.setTimeout(() => {
-        btn.textContent = label;
+        delete btn.dataset.state;
         if (status) status.textContent = '';
       }, 1800),
     );
   } else {
     selectText(btn);
-    if (status) status.textContent = btn.dataset.copyFailed ?? '';
+    if (status) {
+      status.dataset.tone = 'error';
+      status.textContent = btn.dataset.copyFailed ?? '';
+    }
   }
 }
 
