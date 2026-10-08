@@ -20,6 +20,8 @@ export type Service = ServiceEntry['data'];
 export type EarlierEntry = CollectionEntry<'earlier'>;
 export type Earlier = EarlierEntry['data'];
 export type Omission = CollectionEntry<'omissions'>['data'] & { id: string };
+export type Brief = CollectionEntry<'brief'>['data'];
+export type BriefOption = Brief['steps']['building']['options'][number];
 
 /** A project entry that has a venture card / a case-study teaser (narrowed types). */
 export type VentureEntry = ProjectEntry & { data: Project & { card: VentureCard } };
@@ -43,6 +45,12 @@ const byOrder = <T extends { data: { order: number } }>(a: T, b: T) => a.data.or
 export async function getSite(): Promise<Site> {
   const entry = await getEntry('site', 'en');
   if (!entry) throw new Error('src/content/site.yaml: entry "en" is missing');
+  return entry.data;
+}
+
+export async function getBrief(): Promise<Brief> {
+  const entry = await getEntry('brief', 'en');
+  if (!entry) throw new Error('src/content/brief.yaml: entry "en" is missing');
   return entry.data;
 }
 

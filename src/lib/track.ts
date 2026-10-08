@@ -17,9 +17,17 @@ export type TrackEvent =
   | 'easter_egg_enter'
   | 'easter_egg_found'
   | 'cursor_pref_change'
-  | 'not_found';
+  | 'not_found'
+  | 'brief_start'
+  | 'brief_step'
+  | 'sketch_open'
+  | 'photo_attach'
+  | 'brief_submit'
+  | 'brief_error';
 
-export type CtaMethod = 'email' | 'whatsapp' | 'booking' | 'linkedin' | 'github' | 'todo';
+export type CtaMethod = 'email' | 'whatsapp' | 'booking' | 'linkedin' | 'github' | 'todo' | 'brief';
+/** brief_submit `method`: the form itself, or one of the fallbacks carrying the summary. */
+export type BriefMethod = 'form' | 'email_app' | 'whatsapp' | 'booking';
 export type CsSource = 'venture_card' | 'case_panel' | 'service_proof' | 'next_project';
 export type NavTarget = 'ventures' | 'services' | 'work' | 'contact' | 'home';
 

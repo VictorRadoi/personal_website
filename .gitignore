@@ -9,3 +9,4 @@ dist/
 *.log
 npm-debug.log*
 .idea/
+.dev.vars*

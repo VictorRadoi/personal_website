@@ -1,0 +1,115 @@
+---
+/**
+ * "Your brief" tray (/start/): a ruled index card, taped at the corners like the hero to-do card, where
+ * every pick shows up as a handwritten line with a ballpoint tick. builder.ts fills the rows (textContent
+ * only) and hides empty ones. Desktop (≥1024): sticky in the right-hand columns. Below 1024 it is a bottom
+ * sheet opened from the dock's "Your brief" button (builder.ts toggles .is-open + aria-expanded).
+ */
+import Tape from '../paper/Tape.astro';
+import Scribble from '../ink/Scribble.astro';
+import type { Brief } from '../../lib/content';
+
+interface Props {
+  brief: Brief;
+}
+
+const { brief } = Astro.props;
+const s = brief.steps;
+const rows: { key: string; label: string }[] = [
+  { key: 'building', label: s.building.tray },
+  { key: 'kind', label: s.features.kindTray },
+  { key: 'stage', label: s.stage.tray },
+  { key: 'features', label: s.features.tray },
+  { key: 'timing', label: s.timing.tray },
+  { key: 'notes', label: s.notes.tray },
+  { key: 'attached', label: s.notes.trayAttached },
+];
+---
+<aside class="tray" id="brief-tray" aria-labelledby="brief-tray-title" data-tray>
+  <div class="tray__card">
+    <Tape placement="corners" seed="brief-tray" />
+    <p class="tray__title" id="brief-tray-title">{brief.tray.title}</p>
+    <p class="tray__empty" data-tray-empty>{brief.tray.empty}</p>
+    <ul class="tray__list" role="list">
+      {
+        rows.map((r) => (
+          <li class="tray__row" data-tray-row={r.key} hidden>
+            <span class="tray__tick" aria-hidden="true">
+              <Scribble name="check" size="xs" box={[22, 20]} />
+            </span>
+            <span class="tray__key">{r.label}:</span> <span class="tray__val" data-tray-val />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</aside>
+
+<style>
+  .tray { min-inline-size: 0; }
+  .tray__card {
+    position: relative;
+    padding: 6px 22px 22px;
+    border-radius: var(--r1);
+    box-shadow: var(--shadow-pinned);
+    /* a real index card: red header line, then ruled lines every 34px (design-system §9.4) */
+    background:
+      repeating-linear-gradient(to bottom, transparent 0 33px, var(--rule) 33px 34px) 0 63px / 100% calc(100% - 63px) no-repeat,
+      linear-gradient(var(--margin-rule), var(--margin-rule)) 0 52px / 100% 1px no-repeat,
+      var(--card) var(--paper-tex) 37px 91px / var(--tex-size) repeat;
+  }
+  .tray__title {
+    font-family: var(--font-hand);
+    font-size: var(--fs-hand-l);
+    line-height: 46px;
+    block-size: 46px;
+    color: var(--ink);
+  }
+  .tray__empty,
+  .tray__list {
+    margin-block-start: 17px;
+    font-family: var(--font-hand);
+    font-size: var(--fs-hand-s);
+    line-height: 34px;
+  }
+  .tray__empty { color: var(--ink-soft); }
+  .tray__row { position: relative; padding-inline-start: 28px; color: var(--ink); overflow-wrap: anywhere; }
+  .tray__tick { position: absolute; inset-inline-start: 0; inset-block-start: 4px; inline-size: 22px; block-size: 20px; }
+  .tray__tick :global(.scribble) { color: var(--ballpoint); }
+  .tray__key { color: var(--ink-soft); }
+
+  /* a new line draws its tick once (builder.ts adds .is-new for one frame cycle) */
+  .tray__row:global(.is-new) .tray__tick :global(.scribble path) { animation: tray-tick 320ms var(--ease-pen) both; }
+  @keyframes tray-tick { from { stroke-dasharray: 1; stroke-dashoffset: 1; } to { stroke-dasharray: 1; stroke-dashoffset: 0; } }
+
+  @media (min-width: 1024px) {
+    .tray { position: sticky; inset-block-start: var(--sticky-top); align-self: start; }
+    .tray__card { rotate: .6deg; }
+  }
+
+  /* below 1024: a paper bottom sheet that slides out from behind the dock */
+  @media (max-width: 1023px) {
+    .tray {
+      position: fixed;
+      z-index: calc(var(--z-header) - 2);
+      inset-inline: 0;
+      inset-block-end: var(--dock-h, 68px);
+      max-block-size: min(62dvh, 32rem);
+      overflow: auto;
+      overscroll-behavior: contain;
+      padding: 22px var(--gutter-x) 16px;
+      background: var(--paper) var(--paper-tex) 0 0 / var(--tex-size) repeat;
+      box-shadow: 0 -1px 0 var(--rule), 0 -16px 28px -18px rgb(var(--ink-rgb) / .4);
+      visibility: hidden;
+      translate: 0 calc(100% + var(--dock-h, 68px));
+      transition: translate var(--dur-base) var(--ease-settle), visibility 0s linear var(--dur-base);
+    }
+    .tray:global(.is-open) {
+      visibility: visible;
+      translate: 0 0;
+      transition: translate var(--dur-base) var(--ease-settle), visibility 0s;
+    }
+    .tray__card { max-inline-size: 30rem; box-shadow: var(--shadow-rest); }
+  }
+  .tray:focus { outline: none; }
+</style>

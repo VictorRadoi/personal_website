@@ -4,7 +4,8 @@
  * section#contact (data-track-section="contact"), the Easter egg (UpsideDownNote, Agent B) and FooterRow.
  * Passed to Base.astro as slot="backcover". Full-bleed night surface with the elastic band.
  * Desktop: cols 1-7 text (H2, lead, signature, the email big and selectable + copy button and phone,
- * CTAs, LinkedIn/GitHub, availability + local time); the upside-down note in cols 9-12, centred on the
+ * CTAs, the "Rather tap than type?" brief teaser card (StartTeaser → /start/), LinkedIn/GitHub,
+ * availability + local time); the upside-down note in cols 9-12, centred on the
  * column, ≥64px from any button. Tablet: one column, the note below the links, right-aligned.
  * Phones: one column, buttons full width, the note right-aligned below the links.
  */
@@ -20,6 +21,7 @@ import TextLink from '../controls/TextLink.astro';
 import FooterRow from '../chrome/FooterRow.astro';
 import LocalTime from '../chrome/LocalTime.astro';
 import UpsideDownNote from './UpsideDownNote.astro';
+import StartTeaser from './StartTeaser.astro';
 import { getSite } from '../../lib/content';
 import { githubHref, linkedinHref, telHref } from '../../lib/links';
 import { trackAttrs } from '../../lib/track';
@@ -46,6 +48,7 @@ const emailDomain = at > 0 ? EMAIL.slice(at + 1) : '';
             <a class="contact__phone" href={telHref()} data-cursor="link">{c.phone}</a>
           </div>
           <div class="contact__ctas"><CtaGroup location="contact" onNight /></div>
+          <StartTeaser />
           <ul class="contact__social" role="list">
             <li>
               <TextLink href={linkedinHref()} external onNight track={trackAttrs('cta_click', { method: 'linkedin', location: 'contact' })}>

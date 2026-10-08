@@ -1,0 +1,292 @@
+---
+/**
+ * The brief builder (/start/, owner spec 2026-10-08): six tap-first steps → a plain-language brief →
+ * POST /api/brief (multipart, contract in scripts/brief/submit.ts). Everything a visitor reads is in
+ * src/content/brief.yaml; behaviour in scripts/brief/builder.ts (loaded only on this page).
+ *
+ * Without JS the whole form stays hidden (.js-only) and the page shows the direct contact links instead
+ * (pages/start.astro). Steps are fieldsets with a legend holding the step's <h2> (focused on every step
+ * change); chips are <button aria-pressed>. Layout on the page's content subgrid: steps in cols 1-8, the
+ * "Your brief" tray sticky in cols 9-12 (≥1024); below 1024 the tray is a bottom sheet opened from the
+ * fixed dock that also carries Back / Next. The review step spans the full width.
+ * The napkin sketch sheet is static markup here; its code is import()ed on first open (sketch.ts).
+ */
+import './brief.css';
+import BriefChip from './BriefChip.astro';
+import BriefTray from './BriefTray.astro';
+import BriefReview from './BriefReview.astro';
+import SketchSheet from './SketchSheet.astro';
+import Button from '../controls/Button.astro';
+import TextLink from '../controls/TextLink.astro';
+import Icon from '../layout/Icon.astro';
+import Tape from '../paper/Tape.astro';
+import Scribble from '../ink/Scribble.astro';
+import { getBrief, type BriefOption } from '../../lib/content';
+import { bookingHref, mailtoHref } from '../../lib/links';
+import { trackAttrs } from '../../lib/track';
+import { fill } from '../../lib/format';
+
+const brief = await getBrief();
+const s = brief.steps;
+const TOTAL = 6;
+const stepIds = ['building', 'stage', 'features', 'timing', 'notes', 'review'] as const;
+const progress = (i: number) => fill(brief.progress, { n: i + 1, total: TOTAL });
+
+// The features step ends with an exclusive "Not sure yet" card.
+const featureUnsure: BriefOption = { id: 'unsure', label: brief.unsure, unsure: true };
+const featureOptions = [...s.features.groups.flatMap((g) => g.options), featureUnsure];
+
+/** What builder.ts needs at runtime (copy stays in the content layer). */
+const strip = (o: BriefOption) => ({
+  id: o.id,
+  label: o.label,
+  ...(o.phrase ? { phrase: o.phrase } : {}),
+  ...(o.sentence ? { sentence: o.sentence } : {}),
+  ...(o.unsure ? { unsure: true } : {}),
+});
+const data = {
+  steps: stepIds,
+  groups: {
+    building: s.building.options.map(strip),
+    stage: s.stage.options.map(strip),
+    kind: s.features.kinds.map(strip),
+    features: featureOptions.map(strip),
+    timing: s.timing.options.map(strip),
+  },
+  t: {
+    progress: brief.progress,
+    next: brief.nav.next,
+    skip: brief.nav.skip,
+    review: brief.nav.review,
+    trayCount: brief.tray.count,
+    trayZero: brief.tray.countZero,
+    send: brief.review.send,
+    sending: brief.review.sending,
+    verifying: brief.review.verifying,
+    nothing: brief.review.nothing,
+    errors: brief.review.errors,
+    reasons: brief.error.reasons,
+    sketch: s.notes.attachedSketch,
+    photo: s.notes.attachedPhoto,
+    photoBusy: s.notes.photoBusy,
+    photoError: s.notes.photoError,
+  },
+  sum: brief.summary,
+  fb: brief.fallback,
+};
+const json = JSON.stringify(data).replace(/</g, '\\u003c');
+---
+<div class="brief js-only" data-brief>
+  <script type="application/json" id="brief-data" set:html={json} />
+
+  <form class="brief__form" novalidate data-brief-form>
+    <div class="brief__top">
+      <div class="progress">
+        <p class="progress__label" aria-hidden="true" data-progress-label>{progress(0)}</p>
+        <ol class="progress__bar" aria-hidden="true" role="list">
+          {stepIds.map((_, i) => <li class:list={['progress__seg', { 'is-current': i === 0 }]} data-seg />)}
+        </ol>
+      </div>
+      <a
+        class="brief__escape"
+        href={mailtoHref()}
+        data-cursor="link"
+        {...trackAttrs('cta_click', { method: 'email', location: 'brief' })}
+      ><Icon name="mail" size={16} />{brief.page.escape}</a>
+    </div>
+
+    <div class="brief__layout">
+      <div class="brief__steps" data-steps>
+        <!-- 1 -->
+        <fieldset class="step" data-step="building" aria-describedby="step-building-hint">
+          <legend class="step__legend">
+            <h2 class="step__title" id="step-building-title" tabindex="-1"><span class="visually-hidden">{progress(0)}: </span>{s.building.title}</h2>
+          </legend>
+          <p class="step__hint" id="step-building-hint">{s.building.hint}</p>
+          <div class="chips chips--cards">
+            {s.building.options.map((o) => <BriefChip option={o} group="building" mode="multi" />)}
+          </div>
+        </fieldset>
+
+        <!-- 2 -->
+        <fieldset class="step" data-step="stage" aria-describedby="step-stage-hint" hidden>
+          <legend class="step__legend">
+            <h2 class="step__title" id="step-stage-title" tabindex="-1"><span class="visually-hidden">{progress(1)}: </span>{s.stage.title}</h2>
+          </legend>
+          <p class="step__hint" id="step-stage-hint">{s.stage.hint}</p>
+          <div class="chips chips--cards chips--single">
+            {s.stage.options.map((o) => <BriefChip option={o} group="stage" mode="single" />)}
+          </div>
+        </fieldset>
+
+        <!-- 3 -->
+        <fieldset class="step" data-step="features" aria-describedby="step-features-hint" hidden>
+          <legend class="step__legend">
+            <h2 class="step__title" id="step-features-title" tabindex="-1"><span class="visually-hidden">{progress(2)}: </span>{s.features.title}</h2>
+          </legend>
+          <p class="step__hint" id="step-features-hint">{s.features.hint}</p>
+          <fieldset class="sub">
+            <legend class="sub__title">{s.features.kindTitle}</legend>
+            <div class="chips chips--pills">
+              {s.features.kinds.map((o) => <BriefChip option={o} group="kind" mode="multi" variant="pill" />)}
+            </div>
+          </fieldset>
+          <fieldset class="sub">
+            <legend class="sub__title">{s.features.featuresTitle}</legend>
+            {
+              s.features.groups.map((g) => (
+                <fieldset class="group">
+                  <legend class="group__title">{g.label}</legend>
+                  <div class="chips chips--cards">
+                    {g.options.map((o) => <BriefChip option={o} group="features" mode="multi" />)}
+                  </div>
+                </fieldset>
+              ))
+            }
+            <div class="chips chips--cards group group--unsure">
+              <BriefChip option={featureUnsure} group="features" mode="multi" />
+            </div>
+          </fieldset>
+        </fieldset>
+
+        <!-- 4 -->
+        <fieldset class="step" data-step="timing" aria-describedby="step-timing-hint" hidden>
+          <legend class="step__legend">
+            <h2 class="step__title" id="step-timing-title" tabindex="-1"><span class="visually-hidden">{progress(3)}: </span>{s.timing.title}</h2>
+          </legend>
+          <p class="step__hint" id="step-timing-hint">{s.timing.hint}</p>
+          <div class="chips chips--cards chips--single">
+            {s.timing.options.map((o) => <BriefChip option={o} group="timing" mode="single" />)}
+          </div>
+        </fieldset>
+
+        <!-- 5 -->
+        <fieldset class="step" data-step="notes" aria-describedby="step-notes-hint" hidden>
+          <legend class="step__legend">
+            <h2 class="step__title" id="step-notes-title" tabindex="-1"><span class="visually-hidden">{progress(4)}: </span>{s.notes.title}</h2>
+          </legend>
+          <p class="step__hint" id="step-notes-hint">{s.notes.hint}</p>
+          <div class="notes">
+            <div class="field">
+              <label class="field__label" for="brief-notes">{s.notes.notesLabel}</label>
+              <textarea
+                class="field__input field__input--area"
+                id="brief-notes"
+                name="notes"
+                rows="5"
+                maxlength="2000"
+                placeholder={s.notes.notesPlaceholder}
+                data-notes
+              ></textarea>
+            </div>
+            <div class="field">
+              <label class="field__label" for="brief-link">{s.notes.linkLabel}</label>
+              <input
+                class="field__input"
+                id="brief-link"
+                name="link"
+                type="url"
+                inputmode="url"
+                maxlength="300"
+                autocomplete="url"
+                placeholder={s.notes.linkPlaceholder}
+                aria-describedby="brief-link-hint"
+                data-link
+              />
+              <p class="meta" id="brief-link-hint">{s.notes.linkHint}</p>
+            </div>
+
+            <div class="extras">
+              <p class="extras__title">{s.notes.extrasTitle} <span class="extras__note">{s.notes.extrasNote}</span></p>
+              <div class="extras__row">
+                <button type="button" class="extra" data-sketch-open data-cursor="link">
+                  <Icon name="t-pen" />
+                  <span data-sketch-open-label data-label-add={s.notes.sketchAdd} data-label-edit={s.notes.sketchEdit}>{s.notes.sketchAdd}</span>
+                </button>
+                <button type="button" class="extra" data-photo-pick data-cursor="link">
+                  <Icon name="f-camera" />
+                  <span data-photo-pick-label data-label-add={s.notes.photoAdd} data-label-edit={s.notes.photoReplace}>{s.notes.photoAdd}</span>
+                </button>
+                <input type="file" accept="image/*" hidden data-photo-input aria-label={s.notes.photoAdd} />
+              </div>
+              <ul class="extras__thumbs" role="list">
+                <li class="thumb" data-thumb="sketch" hidden>
+                  <img class="thumb__img" alt={s.notes.sketchAlt} width="120" height="90" data-thumb-img />
+                  <button type="button" class="thumb__remove" data-remove="sketch" data-cursor="link">
+                    <Icon name="close" size={16} />{s.notes.removeSketch}
+                  </button>
+                </li>
+                <li class="thumb" data-thumb="photo" hidden>
+                  <img class="thumb__img" alt={s.notes.photoAlt} width="120" height="90" data-thumb-img />
+                  <button type="button" class="thumb__remove" data-remove="photo" data-cursor="link">
+                    <Icon name="close" size={16} />{s.notes.removePhoto}
+                  </button>
+                </li>
+              </ul>
+              <p class="extras__status" role="status" aria-live="polite" data-extras-status></p>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- 6 -->
+        <BriefReview brief={brief} index={5} total={TOTAL} />
+      </div>
+
+      <BriefTray brief={brief} />
+    </div>
+
+    <div class="dock" data-dock>
+      <button
+        type="button"
+        class="dock__tray"
+        aria-expanded="false"
+        aria-controls="brief-tray"
+        data-tray-toggle
+        data-cursor="link"
+      >
+        <span class="dock__tray-label">{brief.tray.toggle}</span>
+        <span class="dock__count" data-tray-count>{brief.tray.countZero}</span>
+        <svg class="dock__caret" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false"><path d="M2.5 9L7 4.5 11.5 9" /></svg>
+      </button>
+      <div class="dock__nav">
+        <Button variant="secondary" class="dock__back" track={{ 'data-back': '' }}>
+          <Icon name="arrow-left" />
+          <span class="dock__back-label">{brief.nav.back}</span>
+        </Button>
+        <Button variant="primary" class="dock__next" track={{ 'data-next': '' }}>
+          <span data-next-label>{brief.nav.skip}</span>
+          <Icon name="arrow-right" />
+        </Button>
+      </div>
+    </div>
+  </form>
+
+  <section class="done" data-done aria-labelledby="brief-done-title" hidden>
+    <div class="done__card">
+      <Tape placement="top" seed="brief-done" />
+      <span class="done__tick" aria-hidden="true"><Scribble name="check" size="s" box={[56, 52]} /></span>
+      <h2 class="done__title" id="brief-done-title" tabindex="-1">{brief.success.title}</h2>
+      <p class="done__body">{brief.success.body}</p>
+      <div class="done__actions">
+        <Button
+          variant="primary"
+          href={bookingHref()}
+          icon="calendar"
+          external
+          track={{ ...trackAttrs('cta_click', { method: 'booking', location: 'brief_done' }), 'data-done-book': '' }}
+        >{brief.success.book}</Button>
+        <TextLink href="/">{brief.success.home}</TextLink>
+      </div>
+      <h3 class="done__sent-title">{brief.success.sentTitle}</h3>
+      <p class="done__sent" data-done-sent></p>
+      <button type="button" class="done__again" data-restart data-cursor="link">{brief.success.again}</button>
+    </div>
+  </section>
+
+  <SketchSheet brief={brief} />
+</div>
+
+<script>
+  import { init } from '../../scripts/brief/builder';
+  init();
+</script>

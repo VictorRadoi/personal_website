@@ -1,0 +1,254 @@
+# Brief builder copy (/start/, the home contact teaser and the "Start a project" links).
+# One entry, id "en". Templates use {placeholders}: {n}, {total}, {list}, {name}, {email}, {step}.
+# Owner rules (brief-builder spec): plain first person, no prices / sizes / weeks, no third-party brand
+# comparisons ("like X"), no exclamation marks. Option ids are stable (sessionStorage, ?b= links);
+# what the Worker receives in `answers` is each picked option's visible label.
+# phrase  = how a multi-select pick reads inside a generated sentence ("It needs {list}.")
+# sentence = a whole sentence for single picks (or picks that don't fit the list); omitted = nothing said.
+en:
+  seo:
+    title: "Start a project · Victor-Andrei Rădoi"
+    description: "Describe your app in six quick questions, mostly by tapping. You see a plain-language brief before it is sent, and I reply within a day."
+
+  page:
+    margin: "start here"
+    eyebrow: "Project brief"
+    h1: "Tell me about your project."
+    lead: "Six quick questions, mostly tapping. Skip anything you're unsure about. At the end you'll see your brief in plain words and can change it before it reaches me. I read every one myself."
+    escape: "Just email me instead"
+    nojsTitle: "This page needs JavaScript."
+    nojsBody: "The tap-through brief runs in your browser, so it needs JavaScript. You can still reach me directly, and I reply within a day."
+
+  progress: "Step {n} of {total}"
+  nav:
+    back: "Back"
+    next: "Next"
+    skip: "Skip"
+    review: "See my brief"
+  unsure: "Not sure yet"
+
+  steps:
+    building:
+      title: "What are you building?"
+      hint: "Pick as many as fit."
+      tray: "building"
+      options:
+        - { id: mobile, label: "Mobile app", note: "iOS and Android", phrase: "a mobile app" }
+        - { id: web, label: "Web app / SaaS", note: "runs in the browser", phrase: "a web app" }
+        - { id: backend, label: "Backend / API", note: "servers and data", phrase: "a backend or API" }
+        - { id: mvp, label: "A new MVP", note: "first version of an idea", phrase: "a first version (MVP) of a new idea" }
+        - { id: existing, label: "Fix or extend an existing app", note: "live or half-built", sentence: "I have an existing app that needs fixing or new features." }
+        - { id: advice, label: "Not sure, need advice", note: "we'll work it out", sentence: "I'm not sure yet what I need, so I'd like your advice." }
+
+    stage:
+      title: "Where are you at?"
+      hint: "Pick one."
+      tray: "stage"
+      options:
+        - { id: idea, label: "Just an idea", sentence: "Right now it's just an idea." }
+        - { id: designs, label: "Designs / Figma", sentence: "I already have designs." }
+        - { id: prototype, label: "Prototype or no-code version", sentence: "There's a prototype or a no-code version already." }
+        - { id: live, label: "Live app that needs work", sentence: "There's a live app that needs work." }
+        - { id: team, label: "My team needs an extra engineer", sentence: "My team needs an extra engineer." }
+        - { id: unsure, label: "Not sure yet", unsure: true }
+
+    features:
+      title: "What should it do?"
+      hint: "Tap the parts you already know you'll need. Skip the rest, I'll ask."
+      tray: "needs"
+      kindTitle: "It's a kind of…"
+      kindTray: "kind of"
+      kinds:
+        - { id: marketplace, label: "Marketplace", phrase: "marketplace" }
+        - { id: booking, label: "Booking app", phrase: "booking app" }
+        - { id: social, label: "Community / social", phrase: "community or social app" }
+        - { id: health, label: "Health & fitness", phrase: "health and fitness app" }
+        - { id: delivery, label: "Delivery / on-demand", phrase: "delivery or on-demand app" }
+        - { id: internal, label: "Internal tool / dashboard", phrase: "internal tool or dashboard" }
+        - { id: other, label: "Something else" }
+      featuresTitle: "Features"
+      groups:
+        - id: accounts
+          label: "Accounts"
+          options:
+            - { id: signin, label: "Sign-in", note: "email or social login", icon: f-key, phrase: "sign-in" }
+            - { id: roles, label: "Profiles & roles", note: "who can do what", icon: f-users, phrase: "user profiles and roles" }
+            - { id: admin, label: "Admin panel", note: "manage users and content", icon: f-sliders, phrase: "an admin panel" }
+        - id: money
+          label: "Money"
+          options:
+            - { id: payments, label: "Payments & subscriptions", note: "one-off or recurring", icon: f-card, phrase: "payments and subscriptions" }
+            - { id: bookings, label: "Bookings / marketplace", note: "slots, orders, sellers", icon: f-store, phrase: "bookings or a marketplace" }
+        - id: engage
+          label: "Engage"
+          options:
+            - { id: push, label: "Push notifications", note: "lock-screen reminders", icon: f-bell, phrase: "push notifications" }
+            - { id: chat, label: "Chat", note: "messages between users", icon: f-chat, phrase: "chat" }
+            - { id: messaging, label: "Email & SMS", note: "receipts and codes", icon: mail, phrase: "email and SMS" }
+        - id: device
+          label: "Device & data"
+          options:
+            - { id: maps, label: "Maps & location", note: "places and distance", icon: f-pin, phrase: "maps and location" }
+            - { id: camera, label: "Camera & uploads", note: "photos, scans, files", icon: f-camera, phrase: "camera and uploads" }
+            - { id: offline, label: "Offline mode", note: "works without signal", icon: f-offline, phrase: "an offline mode" }
+            - { id: wearables, label: "Bluetooth / wearables / health", note: "devices and sensors", icon: f-watch, phrase: "Bluetooth, wearables or health data" }
+        - id: smart
+          label: "Smart"
+          options:
+            - { id: ai, label: "AI features", note: "summaries, suggestions, chat", icon: f-chip, phrase: "AI features" }
+            - { id: analytics, label: "Analytics & dashboards", note: "numbers at a glance", icon: f-chart, phrase: "analytics and dashboards" }
+        - id: platform
+          label: "Platform"
+          options:
+            - { id: integrations, label: "Integrations", note: "talks to your other tools", icon: f-plug, phrase: "integrations with other tools" }
+            - { id: launch, label: "App Store & Play launch", note: "listings and review", icon: f-upload, phrase: "help launching on the App Store and Google Play" }
+            - { id: hosting, label: "Hosting & CI", note: "servers and releases", icon: f-server, phrase: "hosting and automated releases" }
+
+    timing:
+      title: "When would you like it ready?"
+      hint: "Pick one. A rough guess is fine."
+      tray: "timing"
+      options:
+        - { id: asap, label: "ASAP", sentence: "I'd like to get going as soon as possible." }
+        - { id: m1, label: "1–3 months", sentence: "I'd like it ready in the next 1–3 months." }
+        - { id: m3, label: "3–6 months", sentence: "I'd like it ready in 3–6 months." }
+        - { id: flexible, label: "Flexible", sentence: "The timing is flexible." }
+        - { id: unsure, label: "Not sure yet", unsure: true }
+
+    notes:
+      title: "Anything else I should know?"
+      hint: "Optional. A few lines is plenty."
+      tray: "notes"
+      notesLabel: "In your own words"
+      notesPlaceholder: "Who it's for, what the first version has to do, what already exists. Whatever's on your mind."
+      linkLabel: "A link, if you have one"
+      linkHint: "A Figma file, a website or a doc."
+      linkPlaceholder: "https://"
+      extrasTitle: "Easier to show than tell?"
+      extrasNote: "both optional"
+      sketchAdd: "Add a napkin sketch"
+      sketchEdit: "Edit sketch"
+      photoAdd: "Upload a photo of your sketch"
+      photoReplace: "Use a different photo"
+      remove: "Remove"
+      removeSketch: "Remove sketch"
+      removePhoto: "Remove photo"
+      sketchAlt: "Your napkin sketch"
+      photoAlt: "Your photo"
+      photoBusy: "Shrinking the photo…"
+      photoError: "Couldn't read that image. Try a JPEG or PNG photo."
+      attachedSketch: "napkin sketch"
+      attachedPhoto: "photo"
+      trayAttached: "attached"
+
+  review:
+    title: "Here's your brief."
+    hint: "This is what I'll read. Change anything that's off."
+    summaryLabel: "Your brief, in plain words"
+    summaryNote: "edit freely"
+    regenerate: "Rewrite it from my answers"
+    picksTitle: "What you picked"
+    change: "Change"
+    changeA11y: "Change: {step}"
+    nothing: "Skipped"
+    contactTitle: "Where should I reply?"
+    name: "Your name"
+    email: "Email"
+    company: "Company"
+    whatsapp: "WhatsApp number"
+    optional: "(optional)"
+    honeypot: "Leave this field empty"
+    consent: "I'll only use this to reply to you. Nothing is stored on the site."
+    privacyLink: "How your details are handled"
+    turnstileNote: "A quick spam check by Cloudflare runs on this step."
+    send: "Send brief"
+    sending: "Sending…"
+    verifying: "Checking you're not a bot…"
+    or: "or"
+    whatsappIt: "WhatsApp it"
+    bookCall: "book a call"
+    errors:
+      name: "Add your name so I know who I'm writing to."
+      email: "Add your email so I can reply."
+      emailInvalid: "That email address doesn't look right. Check it for typos."
+      summary: "Add a line or two about your project."
+      fix: "Check the highlighted fields."
+
+  summary:
+    build: "I'd like to build {list}."
+    features: "It needs {list}."
+    featuresUnsure: "I'm not sure about features yet."
+    kind: "It's a kind of {list}."
+    link: "Link: {link}"
+    sketch: "I've added a napkin sketch."
+    photo: "I've added a photo of my sketch."
+    both: "I've added a napkin sketch and a photo of my sketch."
+    and: " and "
+    andLast: ", and "
+    empty: "I'd like to talk about a project."
+
+  success:
+    title: "Got it. I'll reply within a day."
+    body: "Your brief is in my inbox. If you'd rather talk it through, grab 30 minutes on my calendar. Your name, email and brief are already filled in there."
+    book: "Book a 30-min call"
+    home: "Back to the homepage"
+    sentTitle: "What you sent"
+    again: "Start a new brief"
+
+  error:
+    title: "That didn't go through."
+    reasons:
+      invalid: "Something in the form didn't look right to the server."
+      turnstile: "The spam check didn't pass."
+      rate_limited: "Too many briefs from this connection in a short time. Wait a minute before trying again."
+      email_failed: "My mail service didn't accept it."
+      network: "I couldn't reach the server. Check your connection."
+      turnstile_load: "The spam check couldn't load. An ad blocker can cause this."
+    next: "Your brief is still here. Try again, or send it another way:"
+    retry: "Try again"
+    email: "Send from my email app"
+    whatsapp: "Send on WhatsApp"
+    booking: "Book a call instead"
+
+  fallback:
+    subject: "Project brief from {name}"
+    subjectNoName: "Project brief"
+    whatsappIntro: "Hi Andrei, here's my project brief:"
+    signoff: "{name} · {email}"
+    attachments: "I also made a sketch or photo. I'll send it when you reply."
+
+  tray:
+    title: "your brief"
+    empty: "nothing picked yet"
+    toggle: "Your brief"
+    count: "{n} picked"
+    countZero: "nothing yet"
+
+  sketch:
+    title: "Napkin sketch"
+    hint: "Boxes and arrows are perfect. Ugly is fine."
+    canvasLabel: "Sketch area. Optional: the text box on the form works just as well."
+    toolsLabel: "Drawing tools"
+    pen: "Pen"
+    eraser: "Eraser"
+    rect: "Box"
+    arrow: "Arrow"
+    text: "Label"
+    framesLabel: "Phone frames"
+    frame1: "1 screen"
+    frame2: "2 screens"
+    frame3: "3 screens"
+    undo: "Undo"
+    clear: "Clear"
+    done: "Done"
+    close: "Close"
+    textLabel: "Label text"
+    textPlaceholder: "type, then Enter"
+
+  teaser:
+    title: "Rather tap than type?"
+    body: "Six quick questions about your app, mostly tapping. You see the brief in plain words before anything is sent."
+    chipsLabel: "Start with what you're building:"
+    cta: "Start a project"
+    note: "about a minute"
+  ctaLink: "Not sure how to put it? Start a project in six taps"

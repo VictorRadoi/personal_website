@@ -1,0 +1,213 @@
+---
+/**
+ * Napkin sketch sheet (/start/, step 5). Static markup only: the drawing code (scripts/brief/sketch.ts,
+ * vanilla canvas + perfect-freehand) is import()ed the first time the sheet opens, so nobody who skips
+ * the sketch downloads it. A native <dialog> opened with showModal(): Esc closes it, focus returns to the
+ * opener. Full-screen on phones, a large sheet from 600px up. Tools are real buttons (aria-pressed);
+ * phone frames, labels, undo and clear all work from the keyboard; the textarea on the form is the
+ * text alternative. Colours come from tokens (sketch.ts reads --ballpoint / --card / --font-hand).
+ */
+import Icon from '../layout/Icon.astro';
+import type { IconName } from '../../lib/icons';
+import type { Brief } from '../../lib/content';
+
+interface Props {
+  brief: Brief;
+}
+
+const { brief } = Astro.props;
+const t = brief.sketch;
+const tools: { id: string; label: string; icon: IconName }[] = [
+  { id: 'pen', label: t.pen, icon: 't-pen' },
+  { id: 'eraser', label: t.eraser, icon: 't-eraser' },
+  { id: 'rect', label: t.rect, icon: 't-rect' },
+  { id: 'arrow', label: t.arrow, icon: 't-arrow' },
+  { id: 'text', label: t.text, icon: 't-text' },
+];
+const frames = [t.frame1, t.frame2, t.frame3];
+---
+<dialog class="sketch" id="brief-sketch" aria-labelledby="brief-sketch-title" data-sketch>
+  <div class="sketch__sheet">
+    <div class="sketch__head">
+      <div class="sketch__titles">
+        <h2 class="sketch__title" id="brief-sketch-title">{t.title}</h2>
+        <p class="sketch__hint">{t.hint}</p>
+      </div>
+      <button type="button" class="sk-btn sk-btn--ghost sketch__close" data-sk="close" data-cursor="link">
+        <Icon name="close" />
+        <span>{t.close}</span>
+      </button>
+    </div>
+
+    <div class="sketch__tools" role="group" aria-label={t.toolsLabel}>
+      <div class="sketch__group">
+        {
+          tools.map((tool, i) => (
+            <button
+              type="button"
+              class="sk-btn sk-tool"
+              data-tool={tool.id}
+              aria-pressed={i === 0 ? 'true' : 'false'}
+              data-cursor="link"
+            >
+              <Icon name={tool.icon} />
+              <span class="sk-btn__label">{tool.label}</span>
+            </button>
+          ))
+        }
+      </div>
+      <div class="sketch__group" role="group" aria-label={t.framesLabel}>
+        {
+          frames.map((label, i) => (
+            <button type="button" class="sk-btn" data-frame={String(i + 1)} data-cursor="link">
+              <Icon name="t-phone" />
+              <span class="sk-btn__label">{label}</span>
+            </button>
+          ))
+        }
+      </div>
+      <div class="sketch__group">
+        <button type="button" class="sk-btn" data-sk="undo" data-cursor="link">
+          <Icon name="t-undo" />
+          <span class="sk-btn__label">{t.undo}</span>
+        </button>
+        <button type="button" class="sk-btn" data-sk="clear" data-cursor="link">
+          <Icon name="t-trash" />
+          <span class="sk-btn__label">{t.clear}</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sketch__stage" data-sk-stage>
+      <canvas class="sketch__canvas" role="img" aria-label={t.canvasLabel} data-sk-canvas width="1200" height="800"></canvas>
+      <input
+        class="sketch__input"
+        type="text"
+        maxlength="60"
+        aria-label={t.textLabel}
+        placeholder={t.textPlaceholder}
+        enterkeyhint="done"
+        autocomplete="off"
+        data-sk-input
+        hidden
+      />
+    </div>
+
+    <div class="sketch__foot">
+      <button type="button" class="sk-btn sk-btn--primary" data-sk="done" data-cursor="link">
+        <Icon name="check" />
+        <span>{t.done}</span>
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .sketch {
+    inline-size: 100vw;
+    max-inline-size: 100vw;
+    block-size: 100dvh;
+    max-block-size: 100dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    overflow: hidden;
+  }
+  .sketch::backdrop { background: var(--backdrop); }
+  .sketch[open] { display: flex; }
+  .sketch__sheet {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    inline-size: 100%;
+    block-size: 100%;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: var(--card) var(--paper-tex) 37px 91px / var(--tex-size) repeat;
+  }
+  @media (min-width: 600px) {
+    .sketch {
+      inline-size: min(1120px, 100vw - 48px);
+      block-size: min(860px, 100dvh - 48px);
+      margin: auto;
+      overflow: visible;
+    }
+    .sketch__sheet { padding: 18px 22px 20px; border-radius: var(--r1); box-shadow: var(--shadow-device); gap: 14px; }
+  }
+
+  .sketch__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s4); }
+  .sketch__titles { min-inline-size: 0; }
+  .sketch__title { font-family: var(--font-display); font-size: var(--fs-title); line-height: var(--lh-title); }
+  .sketch__hint { font-family: var(--font-hand); font-size: var(--fs-hand-s); line-height: var(--lh-hand-s); color: var(--ballpoint); }
+
+  .sketch__tools { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+  .sketch__group { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .sk-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-block-size: 44px;
+    min-inline-size: 44px;
+    padding-inline: 10px;
+    border: 1.5px solid var(--ink-faint);
+    border-radius: var(--r2);
+    background: var(--card);
+    color: var(--ink);
+    font-size: var(--fs-meta);
+    font-weight: 600;
+    line-height: 1;
+    transition: background-color var(--dur-quick) linear, border-color var(--dur-quick) linear;
+  }
+  @media (hover: hover) { .sk-btn:hover { border-color: var(--ink); background: var(--shade); } }
+  .sk-btn[aria-pressed="true"] { border-color: var(--ballpoint); background: var(--ballpoint); color: var(--card); }
+  .sk-btn--ghost { border-color: transparent; background: transparent; }
+  .sk-btn--primary { min-block-size: 48px; padding-inline: 22px; border-color: var(--ink); background: var(--ink); color: var(--card); font-size: var(--fs-ui); }
+  @media (hover: hover) { .sk-btn--primary:hover { background: var(--ink-press); border-color: var(--ink-press); } }
+  /* phones: tools are icon-only (the label stays for screen readers) */
+  @media (max-width: 599px) {
+    .sk-tool .sk-btn__label { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .sketch__tools { gap: 6px 10px; }
+  }
+
+  .sketch__stage {
+    position: relative;
+    flex: 1;
+    min-block-size: 0;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .sketch__canvas {
+    max-inline-size: 100%;
+    max-block-size: 100%;
+    border: 1.5px solid var(--ink-faint);
+    border-radius: var(--r1);
+    /* napkin: faint dot grid (CSS only; the exported PNG is plain paper) */
+    background:
+      radial-gradient(circle, var(--rule) 1px, transparent 1.4px) 0 0 / 24px 24px,
+      var(--card);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    cursor: crosshair;
+  }
+  .sketch__input {
+    position: absolute;
+    inline-size: min(260px, 70%);
+    min-block-size: 44px;
+    padding: 6px 10px;
+    border: 1.5px solid var(--ballpoint);
+    border-radius: var(--r2);
+    background: var(--card);
+    color: var(--ballpoint);
+    font-family: var(--font-hand);
+    font-size: 1.25rem;
+  }
+
+  .sketch__foot { display: flex; justify-content: flex-end; }
+</style>

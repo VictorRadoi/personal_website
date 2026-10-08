@@ -1,0 +1,123 @@
+---
+/**
+ * One tappable answer in the brief builder (/start/). A real <button aria-pressed>: builder.ts toggles it.
+ * multi:  a hand-drawn box that gets a ballpoint tick when picked (like the hero to-do card).
+ * single: a hand-drawn bubble + tick, and the whole card gets circled in ballpoint (PenCircle; magnetic.ts
+ *         fits the circle to the card's measured box). `unsure` options are exclusive in multi groups.
+ * Variants: card (label + 3-word note + optional icon) and pill (label only, the "It's a kind of…" row).
+ */
+import Scribble from '../ink/Scribble.astro';
+import PenCircle from '../ink/PenCircle.astro';
+import Icon from '../layout/Icon.astro';
+import type { BriefOption } from '../../lib/content';
+
+interface Props {
+  option: BriefOption;
+  group: 'building' | 'stage' | 'kind' | 'features' | 'timing';
+  mode: 'multi' | 'single';
+  variant?: 'card' | 'pill';
+}
+
+const { option, group, mode, variant = 'card' } = Astro.props;
+const single = mode === 'single';
+---
+<button
+  type="button"
+  class:list={['chip', `chip--${variant}`, `chip--${mode}`, { 'chip--unsure': option.unsure }]}
+  aria-pressed="false"
+  data-chip
+  data-group={group}
+  data-value={option.id}
+  data-exclusive={option.unsure && !single ? '' : undefined}
+  data-cursor="link"
+>
+  {single && <PenCircle />}
+  <span class="chip__mark" aria-hidden="true">
+    {single ? (
+      <Scribble name="circleLoose" size="xs" box={[20, 20]} class="chip__box" />
+    ) : (
+      <Scribble name="box" size="xs" box={[18, 18]} class="chip__box" />
+    )}
+    <span class="chip__tick"><Scribble name="check" size="xs" box={[24, 22]} /></span>
+  </span>
+  <span class="chip__text">
+    <span class="chip__label">{option.label}</span>
+    {option.note && variant === 'card' && <span class="chip__note">{option.note}</span>}
+  </span>
+  {option.icon && variant === 'card' && <Icon name={option.icon} class="chip__icon" />}
+</button>
+
+<style>
+  .chip {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    inline-size: 100%;
+    min-block-size: 60px;
+    padding: 10px 14px 10px 14px;
+    border: 1.5px solid var(--ink-faint);
+    border-radius: var(--r1);
+    background: var(--card) var(--paper-tex) 37px 91px / var(--tex-size) repeat;
+    box-shadow: var(--shadow-rest);
+    color: var(--ink);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      border-color var(--dur-quick) linear,
+      box-shadow var(--dur-base) var(--ease-settle),
+      translate var(--dur-base) var(--ease-settle),
+      scale 120ms var(--ease-press);
+  }
+  @media (hover: hover) {
+    .chip:hover { border-color: var(--ink); translate: 0 -2px; box-shadow: var(--shadow-lift); }
+  }
+  @media (hover: hover) and (prefers-reduced-motion: reduce) {
+    .chip:hover { translate: none; }
+  }
+  .chip:active { scale: .985; }
+  .chip[aria-pressed="true"] { border-color: var(--ballpoint); }
+  .chip--unsure { border-style: dashed; box-shadow: none; background: transparent; }
+  .chip--unsure[aria-pressed="true"] { border-style: solid; }
+
+  /* hand-drawn box / bubble with the ballpoint tick on top */
+  .chip__mark { position: relative; flex: none; inline-size: 20px; block-size: 20px; }
+  .chip__mark :global(.chip__box) { position: absolute; inset: 0; color: var(--ink); }
+  .chip__mark :global(.chip__box .ink) { stroke-width: 1.6px; }
+  .chip--multi .chip__mark :global(.chip__box) { inset: 1px; }
+  .chip__tick { position: absolute; inset-block-start: -7px; inset-inline-start: -1px; inline-size: 24px; block-size: 22px; }
+  .chip__tick :global(.scribble) { color: var(--ballpoint); }
+  .chip__tick :global(.scribble path) {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 90ms linear;
+  }
+  .chip[aria-pressed="true"] .chip__tick :global(.scribble path) {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 260ms var(--ease-pen);
+  }
+
+  /* single choice: the whole card gets circled (pen circle, fitted by magnetic.ts) */
+  .chip--single :global(.pen-circle) { color: var(--ballpoint); }
+  .chip--single[aria-pressed="true"] > :global(.pen-circle path) { stroke-dashoffset: 0; transition-duration: 340ms; }
+  .chip--single:focus-visible:not([aria-pressed="true"]) > :global(.pen-circle path) { stroke-dashoffset: 1; }
+
+  .chip__text { display: flex; flex-direction: column; gap: 2px; min-inline-size: 0; }
+  .chip__label { font-size: var(--fs-ui); font-weight: 600; line-height: var(--lh-ui); letter-spacing: var(--tr-ui); }
+  .chip__note { font-size: var(--fs-meta); line-height: var(--lh-meta); color: var(--ink-soft); }
+  .chip :global(.chip__icon) { margin-inline-start: auto; color: var(--ink-soft); align-self: center; }
+  .chip[aria-pressed="true"] :global(.chip__icon) { color: var(--ink); }
+
+  /* pill: the "It's a kind of…" row */
+  .chip--pill {
+    display: inline-flex;
+    inline-size: auto;
+    min-block-size: 44px;
+    gap: 10px;
+    padding: 6px 14px 6px 12px;
+    box-shadow: none;
+  }
+  .chip--pill .chip__label { font-size: var(--fs-small); }
+</style>

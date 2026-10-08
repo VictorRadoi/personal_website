@@ -1,0 +1,301 @@
+---
+/**
+ * Step 6 of the brief builder: the generated plain-language brief (editable), what was picked (with
+ * "Change" jumps back), the reply details, the consent line, the Turnstile slot (builder.ts loads Turnstile
+ * only when this step is shown), the honeypot, Send, and the error panel with fallbacks that carry the
+ * summary (mailto / wa.me / cal.com hrefs are rewritten by builder.ts; the static ones work as-is).
+ * No size, weeks or price anywhere (owner decision).
+ */
+import Button from '../controls/Button.astro';
+import Icon from '../layout/Icon.astro';
+import { getSite, type Brief } from '../../lib/content';
+import { bookingHref, mailtoHref, whatsappHref } from '../../lib/links';
+import { trackAttrs } from '../../lib/track';
+import { fill } from '../../lib/format';
+
+interface Props {
+  brief: Brief;
+  index: number;
+  total: number;
+}
+
+const { brief, index, total } = Astro.props;
+const site = await getSite();
+const r = brief.review;
+const s = brief.steps;
+const progress = fill(brief.progress, { n: index + 1, total });
+const picks: { key: string; label: string; step: number; title: string }[] = [
+  { key: 'building', label: s.building.tray, step: 0, title: s.building.title },
+  { key: 'stage', label: s.stage.tray, step: 1, title: s.stage.title },
+  { key: 'kind', label: s.features.kindTray, step: 2, title: s.features.kindTitle },
+  { key: 'features', label: s.features.tray, step: 2, title: s.features.title },
+  { key: 'timing', label: s.timing.tray, step: 3, title: s.timing.title },
+  { key: 'notes', label: s.notes.tray, step: 4, title: s.notes.title },
+  { key: 'attached', label: s.notes.trayAttached, step: 4, title: s.notes.extrasTitle },
+];
+const fields = [
+  { id: 'name', label: r.name, type: 'text', autocomplete: 'name', required: true, max: 100 },
+  { id: 'email', label: r.email, type: 'email', autocomplete: 'email', required: true, max: 200 },
+  { id: 'company', label: r.company, type: 'text', autocomplete: 'organization', required: false, max: 100 },
+  { id: 'whatsapp', label: r.whatsapp, type: 'tel', autocomplete: 'tel', required: false, max: 40 },
+] as const;
+---
+<section class="step review" data-step="review" aria-labelledby="step-review-title" hidden>
+  <div class="step__head">
+    <h2 class="step__title" id="step-review-title" tabindex="-1"><span class="visually-hidden">{progress}: </span>{r.title}</h2>
+    <p class="step__hint">{r.hint}</p>
+  </div>
+
+  <div class="review__grid">
+    <div class="review__brief">
+      <div class="review__paper">
+        <div class="review__label-row">
+          <label class="field__label" for="brief-summary">{r.summaryLabel}</label>
+          <span class="review__note" aria-hidden="true">{r.summaryNote}</span>
+        </div>
+        <textarea
+          class="review__summary"
+          id="brief-summary"
+          name="summary"
+          rows="9"
+          maxlength="4000"
+          aria-describedby="brief-summary-error"
+          data-summary
+        ></textarea>
+        <p class="field__error" id="brief-summary-error" data-error-for="summary"></p>
+        <button type="button" class="review__regen" data-regenerate data-cursor="link" hidden>
+          <Icon name="t-undo" size={16} />{r.regenerate}
+        </button>
+      </div>
+
+      <h3 class="review__picks-title">{r.picksTitle}</h3>
+      <dl class="review__picks">
+        {
+          picks.map((p) => (
+            <div class="review__pick" data-pick-row={p.key}>
+              <dt class="review__pick-key">{p.label}</dt>
+              <dd class="review__pick-val" data-pick={p.key} data-empty={r.nothing}>{r.nothing}</dd>
+              <dd class="review__pick-change">
+                <button type="button" class="review__change" data-goto={String(p.step)} data-cursor="link">
+                  {r.change}<span class="visually-hidden">: {p.title}</span>
+                </button>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <fieldset class="review__contact">
+      <legend class="review__contact-title"><h3>{r.contactTitle}</h3></legend>
+      <div class="review__contact-body">
+      {
+        fields.map((f) => (
+          <div class="field">
+            <label class="field__label" for={`brief-${f.id}`}>
+              {f.label}
+              {!f.required && <span class="field__optional"> {r.optional}</span>}
+            </label>
+            <input
+              class="field__input"
+              id={`brief-${f.id}`}
+              name={f.id}
+              type={f.type}
+              autocomplete={f.autocomplete}
+              maxlength={f.max}
+              required={f.required}
+              aria-required={f.required ? 'true' : undefined}
+              aria-describedby={f.required ? `brief-${f.id}-error` : undefined}
+              inputmode={f.type === 'email' ? 'email' : f.type === 'tel' ? 'tel' : undefined}
+              spellcheck={f.type === 'text' && f.id === 'name' ? 'false' : undefined}
+              data-contact={f.id}
+            />
+            {f.required && <p class="field__error" id={`brief-${f.id}-error`} data-error-for={f.id} />}
+          </div>
+        ))
+      }
+
+      <!-- Honeypot: people never see or reach it; bots fill it in (the Worker drops non-empty values). -->
+      <div class="review__hp" aria-hidden="true">
+        <label for="brief-website">{r.honeypot}</label>
+        <input id="brief-website" name="website" type="text" tabindex="-1" autocomplete="off" data-honeypot />
+      </div>
+
+      <p class="review__consent">
+        {r.consent} <a href="/privacy/#privacy-brief" data-cursor="link">{r.privacyLink}</a>
+      </p>
+
+      <div class="review__turnstile" data-turnstile></div>
+      <p class="review__turnstile-note meta">{r.turnstileNote}</p>
+
+      <div class="review__error" role="alert" data-error-panel hidden tabindex="-1">
+        <p class="review__error-title">{brief.error.title}</p>
+        <p class="review__error-reason" data-error-reason></p>
+        <p class="review__error-next">{brief.error.next}</p>
+        <div class="review__fallbacks">
+          <Button variant="secondary" size="small" type="button" track={{ 'data-retry': '' }}>{brief.error.retry}</Button>
+          <Button variant="secondary" size="small" href={mailtoHref()} icon="mail" track={{ ...trackAttrs('brief_submit', { method: 'email_app' }), 'data-fallback': 'email' }}>
+            {brief.error.email}
+          </Button>
+          <Button variant="secondary" size="small" href={whatsappHref()} icon="whatsapp" external track={{ ...trackAttrs('brief_submit', { method: 'whatsapp' }), 'data-fallback': 'whatsapp' }}>
+            {brief.error.whatsapp}
+          </Button>
+          <Button variant="secondary" size="small" href={bookingHref()} icon="calendar" external track={{ ...trackAttrs('brief_submit', { method: 'booking' }), 'data-fallback': 'booking' }}>
+            {brief.error.booking}
+          </Button>
+        </div>
+      </div>
+
+      <div class="review__send">
+        <Button variant="primary" type="submit" class="review__submit" track={{ 'data-submit': '' }}>
+          <span data-submit-label>{r.send}</span>
+          <Icon name="arrow-right" />
+        </Button>
+        <p class="review__alt">
+          {r.or}{' '}
+          <a href={whatsappHref()} target="_blank" rel="noopener" data-fallback="whatsapp" data-cursor="link" {...trackAttrs('brief_submit', { method: 'whatsapp' })}>{r.whatsappIt}<span class="visually-hidden"> {site.ui.external}</span></a>
+          {' · '}
+          <a href={bookingHref()} target="_blank" rel="noopener" data-fallback="booking" data-cursor="link" {...trackAttrs('brief_submit', { method: 'booking' })}>{r.bookCall}<span class="visually-hidden"> {site.ui.external}</span></a>
+        </p>
+      </div>
+      <p class="visually-hidden" role="status" aria-live="polite" data-send-status></p>
+      </div>
+    </fieldset>
+  </div>
+</section>
+
+<style>
+  .review__grid { display: grid; gap: var(--s7); margin-block-start: var(--s5); }
+  @media (min-width: 1024px) {
+    .review__grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--s7) calc(var(--col-gap) * 2); align-items: start; }
+  }
+
+  /* the brief itself: a ruled index card you can write on */
+  .review__paper {
+    position: relative;
+    padding: 18px 20px 20px;
+    border-radius: var(--r1);
+    box-shadow: var(--shadow-pinned);
+    background: var(--card) var(--paper-tex) 37px 91px / var(--tex-size) repeat;
+  }
+  .review__label-row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+  .review__note { font-family: var(--font-hand); font-size: var(--fs-hand-s); color: var(--ballpoint); rotate: -2deg; }
+  .review__summary {
+    display: block;
+    inline-size: 100%;
+    min-block-size: 15rem;
+    margin-block-start: 10px;
+    padding: 0 2px;
+    border: 0;
+    border-block-start: 1px solid var(--margin-rule);
+    background: repeating-linear-gradient(to bottom, transparent 0 31px, var(--rule) 31px 32px) 0 0 / 100% 32px local;
+    color: var(--ink);
+    font-family: var(--font-text);
+    font-size: var(--fs-body);
+    line-height: 32px;
+    resize: vertical;
+    field-sizing: content;
+    max-block-size: 36rem;
+  }
+  .review__summary:focus-visible { outline: 2px solid var(--ballpoint); outline-offset: 6px; }
+  .review__regen {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-block-size: 44px;
+    margin-block-start: 6px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ballpoint);
+    font-size: var(--fs-meta);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: .2em;
+  }
+
+  .review__picks-title { margin-block-start: var(--s6); font-family: var(--font-display); font-size: var(--fs-title); line-height: var(--lh-title); }
+  .review__picks { margin-block-start: var(--s3); }
+  .review__pick {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px var(--s3);
+    padding-block: 10px;
+    border-block-end: 1px solid var(--rule);
+  }
+  .review__pick-key { grid-column: 1; font-size: var(--fs-eyebrow); font-weight: 600; letter-spacing: var(--tr-eyebrow); text-transform: uppercase; color: var(--ink-soft); }
+  .review__pick-val { grid-column: 1; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; font-size: var(--fs-small); color: var(--ink); overflow-wrap: anywhere; }
+  .review__pick-val:global(.is-empty) { color: var(--ink-soft); }
+  .review__pick-val :global(.tag) {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: var(--r-tag);
+    background: var(--ink);
+    color: var(--card);
+    font-size: var(--fs-tag);
+    font-weight: 700;
+    letter-spacing: var(--tr-tag);
+    line-height: 1;
+    text-transform: uppercase;
+    box-shadow: inset 0 1px 0 var(--white-12);
+  }
+  .review__pick-change { grid-column: 2; grid-row: 1 / span 2; align-self: center; margin: 0; }
+  .review__change {
+    min-block-size: 44px;
+    padding-inline: 8px;
+    border: 0;
+    background: none;
+    color: var(--ballpoint);
+    font-size: var(--fs-meta);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: .2em;
+  }
+
+  /* reply details */
+  .review__contact {
+    min-inline-size: 0;
+    margin: 0;
+    padding: var(--card-pad);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--r1);
+    background: var(--card) var(--paper-tex) 200px 40px / var(--tex-size) repeat;
+  }
+  /* floated, so the legend sits inside the card instead of cutting into its border */
+  .review__contact-title { float: inline-start; inline-size: 100%; padding: 0; margin-block-end: var(--s4); }
+  .review__contact-body { clear: both; display: flex; flex-direction: column; gap: var(--s4); }
+  .review__contact-title h3 { font-family: var(--font-display); font-size: var(--fs-title); line-height: var(--lh-title); }
+  /* .field / .field__* live in brief.css (shared with step 5) */
+  .review__hp { position: absolute; inset-inline-start: -10000px; inline-size: 1px; block-size: 1px; overflow: hidden; }
+  .review__consent { font-size: var(--fs-small); color: var(--ink); }
+  .review__consent a { font-weight: 600; }
+  .review__turnstile:empty { display: none; }
+  .review__turnstile { min-block-size: 0; }
+  .review__turnstile-note { margin-block-start: calc(-1 * var(--s2)); }
+
+  .review__error {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+    padding: var(--s4);
+    border: 1.5px dashed var(--stamp);
+    border-radius: var(--r1);
+    background: var(--paper);
+  }
+  .review__error:focus { outline: none; }
+  .review__error:focus-visible { outline: 2px solid var(--ballpoint); outline-offset: 3px; }
+  .review__error-title { font-family: var(--font-display); font-size: var(--fs-title); line-height: var(--lh-title); }
+  .review__error-reason { font-weight: 600; color: var(--stamp); }
+  .review__error-next { font-size: var(--fs-small); }
+  .review__fallbacks { display: flex; flex-wrap: wrap; gap: var(--s2); margin-block-start: var(--s2); }
+  @media (max-width: 599px) {
+    .review__fallbacks { flex-direction: column; align-items: stretch; }
+    .review__fallbacks :global(.btn) { min-block-size: 48px; }
+  }
+
+  .review__send { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); margin-block-start: var(--s2); }
+  .review__send :global(.review__submit) { inline-size: 100%; }
+  .review__send :global(.review__submit[aria-busy="true"]) { cursor: progress; opacity: .85; }
+  .review__alt { font-size: var(--fs-small); color: var(--ink-soft); }
+  .review__alt a { display: inline-flex; align-items: center; min-block-size: 44px; font-weight: 600; }
+</style>

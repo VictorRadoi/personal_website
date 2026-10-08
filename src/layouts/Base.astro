@@ -17,7 +17,7 @@ import CursorRoot from '../components/chrome/CursorRoot.astro';
 import Lightbox from '../components/media/Lightbox.astro';
 import {
   SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION, JOB_TITLE, EMAIL, GITHUB_URL, LINKEDIN_URL,
-  GA_MEASUREMENT_ID, DEFAULT_OG_IMAGE, OG_IMAGE_SIZE, TELEPHONE,
+  GA_MEASUREMENT_ID, DEFAULT_OG_IMAGE, OG_IMAGE_SIZE, TELEPHONE, ANALYTICS_HOSTS,
 } from '../config';
 import { inlineScript } from '../lib/csp';
 
@@ -34,7 +34,7 @@ interface Props {
   image?: string;
   noindex?: boolean;
   /** Page type: drives Header `current`, <main> analytics hooks and the Lightbox. */
-  page?: 'home' | 'project' | 'privacy' | 'notFound' | 'other';
+  page?: 'home' | 'project' | 'privacy' | 'notFound' | 'start' | 'other';
   /** Project slug (page="project"). */
   slug?: string;
   /** Extra JSON-LD nodes appended to the @graph (lib/seo.ts). */
@@ -102,8 +102,9 @@ const headBoot = inlineScript(
   [
     `document.documentElement.classList.add('js');`,
     `var GA_ID = ${JSON.stringify(GA_MEASUREMENT_ID)}, gaEnabled = ${JSON.stringify(gaEnabled)};`,
-    // Local previews never talk to Google (keeps dev hits out of the GA property).
-    `if (/^(localhost|127\\.0\\.0\\.1|\\[::1\\])$/.test(location.hostname)) { gaEnabled = false; document.documentElement.setAttribute('data-analytics', 'off'); }`,
+    // Production only: workers.dev previews, localhost and any other host never talk to Google (no gtag.js,
+    // no events). The consent slip still behaves normally there; analytics.ts reads data-analytics.
+    `if (${JSON.stringify(ANALYTICS_HOSTS)}.indexOf(location.hostname) < 0) { gaEnabled = false; document.documentElement.setAttribute('data-analytics', 'off'); }`,
     `window.dataLayer = window.dataLayer || [];`,
     `function gtag() { window.dataLayer.push(arguments); }`,
     `window.gtag = gtag;`,
