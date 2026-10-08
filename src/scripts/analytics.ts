@@ -24,6 +24,12 @@ const debug = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 const LOAD_EVENTS = new Set(['page_view', 'case_study_open', 'not_found']);
 const heldBack: [string, EventParams][] = [];
 
+/**
+ * cta_click methods that are real contact intents. Each also sends its own `contact_<method>` event,
+ * which is marked as a GA4 key event (GA4 can only mark events by name, not by parameter value).
+ */
+const CONTACT_METHODS = new Set(['email', 'whatsapp', 'booking']);
+
 /** Safe no-op when analytics is unconfigured (no real GA ID), blocked, or the visitor has not said yes. */
 export function track(event: string, params: EventParams = {}): void {
   try {
@@ -38,6 +44,8 @@ export function track(event: string, params: EventParams = {}): void {
     }
     if (!enabled || typeof window.gtag !== 'function') return;
     window.gtag('event', event, clean);
+    const method = String(clean.method ?? '');
+    if (event === 'cta_click' && CONTACT_METHODS.has(method)) window.gtag('event', `contact_${method}`, clean);
   } catch {
     /* never break the page for analytics */
   }
