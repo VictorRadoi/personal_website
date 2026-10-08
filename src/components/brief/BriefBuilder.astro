@@ -8,7 +8,8 @@
  * (pages/start.astro). Steps are fieldsets with a legend holding the step's <h2> (focused on every step
  * change); chips are <button aria-pressed>. Layout on the page's content subgrid: steps in cols 1-8, the
  * "Your brief" tray sticky in cols 9-12 (≥1024); below 1024 the tray is a bottom sheet opened from the
- * fixed dock that also carries Back / Next. The review step spans the full width.
+ * fixed dock that also carries Back / Next. The dock lives in the steps column, so a growing tray never
+ * shifts the Next button. The review step spans the full width.
  * The napkin sketch sheet is static markup here; its code is import()ed on first open (sketch.ts).
  */
 import './brief.css';
@@ -230,35 +231,37 @@ const json = JSON.stringify(data).replace(/</g, '\\u003c');
 
         <!-- 6 -->
         <BriefReview brief={brief} index={5} total={TOTAL} />
+
+        <!-- Back / Next: under the step (not under the tray), so the tray's height never moves it -->
+        <div class="dock" data-dock>
+          <button
+            type="button"
+            class="dock__tray"
+            aria-expanded="false"
+            aria-controls="brief-tray"
+            data-tray-toggle
+            data-cursor="link"
+          >
+            <span class="dock__tray-label">{brief.tray.toggle}</span>
+            <span class="dock__count" data-tray-count>{brief.tray.countZero}</span>
+            <svg class="dock__caret" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false"><path d="M2.5 9L7 4.5 11.5 9" /></svg>
+          </button>
+          <div class="dock__nav">
+            <Button variant="secondary" class="dock__back" track={{ 'data-back': '' }}>
+              <Icon name="arrow-left" />
+              <span class="dock__back-label">{brief.nav.back}</span>
+            </Button>
+            <Button variant="primary" class="dock__next" track={{ 'data-next': '' }}>
+              <span data-next-label>{brief.nav.skip}</span>
+              <Icon name="arrow-right" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       <BriefTray brief={brief} />
     </div>
 
-    <div class="dock" data-dock>
-      <button
-        type="button"
-        class="dock__tray"
-        aria-expanded="false"
-        aria-controls="brief-tray"
-        data-tray-toggle
-        data-cursor="link"
-      >
-        <span class="dock__tray-label">{brief.tray.toggle}</span>
-        <span class="dock__count" data-tray-count>{brief.tray.countZero}</span>
-        <svg class="dock__caret" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false"><path d="M2.5 9L7 4.5 11.5 9" /></svg>
-      </button>
-      <div class="dock__nav">
-        <Button variant="secondary" class="dock__back" track={{ 'data-back': '' }}>
-          <Icon name="arrow-left" />
-          <span class="dock__back-label">{brief.nav.back}</span>
-        </Button>
-        <Button variant="primary" class="dock__next" track={{ 'data-next': '' }}>
-          <span data-next-label>{brief.nav.skip}</span>
-          <Icon name="arrow-right" />
-        </Button>
-      </div>
-    </div>
   </form>
 
   <section class="done" data-done aria-labelledby="brief-done-title" hidden>

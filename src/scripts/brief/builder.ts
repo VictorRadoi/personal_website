@@ -4,8 +4,10 @@
  *
  * - Six steps (fieldsets). Chips are <button aria-pressed>; pick-one groups advance by themselves after
  *   a pointer tap (not after keyboard activation, WCAG 3.2.2); multi groups have exclusive "Not sure yet".
- * - Every step change pushes a history entry, so the phone's back gesture walks back through the steps;
- *   the new step's <h2> gets focus and the progress bar comes into view.
+ * - Every step change pushes a history entry, so the phone's back gesture walks back through the steps.
+ *   Each change jumps (instantly, never smooth: a moving page makes the next click miss) to the top of the
+ *   new step, swallows trackpad momentum that was still running, then focuses the step's <h2> with
+ *   preventScroll. Scroll restoration is manual, so browser Back lands on the step top too.
  * - Answers, the edited brief and the reply details live in sessionStorage (this tab only, cleared on
  *   success); attachments stay in memory.
  * - "Your brief" tray + dock count follow every pick. Review: generated summary (editable), picks with
@@ -297,11 +299,54 @@ export function init(): void {
     if (!changed) return;
     if (push) history.pushState({ ...(history.state ?? {}), brief: i }, '');
     if (focus) {
-      const r = top.getBoundingClientRect();
-      if (r.top < 0 || r.top > innerHeight * 0.35) top.scrollIntoView({ block: 'start', behavior: reduce.matches ? 'auto' : 'smooth' });
+      scrollToStep();
       steps[i].querySelector<HTMLElement>('.step__title')?.focus({ preventScroll: true });
     }
     reached(i);
+  }
+
+  /**
+   * Put the progress bar + new step right under the sticky header (instant jump). If a wheel/trackpad
+   * stream was still running when the step changed (momentum from scrolling down to Next), that stream is
+   * swallowed until it pauses (max 1.5s, released by any pointer or key input), so it cannot carry the view
+   * off the new step. A fresh scroll after a pause is never blocked.
+   */
+  let lastWheel = -1e9;
+  addEventListener('wheel', () => (lastWheel = performance.now()), { passive: true });
+  let unhold: (() => void) | null = null;
+  function scrollToStep(): void {
+    unhold?.();
+    const pad = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+    const target = Math.max(0, Math.round(top.getBoundingClientRect().top + scrollY - pad));
+    const jump = () => {
+      if (Math.abs(scrollY - target) > 2) window.scrollTo({ top: target, behavior: 'instant' });
+    };
+    jump();
+    requestAnimationFrame(jump); // after any layout change in the first frame
+    const t0 = performance.now();
+    if (t0 - lastWheel > 250) return; // nothing in flight: nothing to hold
+    let last = t0;
+    const onWheel = (e: WheelEvent) => {
+      const now = performance.now();
+      if (now - t0 > 1500 || now - last > 160) return unhold?.();
+      last = now;
+      e.preventDefault();
+    };
+    const onScroll = () => jump(); // e.g. a fling the compositor keeps running
+    const stop = () => unhold?.();
+    addEventListener('wheel', onWheel, { passive: false });
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('pointerdown', stop, true);
+    addEventListener('keydown', stop, true);
+    const timer = window.setTimeout(stop, 1600);
+    unhold = () => {
+      removeEventListener('wheel', onWheel);
+      removeEventListener('scroll', onScroll);
+      removeEventListener('pointerdown', stop, true);
+      removeEventListener('keydown', stop, true);
+      window.clearTimeout(timer);
+      unhold = null;
+    };
   }
 
   const exclusive = (g: Group, id: string) => !SINGLE.has(g) && d.groups[g].some((o) => o.id === id && o.unsure);
@@ -311,7 +356,7 @@ export function init(): void {
     const v = chip.dataset.value ?? '';
     const cur = st.a[g];
     let next: string[];
-    if (SINGLE.has(g)) next = cur[0] === v ? [] : [v];
+    if (SINGLE.has(g)) next = [v]; // radio: tapping the chosen card again confirms it (and moves on)
     else if (cur.includes(v)) next = cur.filter((x) => x !== v);
     else if (exclusive(g, v)) next = [v];
     else next = [...cur.filter((x) => !exclusive(g, x)), v];
@@ -707,6 +752,8 @@ export function init(): void {
 
   /* ------------------------------- boot ------------------------------- */
 
+  // Steps are history entries; the browser must not restore an old scroll offset on Back/Forward.
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   history.replaceState({ ...(history.state ?? {}), brief: st.step }, '');
   paintChips();
   shownRows = {};

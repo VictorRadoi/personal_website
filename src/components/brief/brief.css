@@ -17,6 +17,10 @@
 .brief :is(.step__legend, .sub__title, .group__title) { float: inline-start; inline-size: 100%; }
 .brief :is(.step__legend, .sub__title, .group__title) + * { clear: both; }
 
+/* No scroll anchoring on this page: when a long step is swapped for a short one, the browser must not
+   pin the view to whatever was under the pointer (the dock, the footer). builder.ts scrolls explicitly. */
+html:has(.brief) { overflow-anchor: none; }
+
 /* ---------------- top: progress + escape link ---------------- */
 .brief__top {
   display: flex;
@@ -235,7 +239,7 @@
   .dock__nav { gap: 6px; }
 }
 @media (min-width: 1024px) {
-  .dock { grid-column: 1 / span 8; padding-block-start: var(--s5); }
+  .dock { padding-block-start: var(--s6); }
   .brief.is-review .dock { display: none; }
   .dock__tray { display: none; }
   .dock__nav { margin-inline-start: 0; }
