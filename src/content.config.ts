@@ -9,6 +9,7 @@
 import { defineCollection, type SchemaContext } from 'astro:content';
 import { z } from 'astro/zod';
 import { file, glob } from 'astro/loaders';
+import { ICON_NAMES } from './lib/icons';
 
 type ImageFn = SchemaContext['image'];
 
@@ -334,4 +335,161 @@ const site = defineCollection({
   }),
 });
 
-export const collections = { projects, services, earlier, site, omissions };
+/* ---------------------------------- brief builder (one entry, id "en") ---------------------------------- */
+
+/** A tappable answer. `phrase` reads inside a list sentence, `sentence` stands alone; `unsure` = exclusive "Not sure yet". */
+const briefOption = z.object({
+  id: z.string().regex(/^[a-z0-9]+$/),
+  label: z.string().max(60),
+  note: z.string().optional(),
+  icon: z.enum(ICON_NAMES).optional(),
+  phrase: z.string().optional(),
+  sentence: z.string().optional(),
+  unsure: z.boolean().default(false),
+});
+const briefStep = z.object({ title: z.string(), hint: z.string(), tray: z.string() });
+
+const brief = defineCollection({
+  loader: file('src/content/brief.yaml'),
+  schema: z.object({
+    seo: titleDesc,
+    page: z.object({
+      margin: z.string(),
+      eyebrow: z.string(),
+      h1: z.string(),
+      lead: z.string(),
+      escape: z.string(),
+      nojsTitle: z.string(),
+      nojsBody: z.string(),
+    }),
+    progress: z.string(),
+    nav: z.object({ back: z.string(), next: z.string(), skip: z.string(), review: z.string() }),
+    unsure: z.string(),
+    steps: z.object({
+      building: briefStep.extend({ options: z.array(briefOption) }),
+      stage: briefStep.extend({ options: z.array(briefOption) }),
+      features: briefStep.extend({
+        kindTitle: z.string(),
+        kindTray: z.string(),
+        kinds: z.array(briefOption),
+        featuresTitle: z.string(),
+        groups: z.array(z.object({ id: z.string(), label: z.string(), options: z.array(briefOption) })),
+      }),
+      timing: briefStep.extend({ options: z.array(briefOption) }),
+      notes: briefStep.extend({
+        notesLabel: z.string(),
+        notesPlaceholder: z.string(),
+        linkLabel: z.string(),
+        linkHint: z.string(),
+        linkPlaceholder: z.string(),
+        extrasTitle: z.string(),
+        extrasNote: z.string(),
+        sketchAdd: z.string(),
+        sketchEdit: z.string(),
+        photoAdd: z.string(),
+        photoReplace: z.string(),
+        remove: z.string(),
+        removeSketch: z.string(),
+        removePhoto: z.string(),
+        sketchAlt: z.string(),
+        photoAlt: z.string(),
+        photoBusy: z.string(),
+        photoError: z.string(),
+        attachedSketch: z.string(),
+        attachedPhoto: z.string(),
+        trayAttached: z.string(),
+      }),
+    }),
+    review: z.object({
+      title: z.string(),
+      hint: z.string(),
+      summaryLabel: z.string(),
+      summaryNote: z.string(),
+      regenerate: z.string(),
+      picksTitle: z.string(),
+      change: z.string(),
+      changeA11y: z.string(),
+      nothing: z.string(),
+      contactTitle: z.string(),
+      name: z.string(),
+      email: z.string(),
+      company: z.string(),
+      whatsapp: z.string(),
+      optional: z.string(),
+      honeypot: z.string(),
+      consent: z.string(),
+      privacyLink: z.string(),
+      turnstileNote: z.string(),
+      send: z.string(),
+      sending: z.string(),
+      verifying: z.string(),
+      or: z.string(),
+      whatsappIt: z.string(),
+      bookCall: z.string(),
+      errors: z.object({ name: z.string(), email: z.string(), emailInvalid: z.string(), summary: z.string(), fix: z.string() }),
+    }),
+    summary: z.object({
+      build: z.string(),
+      features: z.string(),
+      featuresUnsure: z.string(),
+      kind: z.string(),
+      link: z.string(),
+      sketch: z.string(),
+      photo: z.string(),
+      both: z.string(),
+      and: z.string(),
+      andLast: z.string(),
+      empty: z.string(),
+    }),
+    success: z.object({ title: z.string(), body: z.string(), book: z.string(), home: z.string(), sentTitle: z.string(), again: z.string() }),
+    error: z.object({
+      title: z.string(),
+      reasons: z.object({
+        invalid: z.string(),
+        turnstile: z.string(),
+        rate_limited: z.string(),
+        email_failed: z.string(),
+        network: z.string(),
+        turnstile_load: z.string(),
+      }),
+      next: z.string(),
+      retry: z.string(),
+      email: z.string(),
+      whatsapp: z.string(),
+      booking: z.string(),
+    }),
+    fallback: z.object({
+      subject: z.string(),
+      subjectNoName: z.string(),
+      whatsappIntro: z.string(),
+      signoff: z.string(),
+      attachments: z.string(),
+    }),
+    tray: z.object({ title: z.string(), empty: z.string(), toggle: z.string(), count: z.string(), countZero: z.string() }),
+    sketch: z.object({
+      title: z.string(),
+      hint: z.string(),
+      canvasLabel: z.string(),
+      toolsLabel: z.string(),
+      pen: z.string(),
+      eraser: z.string(),
+      rect: z.string(),
+      arrow: z.string(),
+      text: z.string(),
+      framesLabel: z.string(),
+      frame1: z.string(),
+      frame2: z.string(),
+      frame3: z.string(),
+      undo: z.string(),
+      clear: z.string(),
+      done: z.string(),
+      close: z.string(),
+      textLabel: z.string(),
+      textPlaceholder: z.string(),
+    }),
+    teaser: z.object({ title: z.string(), body: z.string(), chipsLabel: z.string(), cta: z.string(), note: z.string() }),
+    ctaLink: z.string(),
+  }),
+});
+
+export const collections = { projects, services, earlier, site, omissions, brief };

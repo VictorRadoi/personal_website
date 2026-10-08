@@ -1,0 +1,69 @@
+---
+/**
+ * /start/ — "Start a project": the tap-first brief builder (owner spec 2026-10-08). Indexable, in the
+ * sitemap (Astro sitemap picks it up). Copy: src/content/brief.yaml. Without JS the builder is hidden and
+ * the page offers the direct contact buttons instead (no broken form).
+ * Share image: the home card (no page-specific OG image is rendered for this page).
+ */
+import Base from '../layouts/Base.astro';
+import Section from '../components/layout/Section.astro';
+import Eyebrow from '../components/layout/Eyebrow.astro';
+import Heading from '../components/layout/Heading.astro';
+import CtaGroup from '../components/controls/CtaGroup.astro';
+import BriefBuilder from '../components/brief/BriefBuilder.astro';
+import { getBrief } from '../lib/content';
+import { pageJsonLd } from '../lib/seo';
+import { DEFAULT_OG_IMAGE } from '../config';
+
+const brief = await getBrief();
+const p = brief.page;
+---
+<Base
+  title={brief.seo.title}
+  description={brief.seo.description}
+  page="start"
+  ogImage={DEFAULT_OG_IMAGE}
+  jsonLd={pageJsonLd('/start/', brief.seo.title, brief.seo.description, DEFAULT_OG_IMAGE)}
+>
+  <Section id="start" padding="projectHeader" marginNote={p.margin} labelledBy="start-title">
+    <div class="start__intro">
+      <Eyebrow text={p.eyebrow} />
+      <Heading level={1} size="l" id="start-title">{p.h1}</Heading>
+      <p class="lead">{p.lead}</p>
+    </div>
+
+    <div class="start__nojs">
+      <p class="start__nojs-title">{p.nojsTitle}</p>
+      <p>{p.nojsBody}</p>
+      <CtaGroup location="contact" />
+    </div>
+
+    <BriefBuilder />
+  </Section>
+</Base>
+
+<style>
+  .start__intro { display: flex; flex-direction: column; gap: var(--s3); }
+  .start__intro .lead { margin-block-start: var(--s2); }
+  @media (min-width: 1024px) {
+    .start__intro { grid-column: 1 / span 8; }
+  }
+
+  .start__nojs {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s4);
+    margin-block-start: var(--s7);
+    padding: var(--card-pad);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--r1);
+    background: var(--card) var(--paper-tex) 200px 40px / var(--tex-size) repeat;
+  }
+  .start__nojs :global(.cta-group) { inline-size: 100%; }
+  .start__nojs-title { font-family: var(--font-display); font-size: var(--fs-title); line-height: var(--lh-title); }
+  :global(html.js) .start__nojs { display: none; }
+  @media (min-width: 1024px) {
+    .start__nojs { grid-column: 1 / span 8; }
+  }
+</style>

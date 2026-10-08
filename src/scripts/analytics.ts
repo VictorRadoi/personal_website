@@ -12,7 +12,14 @@
  *   [data-track-section]                           section_view once per session at ≥ 40% visible
  *   main[data-not-found]                           not_found { path }
  * Other events are fired by their owners: email_copy (copy.ts), screenshot_zoom (loupe/lightbox),
- * easter_egg_* (egg.ts), cursor_pref_change (cursor.ts).
+ * easter_egg_* (egg.ts), cursor_pref_change (cursor.ts), and the /start/ brief builder (scripts/brief/
+ * builder.ts): brief_start {source} · brief_step {step, name} · sketch_open {device} · photo_attach ·
+ * brief_submit {method: form|email_app|whatsapp|booking} · brief_error {error}. brief_submit is meant to be
+ * marked as a GA4 key event by name.
+ *
+ * Production only: Base.astro's head boot sets html[data-analytics="off"] on any host other than
+ * rvandrei.com / www.rvandrei.com (workers.dev previews, localhost). There gtag.js never loads and track()
+ * sends nothing, while the consent slip keeps working as usual.
  */
 import { consent } from './consent';
 

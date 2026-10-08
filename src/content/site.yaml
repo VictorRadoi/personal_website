@@ -8,7 +8,7 @@ en:
       description: "I build iOS and Android apps, plus the backends and websites behind them. Co-founder of Teamboard, founding engineer at GoParty. Independent, working with EU and US teams."
     privacy:
       title: "Privacy · Victor-Andrei Rădoi"
-      description: "What this site collects (only Google Analytics, only if you say yes) and how to change your mind."
+      description: "What this site collects (Google Analytics only if you say yes, a project brief only if you send one) and how to change your mind."
     notFound:
       title: "Page not found · Victor-Andrei Rădoi"
       description: "This page moved or never existed."
@@ -96,7 +96,7 @@ en:
           done: true
         - text: "your app →"
           done: false
-          href: "#contact"
+          href: "/start/?from=todo"
       a11yCaption: "Andrei's to-do card"
       donePrefix: "Done:"
       openNote: "room for one more"
@@ -221,6 +221,7 @@ en:
         h: "The short version"
         p:
           - "This site counts visits with Google Analytics, and only after you say yes. There are no ads, no ad cookies, no social trackers and no selling of anything. If you say no, or ignore the note, nothing is sent to Google at all."
+          - "If you send me a project brief, it is emailed to me and not stored on the site."
       - id: who
         h: "Who runs this site"
         p:
@@ -232,6 +233,7 @@ en:
         list:
           - "the pages you open and how far you scroll on project pages"
           - "which buttons and links you use, for example email, WhatsApp or booking a call"
+          - "how far you get through the Start a project questions, but never your answers or details"
           - "roughly where you are (country and city), worked out from your IP address, which Google does not keep"
           - "your device, screen size, browser and language"
           - "which site sent you here"
@@ -248,11 +250,25 @@ en:
       - id: local
         h: "What stays in your browser"
         p:
-          - "The site also keeps a few small notes on your device: your consent choice and the date you made it, whether you prefer the plain cursor, and whether you found the upside-down note. While a tab is open it remembers which animations already played. None of this is sent anywhere."
+          - "The site also keeps a few small notes on your device: your consent choice and the date you made it, whether you prefer the plain cursor, and whether you found the upside-down note. While a tab is open it remembers which animations already played and, on the Start a project page, your unsent answers. None of this is sent anywhere, and the answers only leave your browser if you press Send brief."
       - id: contact
         h: "If you contact me"
         p:
           - "If you email me, message me on WhatsApp or book a call, those services handle your message under their own rules. I use what you send only to reply and to work with you."
+      - id: brief
+        h: "If you send a project brief"
+        p:
+          - "The Start a project page turns your answers into a short brief. When you press Send brief, it goes to my inbox as an email. Nothing is saved on this website or in a database. What gets sent:"
+        list:
+          - "the options you picked and the brief text, as you left it"
+          - "your name and email, plus your company and WhatsApp number if you add them"
+          - "a napkin sketch or a photo, only if you add one"
+      - id: brief-delivery
+        h: "How the brief reaches me"
+        p:
+          - "This site runs on Cloudflare, which passes the brief on to my email inbox (Gmail). I use it only to reply and to work with you, like any other email you send me."
+          - "To keep out spam, the last step of the brief uses Cloudflare Turnstile. It looks at technical signals from your browser and your IP address to tell people from bots, and Cloudflare handles that under its own privacy policy. It runs without asking for your yes, because without it the form would fill up with spam."
+          - "While you fill in the brief, your answers stay in that browser tab so a reload doesn't lose them. They are cleared when the brief is sent or the tab is closed. If you choose to send it by email or WhatsApp instead, it goes through that app, under its own rules."
       - id: rights
         h: "Your rights"
         p:
@@ -260,7 +276,7 @@ en:
     changeHeading: "Change your mind"
     changeBody: "You can switch analytics on or off here at any time. It takes effect straight away."
     noscript: "The buttons need JavaScript. Without it the site sets nothing and counts nothing, so there is nothing to change."
-    updated: "Last updated: 7 October 2026"
+    updated: "Last updated: 8 October 2026"
 
   notFound:
     h1: "Nothing here."
