@@ -1,0 +1,51 @@
+---
+/**
+ * Privacy page (site-spec §4.2): one text column, plain language, inline consent control.
+ * OWNER: Agent D. Copy lives in site.yaml → privacy. GA4 property data retention must be 14 months in GA admin.
+ */
+import Base from '../layouts/Base.astro';
+import Section from '../components/layout/Section.astro';
+import Heading from '../components/layout/Heading.astro';
+import ConsentSlip from '../components/chrome/ConsentSlip.astro';
+import { getSite } from '../lib/content';
+import { pageJsonLd } from '../lib/seo';
+
+const site = await getSite();
+const t = site.privacy;
+
+const blocks = t.blocks;
+---
+<Base
+  title={site.seo.privacy.title}
+  description={site.seo.privacy.description}
+  page="privacy"
+  ogImage="/og/privacy.png"
+  jsonLd={pageJsonLd('/privacy/', site.seo.privacy.title, site.seo.privacy.description, '/og/privacy.png')}
+>
+  <Section id="privacy" padding="projectHeader" labelledBy="privacy-title">
+    <div class="privacy">
+      <Heading level={1} size="l" id="privacy-title">{t.h1}</Heading>
+      {blocks.map((b) => (
+        <section class="privacy__block" aria-labelledby={`privacy-${b.id}`}>
+          <h2 class="h-title" id={`privacy-${b.id}`}>{b.h}</h2>
+          {b.p.map((para, i) => <p class:list={{ lead: b.id === 'short' && i === 0 }}>{para}</p>)}
+          {b.list && <ul class="privacy__list">{b.list.map((item) => <li>{item}</li>)}</ul>}
+        </section>
+      ))}
+      <section class="privacy__block" aria-labelledby="privacy-change">
+        <h2 class="h-title" id="privacy-change">{t.changeHeading}</h2>
+        <p>{t.changeBody}</p>
+        <ConsentSlip mode="inline" />
+        <noscript><p class="small">{t.noscript}</p></noscript>
+      </section>
+      <p class="meta">{t.updated}</p>
+    </div>
+  </Section>
+</Base>
+
+<style>
+  .privacy { display: flex; flex-direction: column; gap: var(--s6); max-inline-size: var(--measure); }
+  .privacy__block { display: flex; flex-direction: column; gap: var(--s3); }
+  .privacy__list { margin: 0; padding-inline-start: 1.25em; display: flex; flex-direction: column; gap: var(--s1); list-style: disc; }
+  @media (min-width: 1024px) { .privacy { grid-column: 1 / span 8; } }
+</style>

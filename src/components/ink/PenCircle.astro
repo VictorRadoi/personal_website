@@ -1,0 +1,12 @@
+---
+/**
+ * STUB (Foundation) — OWNER: Agent A (markup) / Agent B (magnetic.ts scales it).
+ * Ballpoint circle around a magnetic CTA or the to-do "your app" link. Positioned inside its parent
+ * (parent needs position: relative). Hidden until magnetic.ts rewrites the path to the measured box
+ * and adds .is-scaled; draws on .is-circled / .is-revealed / :focus-visible (base.css).
+ */
+import { scribbles } from '../../lib/scribbles';
+---
+<svg class="pen-circle" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+  <path d={scribbles.circleLoose.d} pathLength="1" />
+</svg>

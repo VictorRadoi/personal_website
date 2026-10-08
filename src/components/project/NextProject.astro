@@ -1,0 +1,35 @@
+---
+/**
+ * STUB (Foundation) — OWNER: Agent D. "Next: {name} →" (display-l link, next_project source) +
+ * ctaLine + CtaGroup location="project_footer".
+ */
+import CtaGroup from '../controls/CtaGroup.astro';
+import { getSite, type ProjectRef } from '../../lib/content';
+import { fill } from '../../lib/format';
+
+interface Props {
+  next: ProjectRef;
+  /** Current project slug, for cta_click { slug } (optional, additive). */
+  slug?: string;
+}
+
+const { next, slug } = Astro.props;
+const site = await getSite();
+---
+<nav class="next-project" aria-label={site.ui.a11y.nextProject}>
+  <a
+    class="next-project__link h-l"
+    href={`/work/${next.slug}/`}
+    data-cursor="open"
+    data-cursor-label={site.cursor.open}
+    data-cs-source="next_project"
+    data-astro-prefetch
+  >{fill(site.project.next, { name: next.title })}</a>
+  <p class="lead">{site.project.ctaLine}</p>
+  <CtaGroup location="project_footer" slug={slug} />
+</nav>
+
+<style>
+  .next-project { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s5); }
+  .next-project__link { max-inline-size: 100%; color: var(--ink); padding-block: 4px; overflow-wrap: break-word; }
+</style>

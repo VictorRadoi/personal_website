@@ -1,0 +1,24 @@
+---
+/**
+ * STUB (Foundation) — OWNER: Agent A. Highlighter swipe behind one phrase per section (design-system §9.3).
+ * <mark class="hl"> styles + swipe states live in base.css. onLoad = hero (load sequence, seq 1);
+ * otherwise it swipes on reveal.
+ */
+import { slugify } from '../../lib/format';
+
+interface Props {
+  onLoad?: boolean;
+}
+
+const { onLoad = false } = Astro.props;
+const html = await Astro.slots.render('default');
+const revealId = `hl-${slugify(html.replace(/<[^>]+>/g, '')).slice(0, 40)}`;
+---
+<mark
+  class="hl"
+  data-reveal="swipe"
+  data-reveal-id={revealId}
+  data-onload-seq={onLoad ? '' : undefined}
+  data-seq={onLoad ? '1' : undefined}
+  set:html={html}
+/>

@@ -1,0 +1,76 @@
+---
+/**
+ * OWNER: Agent A (markup) + copy.ts. Copy-to-clipboard for the email address.
+ * Contract: button[data-copy=<value>][data-copy-location=<location>] with data-copy-done /
+ * data-copy-failed strings; copy.ts fires email_copy { location } on success and selects
+ * .selectable text on failure. The button is .js-only (does nothing without JS).
+ */
+import { getSite } from '../../lib/content';
+
+interface Props {
+  value: string;
+  location: string;
+  onNight?: boolean;
+  /** Render the value next to the button (optional, additive; the contact section shows it big instead). */
+  showValue?: boolean;
+}
+
+const { value, location, onNight = false, showValue = true } = Astro.props;
+const site = await getSite();
+---
+<div class:list={['copy-field', { 'copy-field--night': onNight }]}>
+  {showValue && <span class="copy-field__value selectable" data-cursor="native">{value}</span>}
+  <button
+    type="button"
+    class="copy-field__button js-only"
+    data-copy={value}
+    data-copy-location={location}
+    data-copy-label={site.copy.button}
+    data-copy-done={site.copy.done}
+    data-copy-failed={site.copy.failed}
+    data-cursor="link"
+    aria-label={site.ui.a11y.copyButton}
+  >
+    <!-- Both labels share one grid cell, so the button is always as wide as the longer one
+         and swapping "Copy" for "Copied" never moves its neighbours. -->
+    <span class="copy-field__label">{site.copy.button}</span>
+    <span class="copy-field__label copy-field__label--done" aria-hidden="true">{site.copy.done}</span>
+  </button>
+  <span class="copy-field__status" role="status" aria-live="polite"></span>
+</div>
+
+<style>
+  .copy-field { position: relative; display: inline-flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .copy-field__value { font-weight: 600; overflow-wrap: anywhere; user-select: all; }
+  /* Without JS a value-less field is empty (the button is .js-only): drop it so it leaves no gap. */
+  :global(html:not(.js)) .copy-field:not(:has(.copy-field__value)) { display: none; }
+  .copy-field__button {
+    display: inline-grid;
+    place-items: center;
+    min-block-size: 44px;
+    padding-inline: 16px;
+    border: 1.5px solid currentColor;
+    border-radius: var(--r2);
+    background: transparent;
+    color: inherit;
+    font-size: var(--fs-meta);
+    font-weight: 600;
+    line-height: 1;
+    transition: background-color var(--dur-quick), color var(--dur-quick);
+  }
+  .copy-field__label { grid-area: 1 / 1; }
+  .copy-field__label--done,
+  .copy-field__button[data-state='done'] .copy-field__label:not(.copy-field__label--done) { visibility: hidden; }
+  .copy-field__button[data-state='done'] .copy-field__label--done { visibility: visible; }
+  /* "Copied" is announced to screen readers only (the button already shows it), so it takes no space.
+     The rare failure message is shown on its own line. */
+  .copy-field__status:not([data-tone='error']) {
+    position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  .copy-field__status[data-tone='error'] { flex: 1 1 100%; font-size: var(--fs-meta); color: var(--stamp); }
+  .copy-field--night .copy-field__status[data-tone='error'] { color: var(--stamp-night); }
+  @media (hover: hover) {
+    .copy-field__button:hover { background: var(--ink); color: var(--card); }
+    .copy-field--night .copy-field__button:hover { background: var(--night-text); color: var(--ink); }
+  }
+</style>

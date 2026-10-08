@@ -1,0 +1,52 @@
+---
+/**
+ * STUB (Foundation) — OWNER: Agent D. Platform chip: icon, label, mini status, ↗ when linked.
+ * Linked chips fire outbound_click { product: slug, target, location: project_header }.
+ * Unlinked chips (e.g. iOS in review) are plain text. A `note` is announced (e.g. "the client's website").
+ */
+import Icon from '../layout/Icon.astro';
+import { getSite, platformStatusLabel, platformTarget, type Platform } from '../../lib/content';
+import { platformIcon } from '../../lib/icons';
+import { trackAttrs } from '../../lib/track';
+
+interface Props {
+  platform: Platform;
+  slug: string;
+}
+
+const { platform, slug } = Astro.props;
+const site = await getSite();
+const status = platformStatusLabel(site, platform.status);
+---
+{
+  platform.url ? (
+    <a
+      class="chip"
+      href={platform.url}
+      target="_blank"
+      rel="noopener"
+      data-cursor="link"
+      {...trackAttrs('outbound_click', { product: slug, target: platformTarget(platform), location: 'project_header' })}
+    >
+      <Icon name={platformIcon(platform.kind)} />
+      <span>{platform.label}</span>
+      {status && <span class:list={['chip__status', `chip__status--${platform.status}`]}>{status}</span>}
+      {platform.note && <span class="visually-hidden">({platform.note})</span>}
+      <span aria-hidden="true">↗</span>
+      <span class="visually-hidden">{site.ui.external}</span>
+    </a>
+  ) : (
+    <span class="chip chip--static">
+      <Icon name={platformIcon(platform.kind)} />
+      <span>{platform.label}</span>
+      {status && <span class:list={['chip__status', `chip__status--${platform.status}`]}>{status}</span>}
+      {platform.note && <span class="visually-hidden">({platform.note})</span>}
+    </span>
+  )
+}
+
+<style>
+  .chip { display: inline-flex; align-items: center; gap: 10px; min-block-size: 44px; padding-inline: 14px; border: 1.5px solid var(--ink); border-radius: var(--r2); background: var(--card); color: var(--ink); font-weight: 600; font-size: var(--fs-small); text-decoration: none; }
+  .chip__status { font-size: .6875rem; font-weight: 700; letter-spacing: var(--tr-tag); text-transform: uppercase; color: var(--live); border: 1.5px solid currentColor; padding: 3px 5px; border-radius: var(--r1); }
+  .chip__status--review, .chip__status--soon, .chip__status--relaunching { color: var(--ink-soft); }
+</style>

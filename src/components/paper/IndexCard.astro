@@ -1,0 +1,40 @@
+---
+/**
+ * Index card (design-system §9.1): .surface-card, --r1, --shadow-rest, optional tilt and hover lift.
+ * Whole-card links: put .stretched-link on the title <a>; inner links get .above. No tape: index cards
+ * rest on the page. The tilt classes own the `rotate` property (base.css): never set it on this element.
+ * OWNER: Agent A.
+ */
+import type { TiltClass } from '../../lib/tilt';
+import { tiltClass } from '../../lib/tilt';
+
+interface Props {
+  as?: 'article' | 'div' | 'li' | 'figure';
+  tilt?: TiltClass;
+  offset?: boolean;
+  hoverLift?: boolean;
+  padding?: 'm' | 's';
+  cursor?: 'open' | 'visit';
+  cursorLabel?: string;
+  id?: string;
+  /** Extra classes (optional, additive). */
+  class?: string;
+}
+
+const { as: Tag = 'div', tilt, offset = false, hoverLift = false, padding = 'm', cursor, cursorLabel, id, class: className } =
+  Astro.props;
+---
+<Tag
+  id={id}
+  class:list={['index-card', 'surface-card', `index-card--pad-${padding}`, tiltClass(tilt), { 'offset-down': offset, lift: hoverLift }, className]}
+  data-cursor={cursor}
+  data-cursor-label={cursorLabel}
+>
+  <slot />
+</Tag>
+
+<style>
+  .index-card { position: relative; border-radius: var(--r1); box-shadow: var(--shadow-rest); min-inline-size: 0; }
+  .index-card--pad-m { padding: var(--card-pad); }
+  .index-card--pad-s { padding: var(--card-pad-s); }
+</style>

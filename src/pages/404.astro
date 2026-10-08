@@ -1,0 +1,34 @@
+---
+/** 404 (site-spec §4.3): the only centered block on the site. Served with status 404. OWNER (Phase 1): Agent D. */
+import Base from '../layouts/Base.astro';
+import Section from '../components/layout/Section.astro';
+import Heading from '../components/layout/Heading.astro';
+import Button from '../components/controls/Button.astro';
+import { getSite } from '../lib/content';
+import { mailtoHref } from '../lib/links';
+import { trackAttrs } from '../lib/track';
+
+const site = await getSite();
+const t = site.notFound;
+---
+<Base title={site.seo.notFound.title} description={site.seo.notFound.description} noindex page="notFound">
+  <Section id="not-found" padding="hero" labelledBy="not-found-title">
+    <div class="not-found">
+      <Heading level={1} size="l" id="not-found-title">{t.h1}</Heading>
+      <p class="lead">{t.body}</p>
+      <div class="not-found__actions">
+        <Button variant="primary" href="/">{t.home}</Button>
+        <Button variant="secondary" href={mailtoHref()} icon="mail" track={trackAttrs('cta_click', { method: 'email', location: 'not_found' })}>
+          {t.email}
+        </Button>
+      </div>
+      <p class="hand-m not-found__note">{t.note}</p>
+    </div>
+  </Section>
+</Base>
+
+<style>
+  .not-found { display: flex; flex-direction: column; align-items: center; gap: var(--s5); text-align: center; }
+  .not-found__note { max-inline-size: 32ch; color: var(--ballpoint); }
+  .not-found__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s4); }
+</style>

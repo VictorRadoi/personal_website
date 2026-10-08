@@ -1,0 +1,117 @@
+# GoParty: own venture (copy.md §1, §4.2, §8.3 + decisions.md: started 2023, live).
+# Screenshots: the App Store listing images at full resolution (owner-approved set). The scanning and
+# logistics app has no screenshots: its block is text-only.
+order: 3
+kind: venture
+title: "GoParty"
+subtitle: "A suite of two apps: one for users to discover events and buy tickets, one for scanning and logistics."
+domain: ["Events", "Ticketing"]
+roleLine: "Founding engineer · built both apps from an empty repo · 2023–now"
+marginNote: "founding engineer"
+icon: ../../assets/work/goparty/brand/app-icon.png
+next: dream-pivot
+
+seo:
+  title: "GoParty · Victor-Andrei Rădoi"
+  description: "GoParty is two apps: one to discover events and buy tickets, one for organizers to scan tickets and handle logistics. I'm the founding engineer and built both."
+  og: /og/goparty.png
+
+platforms:
+  - kind: ios
+    label: "Guests · iOS"
+    url: "https://apps.apple.com/ro/app/goparty-ticketing-social/id6448707631"
+    status: live
+    target: app_store
+  - kind: android
+    label: "Guests · Android"
+    url: "https://play.google.com/store/apps/details?id=com.gop.events"
+    status: live
+    target: google_play
+  - kind: organizer
+    label: "Organizers · iOS"
+    url: "https://apps.apple.com/ro/app/goparty-ticket-scanner/id6450062414"
+    status: live
+    target: organizer_ios
+  - kind: organizer
+    label: "Organizers · Android"
+    url: "https://play.google.com/store/apps/details?id=com.gop.scanner"
+    status: live
+    target: organizer_android
+  - kind: web
+    label: "Web · gopartyapp.ro"
+    url: "https://www.gopartyapp.ro/"
+    status: relaunching
+    target: website
+
+mainShot:
+  id: gp-main
+  src: ../../assets/work/goparty/03-ticket-qr.png
+  alt: 'GoParty "Your tickets always in app" screen with a QR code for a DISCOTERRA event'
+  kind: marketing
+
+description:
+  - "GoParty is a suite of two apps. The first is for users: they discover events and buy tickets. The second is for scanning and logistics, and it is built for the organizer's team."
+  - "I designed the architecture and built both apps, from the first prototype through user testing to the current release."
+
+csi:
+  challenge: "Checking tickets at the door in real time, with a queue waiting. The organizer app verifies every code against the backend live, so I used Retrofit and Dio with request caching to cut API latency and make each check faster."
+  stack: ["Flutter", "Riverpod", "Retrofit", "Dio", "Stripe", "QR scanning"]
+  impact: "5.0 on the App Store from 13 ratings. 100+ installs on Google Play."
+
+features:
+  - name: "Discover events."
+    body: "Users find the events around them and open any one for the details."
+    shots:
+      - id: gp-events
+        src: ../../assets/work/goparty/01-find-events.png
+        alt: 'GoParty "Find events around you" screen with a DISCOTERRA event card'
+        kind: marketing
+  - name: "Buy tickets."
+    body: "Pick a ticket category and quantity, then pay with Stripe."
+    shots:
+      - id: gp-checkout
+        src: ../../assets/work/goparty/02-event-checkout.png
+        alt: 'GoParty event page for a DISCOTERRA night with a General Access ticket, a quantity picker and the caption "Simple buying process!"'
+        kind: marketing
+  - name: "Tickets live in the app."
+    body: "Each ticket is a QR code with the order number and category, ready to scan."
+    shots:
+      - id: gp-ticket
+        src: ../../assets/work/goparty/03-ticket-qr.png
+        alt: 'GoParty "My tickets" screen with a QR code, order number and category for a DISCOTERRA ticket'
+        kind: marketing
+  - name: "Scanning and logistics."
+    body: "The second app is for the organizer's team. It scans tickets at the door and checks each one against the backend in real time."
+  - name: "All the stats."
+    body: "Organizers get the full picture of every event: all the stats, down to where each buyer bought the ticket and how they found out about the event."
+
+card:
+  role: "Founding engineer · built both apps from an empty repo"
+  stamp: "Live since 2023"
+  stampTone: live
+  problem: "GoParty is a suite of two apps: one for users, one for scanning and logistics."
+  solution: "Users discover events and buy tickets. The organizer's team scans tickets at the door and gets all the stats on every event."
+  facts: "iOS · Android · one app for users, one for scanning and logistics"
+  stats:
+    - value: "5.0"
+      label: "on the App Store, from 13 ratings"
+    - value: "2 apps"
+      label: "one for users, one for scanning and logistics"
+  links:
+    - label: "gopartyapp.ro ↗ (relaunching)"
+      url: "https://www.gopartyapp.ro/"
+      target: website
+    - label: "App Store ↗"
+      url: "https://apps.apple.com/ro/app/goparty-ticketing-social/id6448707631"
+      target: app_store
+    - label: "Google Play ↗"
+      url: "https://play.google.com/store/apps/details?id=com.gop.events"
+      target: google_play
+  linkStory: "Read the story →"
+  peek:
+    id: gp-peek
+    src: ../../assets/work/goparty/03-ticket-qr.png
+    alt: ""
+    kind: marketing
+  tilt: p06
+  offset: false

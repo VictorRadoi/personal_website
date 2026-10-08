@@ -1,0 +1,127 @@
+# Dream Pivot: client case study (copy.md §1, §6.1, §8.1 + decisions.md).
+# He designed (UI/UX) and built the app only. dream-pivot.com is the client's site: never imply he built it.
+# No metrics available: impact is qualitative. No prices.
+order: 1
+kind: caseStudy
+title: "Dream Pivot"
+subtitle: 'An AI career coach that turns "what does AI mean for my job?" into one task a day.'
+domain: ["EdTech", "Careers", "AI"]
+roleLine: "Client project for Dream Pivot Ltd (UK) · app designed and built solo · 2026"
+marginNote: "client project"
+icon: ../../assets/work/dream-pivot/brand/app-icon-512.png
+next: teamboard
+
+seo:
+  title: "Dream Pivot case study · Victor-Andrei Rădoi"
+  description: "How I built Dream Pivot, an AI career coach for a UK startup, on my own: an eight-minute intake, nine career paths and a plan written one week at a time."
+  og: /og/dream-pivot.png
+
+platforms:
+  - kind: android
+    label: "Android · Google Play"
+    url: "https://play.google.com/store/apps/details?id=com.dreampivot.dreampivot"
+    status: live
+    target: google_play
+  - kind: ios
+    label: "iOS · App Store"
+    status: review
+  - kind: web
+    label: "Website · dream-pivot.com"
+    url: "https://dream-pivot.com/"
+    target: website
+    note: "the client's website"
+
+mainShot:
+  id: dp-home-main
+  src: ../../assets/work/dream-pivot/04-home-dashboard.png
+  alt: "Dream Pivot home screen: today's task, a one-day streak and plan progress at 6%"
+  kind: raw
+
+description:
+  - 'Dream Pivot is for people who suspect AI is about to change their job and would rather have a plan than a panic. Its own site says it best: for anyone "super curious about AI, laid off, bored, stuck, or just paying attention."'
+  - "You answer a few honest questions and can add a CV or LinkedIn profile. The app comes back with nine paths: three skills, three ways to bring AI into the job you have, and three career pivots. All nine are free to read. Pick one and you get a plan between 7 and 365 days long, one task a day."
+  - "I designed and built the app on my own: the screens and flows, the app itself, the Firebase backend, plan generation with Gemini, and subscriptions through RevenueCat. I also made the store screenshots and feature graphics, and worked closely with the client to get the terms and privacy policy right for App Store and Google Play rules."
+  - "The first version was ready in a month and a half, working closely with the founders."
+
+csi:
+  challenge: "There is no fixed course. Each new week of a plan is written by Gemini after a quick reflection on the last one, so the app has to generate, save and schedule content week by week, with reminders, on top of an intake that can read a CV or LinkedIn profile."
+  stack: ["Flutter", "Firebase", "Gemini", "RevenueCat"]
+  impact: "Live on Google Play for Dream Pivot Ltd, iOS in App Store review. Four plans, from a free 7-day Sprint to a 365-day Reinvention, sold as subscriptions through RevenueCat."
+
+features:
+  - name: "A report worth reading."
+    body: "It starts with eight minutes of honest questions; a CV or LinkedIn profile is optional. What comes back is a personal pivot report: your profile, your unfair advantages, and nine possible futures across three tiers. All nine are free to read."
+    shots:
+      - id: dp-pivot-report
+        src: ../../assets/work/dream-pivot/01-pivot-report.png
+        alt: "Dream Pivot pivot report: the reader's profile, their unfair advantages and the start of nine pivot paths"
+        kind: raw
+  - name: "Skills you could have in a week."
+    body: "The first tier is Sprints: one nameable AI skill, seven days, seven tasks, free. The 90-day plans and full Pivots sit one tab over."
+    shots:
+      - id: dp-sprints
+        src: ../../assets/work/dream-pivot/02-sprints.png
+        alt: "Dream Pivot Sprints tab: seven-day skill plans marked free, next to the 90-Day and Pivots tabs"
+        kind: raw
+  - name: "A plan written week by week."
+    body: 'Every week ends with thirty seconds of feedback, and Gemini writes the next week from it. That''s why the plan screen says "written so far".'
+    shots:
+      - id: dp-plan
+        src: ../../assets/work/dream-pivot/03-90day-plan.png
+        alt: "Dream Pivot 90-day plan, week 1 of 13, with the first tasks listed"
+        kind: raw
+    annotation:
+      preset: dp-plan-weeks
+      note: "the plan is written week by week"
+  - name: "One task a day."
+    body: "Home shows today's task, why it matters and what good looks like, with your streak and how far through the plan you are."
+    shots:
+      - id: dp-home
+        src: ../../assets/work/dream-pivot/04-home-dashboard.png
+        alt: "Dream Pivot home screen: today's task, a one-day streak and plan progress at 6%"
+        kind: raw
+    annotation:
+      preset: dp-home-task
+      note: "one task a day"
+  - name: "Free to start, paid to go long."
+    body: "The 7-day Sprint is free with no card; an email address creates the account and saves every plan. Longer plans are subscriptions handled by RevenueCat, which keeps Android and iOS billing in one place. Gentle reminders keep people going."
+    shots:
+      - id: dp-pro-monthly
+        src: ../../assets/work/dream-pivot/brand/pro-monthly-1024.png
+        alt: "Dream Pivot Pro monthly badge: the D mark inside a dashed ring"
+        kind: marketing
+      - id: dp-pro-annual
+        src: ../../assets/work/dream-pivot/brand/pro-annual-1024.png
+        alt: "Dream Pivot Pro annual badge: the D mark inside a closed ring"
+        kind: marketing
+  - name: "The same app on iPad."
+    body: "One codebase, laid out for the bigger screen rather than stretched."
+    shots:
+      - id: dp-ipad-home
+        src: ../../assets/work/dream-pivot/ipad/02-home-dashboard.png
+        alt: "Dream Pivot on iPad: the home dashboard with today's focus, why it matters and what good looks like"
+        kind: tablet
+
+teaser:
+  tab: "Dream Pivot · client project · 2026"
+  stamp: "Shipped 2026"
+  stampTone: shipped
+  title: "An AI career coach, built solo for a UK startup."
+  summary: "Dream Pivot Ltd wanted a coach people would open every day, for anyone wondering what AI means for their job. I designed and built the app on my own: an eight-minute intake, nine possible paths, and a daily plan that's written one week at a time."
+  shots:
+    - id: dp-teaser-plan
+      src: ../../assets/work/dream-pivot/03-90day-plan.png
+      alt: "Dream Pivot 90-day plan, week 1 of 13, with the first tasks listed"
+      kind: raw
+      tilt: p14
+    - id: dp-teaser-home
+      src: ../../assets/work/dream-pivot/04-home-dashboard.png
+      alt: "Dream Pivot home screen: today's task, a one-day streak and plan progress at 6%"
+      kind: raw
+      tilt: n22
+  notes:
+    - preset: dp-home-task
+      note: "one task a day"
+    - preset: dp-plan-weeks
+      note: "the plan is written week by week"
+  cta: "Read the case study →"

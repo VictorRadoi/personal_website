@@ -1,0 +1,34 @@
+---
+/**
+ * OWNER: Agent C. First focusable element on every page; hidden until focused, then visible top-left
+ * above everything (header, consent slip, menu). Targets <main id="main">.
+ */
+import { getSite } from '../../lib/content';
+
+const site = await getSite();
+---
+<a class="skip-link" href="#main">{site.nav.skip}</a>
+
+<style>
+  .skip-link {
+    position: absolute;
+    inset-inline-start: 12px;
+    inset-block-start: calc(-1 * var(--s9));
+    z-index: var(--z-skip);
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    padding-inline: var(--s4);
+    border-radius: var(--r2);
+    background: var(--ink);
+    color: var(--card);
+    font-size: var(--fs-ui);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .skip-link:focus,
+  .skip-link:focus-visible {
+    inset-block-start: calc(12px + env(safe-area-inset-top, 0px));
+    color: var(--card);
+  }
+</style>

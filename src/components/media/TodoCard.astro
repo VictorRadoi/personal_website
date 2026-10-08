@@ -1,0 +1,130 @@
+---
+/**
+ * The hero's to-do card (design-system §9.4). OWNER: Agent A. No photo of Victor anywhere: this card is
+ * the personal artifact. An index card taped at both top corners, ruled like a real one (the only ruled
+ * object on the page). Done items carry a ballpoint tick drawn over a hand-drawn box; the open item is a
+ * real link to #contact with a pen circle. Load sequence (reveal.ts): ticks = data-onload-seq seq 3,
+ * the open link (its pen circle) = seq 4. Without JS everything is drawn at rest except the circle
+ * (the circle needs magnetic.ts to measure it). Tilt +2.2deg (1.1 on mobile via --tilt-k).
+ */
+import Tape from '../paper/Tape.astro';
+import Scribble from '../ink/Scribble.astro';
+import PenCircle from '../ink/PenCircle.astro';
+import { getSite } from '../../lib/content';
+import { trackAttrs } from '../../lib/track';
+
+interface Props {
+  heading: string;
+  items: { text: string; done: boolean; href?: string }[];
+  openNote?: string;
+}
+
+const { heading, items, openNote } = Astro.props;
+const site = await getSite();
+// Kalam has no arrow glyph: a trailing "→" is drawn as a pen stroke instead.
+const split = (text: string) => {
+  const m = text.match(/^(.*?)\s*→$/);
+  return { label: m ? m[1] : text, arrow: Boolean(m) };
+};
+---
+<figure class="todo tilt-p22">
+  <Tape placement="corners" seed="todo" />
+  <figcaption class="visually-hidden">{site.hero.todo.a11yCaption}</figcaption>
+  <p class="todo__head" aria-hidden="true">{heading}</p>
+  <ul class="todo__list" role="list">
+    {
+      items.map((item) => {
+        const { label, arrow } = split(item.text);
+        return (
+          <li class:list={['todo__item', { 'todo__item--open': !item.done }]}>
+            <span class="todo__box" aria-hidden="true">
+              <Scribble name="box" size="xs" box={[18, 18]} class="todo__square" />
+              {item.done && (
+                <span class="todo__tick" data-reveal="draw" data-onload-seq data-seq="3">
+                  <Scribble name="check" size="xs" box={[24, 22]} />
+                </span>
+              )}
+            </span>
+            {item.href ? (
+              <a
+                class="todo__link"
+                href={item.href}
+                data-cursor="cta"
+                data-onload-seq
+                data-seq="4"
+                {...trackAttrs('cta_click', { method: 'todo', location: 'hero' })}
+              >
+                <PenCircle />
+                {label}
+                {arrow && (
+                  <svg class="todo__arrow" width="26" height="14" viewBox="0 0 26 14" aria-hidden="true" focusable="false">
+                    <path d="M1,8 C8,6.5 16,9 25,7 M19,1.5 L25.5,7 L18.5,12.5" />
+                  </svg>
+                )}
+              </a>
+            ) : (
+              <span>
+                {item.done && <span class="visually-hidden">{site.hero.todo.donePrefix} </span>}
+                {label}
+              </span>
+            )}
+          </li>
+        );
+      })
+    }
+  </ul>
+  {openNote && <p class="todo__note">{openNote}</p>}
+</figure>
+
+<style>
+  .todo {
+    position: relative;
+    margin: 0;
+    inline-size: 100%;
+    max-inline-size: 320px;
+    align-self: start;
+    padding: 6px 26px 26px;
+    border-radius: var(--r1);
+    box-shadow: var(--shadow-pinned);
+    background:
+      repeating-linear-gradient(to bottom, transparent 0 33px, var(--rule) 33px 34px) 0 63px / 100% calc(100% - 63px) no-repeat,
+      linear-gradient(var(--margin-rule), var(--margin-rule)) 0 52px / 100% 1px no-repeat,
+      var(--card) var(--paper-tex) 37px 91px / var(--tex-size) repeat;
+  }
+  @media (min-width: 600px) and (max-width: 1023px) { .todo { max-inline-size: 260px; } }
+  @media (min-width: 1024px) { .todo { max-inline-size: 300px; } }
+
+  .todo__head { font-family: var(--font-hand); font-size: var(--fs-hand-l); line-height: 46px; block-size: 46px; color: var(--ink); }
+  .todo__list { margin-block-start: 17px; }
+  .todo__item {
+    position: relative;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-family: var(--font-hand);
+    font-size: var(--fs-hand-m);
+    line-height: 34px;
+    color: var(--ink);
+  }
+  .todo__box { position: relative; flex: none; inline-size: 18px; block-size: 18px; margin-block-start: 7px; }
+  .todo__box :global(.todo__square) { position: absolute; inset: 0; color: var(--ink); }
+  .todo__box :global(.todo__square .ink) { stroke-width: 1.6px; }
+  .todo__tick { position: absolute; inset-block-start: -6px; inset-inline-start: -2px; inline-size: 24px; block-size: 22px; --draw-delay: 0ms; }
+  .todo__tick :global(.scribble) { color: var(--ballpoint); }
+  .todo__tick.is-revealed :global(.scribble path) { transition-duration: var(--dur-quick); }
+
+  .todo__link { position: relative; color: var(--ballpoint); text-decoration: none; padding-inline: 4px; display: inline-block; }
+  .todo__link::after { content: ""; position: absolute; inset: -6px -8px; }   /* 46px tap target */
+  .todo__link :global(.pen-circle) { inset-inline-start: -14px; inset-block-start: -4px; inline-size: calc(100% + 28px); block-size: calc(100% + 8px); }
+  .todo__arrow { display: inline-block; vertical-align: middle; margin-inline-start: 6px; translate: 0 -1px; }
+  .todo__arrow path { fill: none; stroke: currentColor; stroke-width: 2px; stroke-linecap: round; stroke-linejoin: round; }
+
+  .todo__note {
+    font-family: var(--font-hand);
+    font-size: var(--fs-hand-s);
+    color: var(--ballpoint);
+    text-align: end;
+    margin-block-start: 4px;
+    rotate: -3deg;
+  }
+</style>

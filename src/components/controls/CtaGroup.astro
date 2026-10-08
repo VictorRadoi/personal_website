@@ -1,0 +1,67 @@
+---
+/**
+ * OWNER: Agent A. The three contact CTAs: Email (primary), WhatsApp, Book a
+ * 30-min call (new tab). Magnetic everywhere except the mobile menu. Every button fires cta_click
+ * { method, location, slug? }. Labels per location: lib/content.ts ctaLabels().
+ * A11y note: visible labels are the accessible names (copy.md §13 names would break WCAG 2.5.3
+ * label-in-name); external links get a visually-hidden "(opens in a new tab)".
+ */
+import Button from './Button.astro';
+import { ctaLabels, getSite, type CtaLocation } from '../../lib/content';
+import { bookingHref, mailtoHref, whatsappHref } from '../../lib/links';
+import { trackAttrs } from '../../lib/track';
+
+interface Props {
+  location: 'hero' | 'services' | 'contact' | 'project_footer' | 'menu' | 'not_found';
+  onNight?: boolean;
+  stack?: boolean;
+  /** Project slug for cta_click on project pages (optional, additive). */
+  slug?: string;
+}
+
+const { location, onNight = false, stack = false, slug } = Astro.props;
+const site = await getSite();
+const labels = ctaLabels(site, location as CtaLocation);
+const magnetic = location !== 'menu';
+const size = location === 'menu' ? 'block' : 'regular';
+---
+<div class:list={['cta-group', { 'cta-group--stack': stack }]}>
+  <Button
+    variant="primary"
+    href={mailtoHref()}
+    icon="mail"
+    size={size}
+    onNight={onNight}
+    magnetic={magnetic}
+    track={trackAttrs('cta_click', { method: 'email', location, slug })}
+  >{labels.email}</Button>
+  <Button
+    variant="secondary"
+    href={whatsappHref(site.cta.whatsappPrefill)}
+    icon="whatsapp"
+    size={size}
+    external
+    onNight={onNight}
+    magnetic={magnetic}
+    track={trackAttrs('cta_click', { method: 'whatsapp', location, slug })}
+  >{labels.whatsapp}</Button>
+  <Button
+    variant="secondary"
+    href={bookingHref()}
+    icon="calendar"
+    size={size}
+    external
+    onNight={onNight}
+    magnetic={magnetic}
+    track={trackAttrs('cta_click', { method: 'booking', location, slug })}
+  >{labels.book}</Button>
+</div>
+
+<style>
+  .cta-group { display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; }
+  .cta-group--stack { flex-direction: column; align-items: stretch; }
+  /* phones: full-width stacked buttons (easy thumb targets) */
+  @media (max-width: 599px) {
+    .cta-group { flex-direction: column; align-items: stretch; gap: var(--s3); }
+  }
+</style>

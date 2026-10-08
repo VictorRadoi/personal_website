@@ -1,0 +1,57 @@
+---
+/**
+ * OWNER: Agent C. One service: <h3> name, body, typical work (meta), Kalam proof link. Proof links into
+ * /work/ carry data-cs-source="service_proof" + prefetch. weight "light" = the smaller fourth service
+ * (websites & portfolios): body in the small size, so it reads as an aside to the three main ones.
+ * Kalam has no arrow glyph: a trailing "→" is set in Schibsted (which has one) inside the same link.
+ */
+import type { ServiceEntry } from '../../lib/content';
+
+interface Props {
+  service: ServiceEntry;
+}
+
+const { service } = Astro.props;
+const s = service.data;
+const internalCase = s.proofHref.startsWith('/work/');
+const m = s.proof.match(/^(.*?)\s*(→)$/);
+const proofLabel = m ? m[1] : s.proof;
+const proofArrow = m ? m[2] : '';
+---
+<div class:list={['service', `service--${s.weight}`]} id={`service-${service.id}`}>
+  <h3 class="h-title">{s.title}</h3>
+  <p class="service__body">{s.body}</p>
+  <p class="meta service__typical">{s.typical}</p>
+  <a
+    class="service__proof"
+    href={s.proofHref}
+    data-cursor="link"
+    data-cs-source={internalCase ? 'service_proof' : undefined}
+    data-astro-prefetch={internalCase ? '' : undefined}
+  >{proofLabel}{proofArrow && <span class="service__arrow" aria-hidden="true">{proofArrow}</span>}</a>
+</div>
+
+<style>
+  .service { display: flex; flex-direction: column; align-items: flex-start; }
+  .service__body { margin-block-start: var(--s3); max-inline-size: var(--measure); }
+  .service__typical { margin-block-start: 10px; max-inline-size: var(--measure); }
+  .service__proof {
+    display: inline-flex;
+    align-items: center;
+    gap: .35em;
+    min-block-size: 44px;
+    margin-block-start: var(--s1);
+    font-family: var(--font-hand);
+    font-size: var(--fs-hand-m);
+    line-height: var(--lh-hand-m);
+    color: var(--ballpoint);
+    text-decoration: none;
+  }
+  .service__proof:hover { color: var(--ballpoint-deep); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .2em; }
+  .service__arrow { font-family: var(--font-text); font-size: .9em; transition: translate var(--dur-base) var(--ease-settle); }
+  @media (hover: hover) {
+    .service__proof:hover .service__arrow { translate: 3px 0; }
+  }
+
+  .service--light .service__body { font-size: var(--fs-small); line-height: var(--lh-small); }
+</style>

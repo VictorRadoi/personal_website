@@ -1,0 +1,44 @@
+---
+/**
+ * STUB (Foundation) — OWNER: Agent D. Project page blocks 0-3 (site-spec §4): back link + margin note,
+ * <h1>, subtitle, domain tags + role line, "Where to get it" + PlatformRow.
+ */
+import Section from '../layout/Section.astro';
+import Eyebrow from '../layout/Eyebrow.astro';
+import LabelTag from '../ink/LabelTag.astro';
+import TextLink from '../controls/TextLink.astro';
+import PlatformRow from './PlatformRow.astro';
+import { getSite, type ProjectEntry } from '../../lib/content';
+
+interface Props {
+  project: ProjectEntry;
+}
+
+const { project } = Astro.props;
+const site = await getSite();
+const p = project.data;
+---
+<Section id="project" padding="projectHeader" marginNote={p.marginNote} labelledBy="project-title">
+  <p class="project-header__back meta"><TextLink href="/#work">{site.nav.backToWork}</TextLink></p>
+  <h1 id="project-title" class="project-header__title h-xl">{p.title}</h1>
+  <p class="lead">{p.subtitle}</p>
+  <div class="project-header__meta">
+    <ul class="project-header__tags" role="list">
+      {p.domain.map((d) => <li><LabelTag label={d} /></li>)}
+    </ul>
+    <p class="meta">{p.roleLine}</p>
+  </div>
+  <div class="project-header__platforms">
+    <Eyebrow text={site.project.platformsLabel} />
+    <PlatformRow platforms={p.platforms} slug={project.id} />
+  </div>
+</Section>
+
+<style>
+  .project-header__back { margin-block: calc(-1 * var(--s3)) var(--s3); }
+  .project-header__back :global(a) { display: inline-flex; align-items: center; min-block-size: 44px; }
+  .project-header__title { margin-block-end: var(--s4); }
+  .project-header__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); margin-block: var(--s5); }
+  .project-header__tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .project-header__platforms { display: flex; flex-direction: column; gap: var(--s3); }
+</style>

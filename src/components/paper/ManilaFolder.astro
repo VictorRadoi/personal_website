@@ -1,0 +1,62 @@
+---
+/**
+ * Manila case folder (design-system §9.1): .surface-manila body, tab 36px high at top-left (offset 32px,
+ * 16px on mobile) with 6px top corners and a 1px manila-edge top line, 1px crease 14px below the folder
+ * top. The whole folder is one link (stretched title link inside the slot); hover lifts it (.lift).
+ * Body padding is the slot owner's business except the default below. OWNER: Agent A.
+ */
+interface Props {
+  tab: string;
+  cursor?: 'open' | 'visit';
+  cursorLabel?: string;
+}
+
+const { tab, cursor, cursorLabel } = Astro.props;
+---
+<div class="folder surface-manila lift" data-cursor={cursor} data-cursor-label={cursorLabel}>
+  <p class="folder__tab eyebrow">{tab}</p>
+  <div class="folder__body"><slot /></div>
+</div>
+
+<style>
+  .folder {
+    position: relative;
+    margin-block-start: 36px;
+    border-radius: 0 var(--r1) var(--r1) var(--r1);
+    box-shadow: var(--shadow-rest);
+    min-inline-size: 0;
+  }
+  .folder::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 14px;
+    block-size: 1px;
+    background: var(--manila-edge);
+    pointer-events: none;
+  }
+  .folder__tab {
+    position: absolute;
+    inset-block-end: 100%;
+    inset-inline-start: 16px;
+    min-block-size: 36px;
+    max-inline-size: calc(100% - 16px);   /* may reach the folder's right edge; wraps only with very large text */
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: var(--r3) var(--r3) 0 0;
+    border-block-start: 1px solid var(--manila-edge);
+    background: var(--manila);
+    color: var(--ink-soft);
+    font-size: var(--fs-tag);
+    line-height: 1.2;
+  }
+  .folder__body { position: relative; padding: 36px var(--card-pad) 28px; }
+  @media (min-width: 600px) {
+    .folder__tab { inset-inline-start: 32px; max-inline-size: calc(100% - 48px); padding-inline: 18px; font-size: var(--fs-eyebrow); }
+    .folder__body { padding: var(--s7); }
+  }
+  @media (min-width: 1024px) {
+    .folder__body { padding: 48px; }
+  }
+</style>

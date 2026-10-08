@@ -1,0 +1,98 @@
+---
+/**
+ * STUB (Foundation) — OWNER: Agent D. One feature (site-spec §4 row 7): text left (<h2> at --fs-title,
+ * sticky on desktop), visuals right: shots (zoomable, gallery per feature) or a stat card. A feature
+ * with neither renders text only (launch rule: missing screenshots are omitted, not placeholders).
+ */
+import IndexCard from '../paper/IndexCard.astro';
+import Annotation from '../ink/Annotation.astro';
+import Screenshot from '../media/Screenshot.astro';
+import Scribble from '../ink/Scribble.astro';
+import { getSite, type Feature } from '../../lib/content';
+
+interface Props {
+  feature: Feature;
+  slug: string;
+  index: number;
+}
+
+const { feature, slug, index } = Astro.props;
+const site = await getSite();
+const titleId = `feature-${index + 1}-title`;
+const gallery = `${slug}-feature-${index + 1}`;
+const shots = feature.shots.filter((s) => s.src);
+// Two printouts side by side must fit the desktop visual column (7/12 of the content): 2 × 260 + gap.
+const widthFor = (kind: string) => (kind === 'tablet' ? 420 : kind === 'marketing' ? (shots.length > 1 ? 260 : 300) : 260);
+const hasVisual = shots.length > 0 || Boolean(feature.stat);
+const swipe = index === 0 && shots.length > 1;
+// One phone / printout / stat card: text and visual sit side by side from 768px (tablet), like desktop.
+const side = (shots.length === 1 && shots[0].kind !== 'tablet') || (shots.length === 0 && Boolean(feature.stat));
+---
+<>
+  {index > 0 && <Scribble name="dividerSquiggle" size="divider" class="feature__divider" />}
+  <section class:list={['feature', { 'feature--text-only': !hasVisual, 'feature--side': side }]} aria-labelledby={titleId}>
+    <div class="feature__text">
+      <h2 class="h-title" id={titleId}>{feature.name}</h2>
+      <p>{feature.body}</p>
+    </div>
+    {
+      hasVisual && (
+        <div class="feature__visual">
+          {shots.length > 0 && (
+            <div class:list={['feature__row', { 'feature__row--single': shots.length === 1 }]} tabindex={shots.length > 1 ? '0' : undefined} role="group" aria-label={feature.name}>
+              {shots.map((shot, i) => (
+                <div class="feature__item">
+                  <Screenshot shot={shot} width={widthFor(shot.kind)} tilt="auto" zoomable gallery={gallery} galleryIndex={i} revealId={`${gallery}-${shot.id}`} />
+                </div>
+              ))}
+            </div>
+          )}
+          {swipe && <p class="hand-s feature__swipe">{site.project.swipeHint}</p>}
+          {feature.annotation && (
+            <Annotation preset={feature.annotation.preset} note={feature.annotation.note} revealId={`${gallery}-note`} />
+          )}
+          {feature.stat && (
+            <IndexCard class="feature__stat">
+              <p class="h-l">{feature.stat.value}</p>
+              <p class="hand-m">{feature.stat.label}</p>
+            </IndexCard>
+          )}
+        </div>
+      )
+    }
+  </section>
+</>
+
+<style>
+  .feature { display: grid; gap: var(--s6); min-inline-size: 0; }
+  .feature__text { display: flex; flex-direction: column; gap: var(--s3); max-inline-size: var(--measure); min-inline-size: 0; }
+  .feature__visual { display: flex; flex-direction: column; gap: var(--s4); min-inline-size: 0; }
+  .feature__row { display: flex; gap: var(--s5); align-items: flex-start; padding-block: var(--s3); }
+  .feature__item { flex: none; }
+  /* A single shot shrinks to the column instead of overflowing it (the 420px iPad frame on phones). */
+  .feature__row--single .feature__item { flex: 0 1 auto; min-inline-size: 0; max-inline-size: 100%; }
+  .feature__swipe { color: var(--ballpoint); margin: 0; }
+  .feature :global(.feature__divider), :global(.feature__divider) { display: block; margin-inline: auto; inline-size: 160px; block-size: auto; color: var(--ink-faint); }
+  /* Caption-mode annotation (no annotation host here): its own height, under the shot, arrow on the
+     left so it points up into the phone. (The dp-* presets set flex: 0 0 100% for row-wrap hosts; in
+     this column flex box that would take the full height and collapse the screenshot row.) */
+  .feature__visual > :global(.annotation) { flex: none; align-items: flex-start; text-align: start; padding-inline-start: var(--s5); }
+  /* mobile: one horizontal scroll-snap row (touch swipe); keyboard focusable */
+  @media (max-width: 799px) {
+    .feature__row { overflow-x: auto; scroll-snap-type: x mandatory; margin-inline: calc(var(--gutter-x, 20px) * -1); padding-inline: var(--gutter-x, 20px); scroll-padding-inline: var(--gutter-x, 20px); -webkit-overflow-scrolling: touch; }
+    .feature__item { scroll-snap-align: start; }
+  }
+  @media (min-width: 800px) { .feature__row { flex-wrap: wrap; gap: var(--s5); } .feature__swipe { display: none; } }
+  /* Tablet (768-1023): a single visual sits beside its text instead of under it. */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .feature--side { grid-template-columns: minmax(0, 1fr) minmax(0, 320px); column-gap: var(--s6); align-items: start; }
+    .feature--side .feature__text { grid-column: 1; grid-row: 1; position: sticky; inset-block-start: var(--sticky-top); }
+    .feature--side .feature__visual { grid-column: 2; grid-row: 1; }
+    .feature--side .feature__row { overflow: visible; margin-inline: 0; padding-inline: 0; }
+  }
+  @media (min-width: 1024px) {
+    .feature { grid-template-columns: 4fr 1fr 7fr; }
+    .feature__text { grid-column: 1; position: sticky; inset-block-start: var(--sticky-top); align-self: start; }
+    .feature__visual { grid-column: 3; }
+  }
+</style>

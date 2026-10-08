@@ -1,0 +1,19 @@
+---
+/**
+ * Store marketing image with text baked in (design-system §9.1): --card border 6px, --r1,
+ * --shadow-pinned; the tape strip on top is added by Screenshot. OWNER: Agent A.
+ */
+interface Props {
+  width: 150 | 160 | 260 | 300;
+}
+
+const { width } = Astro.props;
+---
+<div class:list={['printout', `w-${width}`]}>
+  <slot />
+</div>
+
+<style>
+  .printout { position: relative; padding: 6px; background: var(--card); border-radius: var(--r1); box-shadow: var(--shadow-pinned); }
+  .printout :global(img) { display: block; inline-size: 100%; block-size: auto; }
+</style>

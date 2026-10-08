@@ -1,0 +1,216 @@
+/* Design tokens: the only place hex/rgb values live (design-system §1-§7, §11.2).
+   Components use var(--…) only. New tokens go through Foundation (site-spec §10.3). */
+
+:root {
+  color-scheme: light;
+
+  /* ---- Paper (surfaces) ---- */
+  --paper: #F3F0E8;
+  --card: #FCFBF7;
+  --card-92: rgb(252 251 247 / .92);   /* cursor stamp, touch stamp fill */
+  --manila: #E9DAB4;
+  --manila-edge: #D6C496;
+  --shade: #E8E3D6;
+  --sticky: #F6E8A6;
+  --tape: rgb(230 218 176 / .72);
+  --night: #1F1D1A;
+  --night-2: #2A2724;
+  --backdrop: rgb(31 29 26 / .82);     /* lightbox ::backdrop */
+
+  /* ---- Ink (text, UI) ---- */
+  --ink: #1D1B18;
+  --ink-press: #34302B;
+  --ink-soft: #575047;
+  --ink-faint: #8A8276;                 /* ≥24px text or non-text only */
+  --rule: #D6CFBF;                      /* decorative separators only */
+  --night-text: #F1EDE4;
+  --night-soft: #B9B1A3;
+
+  /* ---- Hand (accents) ---- */
+  --ballpoint: #2340A8;
+  --ballpoint-deep: #1A3088;
+  --ballpoint-night: #9DB2FF;
+  --highlighter: #F5D547;
+  --highlighter-band: rgb(245 213 71 / .85);
+  --stamp: #B02A1E;
+  --stamp-deep: #7D1D15;               /* egg button lip */
+  --stamp-night: #FF8A7A;
+  --live: #2D6A44;
+  --margin-rule: #E3A79C;
+  --tbd-bg: #FFF4C2;
+  --tbd-ink: #7A2E14;
+
+  /* ---- Light overlays (tags, phone glass, egg button) ---- */
+  --white-04: rgb(255 255 255 / .04);
+  --white-12: rgb(255 255 255 / .12);
+  --white-35: rgb(255 255 255 / .35);
+
+  /* for shadows: rgb(var(--ink-rgb) / .2) — never pure black */
+  --ink-rgb: 29 27 24;
+
+  /* ---- Texture ---- */
+  --paper-tex: url(/textures/paper-tile.webp);
+  --tex-size: 384px 384px;
+
+  /* ---- Type families ---- */
+  --font-display: "Young Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-text: "Schibsted Grotesk", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-hand: "Kalam", "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive;
+
+  /* ---- Type scale (fluid 375 → 1280px) ---- */
+  --fs-display-xl: clamp(2.625rem, 1.537rem + 4.64vw, 5.25rem);
+  --fs-display-l: clamp(2.125rem, 1.555rem + 2.43vw, 3.5rem);
+  --fs-display-m: clamp(1.75rem, 1.439rem + 1.33vw, 2.5rem);
+  --fs-title: clamp(1.5rem, 1.396rem + .442vw, 1.75rem);
+  --fs-stat: clamp(1.75rem, 1.543rem + .884vw, 2.25rem);
+  --fs-lead: clamp(1.188rem, 1.11rem + .331vw, 1.375rem);
+  --fs-body: clamp(1.062rem, 1.037rem + .11vw, 1.125rem);
+  --fs-small: .9375rem;
+  --fs-ui: 1rem;
+  --fs-meta: .875rem;
+  --fs-eyebrow: .8125rem;
+  --fs-tag: .75rem;
+  --fs-stamp: .8125rem;
+  --fs-hand-l: clamp(1.375rem, 1.168rem + .884vw, 1.875rem);
+  --fs-hand-m: clamp(1.188rem, 1.11rem + .331vw, 1.375rem);
+  --fs-hand-s: clamp(1rem, .9482rem + .221vw, 1.125rem);
+
+  --lh-display-xl: 1.05;  --tr-display-xl: -.02em;
+  --lh-display-l: 1.1;    --tr-display-l: -.015em;
+  --lh-display-m: 1.15;   --tr-display-m: -.01em;
+  --lh-title: 1.2;        --tr-title: -.005em;
+  --lh-stat: 1.1;
+  --lh-lead: 1.55;
+  --lh-body: 1.6;
+  --lh-small: 1.55;
+  --lh-ui: 1.25;          --tr-ui: .005em;
+  --lh-meta: 1.45;        --tr-meta: .01em;
+  --lh-eyebrow: 1.25;     --tr-eyebrow: .09em;
+  --tr-tag: .12em;
+  --tr-stamp: .14em;
+  --lh-hand-l: 1.15;
+  --lh-hand-m: 1.2;
+  --lh-hand-s: 1.25;
+
+  --measure: 40rem;
+
+  /* ---- Spacing (base 4px) ---- */
+  --s1: .25rem; --s2: .5rem; --s3: .75rem; --s4: 1rem; --s5: 1.5rem; --s6: 2rem;
+  --s7: 3rem; --s8: 4rem; --s9: 6rem; --s10: 8rem; --s11: 11rem;
+
+  /* ---- Radii ---- */
+  --r0: 0;
+  --r1: 2px;
+  --r2: 4px;
+  --r3: 6px;
+  --r-tag: 1px;
+  --r-icon: 22%;
+
+  /* ---- Shadows (ink-tinted) ---- */
+  --shadow-rest: 0 1px 1px rgb(var(--ink-rgb) / .06), 0 6px 14px -4px rgb(var(--ink-rgb) / .14);
+  --shadow-lift: 0 2px 2px rgb(var(--ink-rgb) / .07), 0 16px 30px -10px rgb(var(--ink-rgb) / .22);
+  --shadow-pinned: 0 1px 0 rgb(var(--ink-rgb) / .08), 0 10px 20px -12px rgb(var(--ink-rgb) / .25);
+  --shadow-device: 0 30px 50px -20px rgb(var(--ink-rgb) / .35);
+  --shadow-ring: 0 0 0 3px rgb(var(--ink-rgb) / .4);   /* touch dot outline */
+
+  /* ---- Motion ---- */
+  --dur-instant: 80ms; --dur-quick: 160ms; --dur-base: 240ms; --dur-settle: 420ms;
+  --dur-swipe: 420ms; --dur-draw: 700ms; --dur-page: 400ms; --dur-flip: 900ms;
+  --ease-settle: cubic-bezier(.16, 1, .3, 1);
+  --ease-press: cubic-bezier(.3, 0, .2, 1);
+  --ease-pen: cubic-bezier(.55, .05, .25, 1);
+  --ease-swipe: cubic-bezier(.7, 0, .2, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-flip: cubic-bezier(.3, 1.35, .5, 1);
+
+  /* ---- Frame / grid (design-system §5); values per breakpoint below ---- */
+  --frame-max: 1320px;
+  --gutter-x: 20px;
+  --margin-col: 0px;
+  --cols: 4;
+  --col-gap: 16px;
+  --measure-tablet: 37.5rem;
+
+  /* ---- Chrome ---- */
+  --header-h: 64px;
+  --scroll-offset: 88px;     /* anchors land below the sticky header */
+  --sticky-top: 120px;       /* sticky columns (services left, feature text) */
+
+  /* ---- Objects ---- */
+  --card-pad: 20px;          /* index-card padding m: 32 / 24 / 20 */
+  --card-pad-s: 20px;        /* index-card padding s: 24 (20 on mobile) */
+  --tape-w: 72px;
+  --tape-h: 22px;
+  --tilt-k: .5;              /* tilt multiplier: all tilts × 0.5 under 600px */
+  --offset-y: 0px;           /* .offset-down: planned vertical offset (desktop only) */
+
+  /* ---- Section padding (top / bottom), design-system §4 — mobile first ---- */
+  --pad-hero-t: 24px;          --pad-hero-b: 72px;
+  --pad-ventures-t: 64px;      --pad-ventures-b: 80px;
+  --pad-services-t: 72px;      --pad-services-b: 72px;
+  --pad-work-t: 72px;          --pad-work-b: 88px;
+  --pad-contact-t: 72px;       --pad-contact-b: 32px;
+  --pad-projectHeader-t: 24px; --pad-projectHeader-b: 40px;
+  --pad-project-t: 72px;       --pad-project-b: 72px;   /* also: gap between feature blocks */
+
+  /* ---- Layers ---- */
+  --z-raised: 1;
+  --z-tape: 2;
+  --z-header: 50;
+  --z-slip: 60;
+  --z-menu: 80;
+  --z-cursor: 1000;
+  --z-skip: 1100;
+}
+
+/* Tablet 600-1023 */
+@media (min-width: 600px) {
+  :root {
+    --gutter-x: 40px;
+    --cols: 8;
+    --col-gap: 20px;
+    --card-pad: 24px;
+    --card-pad-s: 24px;
+    --tape-w: 84px;
+    --tape-h: 26px;
+    --tilt-k: 1;
+
+    --pad-hero-t: 40px;          --pad-hero-b: 96px;
+    --pad-ventures-t: 80px;      --pad-ventures-b: 112px;
+    --pad-services-t: 96px;      --pad-services-b: 96px;
+    --pad-work-t: 96px;          --pad-work-b: 112px;
+    --pad-contact-t: 96px;       --pad-contact-b: 40px;
+    --pad-projectHeader-t: 40px; --pad-projectHeader-b: 48px;
+    --pad-project-t: 96px;       --pad-project-b: 96px;
+  }
+}
+
+/* Desktop 1024-1279 */
+@media (min-width: 1024px) {
+  :root {
+    --margin-col: 88px;
+    --cols: 12;
+    --col-gap: 24px;
+    --header-h: 72px;
+    --card-pad: 32px;
+    --offset-y: 48px;
+
+    --pad-hero-t: 56px;          --pad-hero-b: 128px;
+    --pad-ventures-t: 96px;      --pad-ventures-b: 144px;
+    --pad-services-t: 128px;     --pad-services-b: 112px;
+    --pad-work-t: 128px;         --pad-work-b: 176px;
+    --pad-contact-t: 128px;      --pad-contact-b: 48px;
+    --pad-projectHeader-t: 48px; --pad-projectHeader-b: 64px;
+    --pad-project-t: 128px;      --pad-project-b: 128px;
+  }
+}
+
+/* Desktop ≥1280 */
+@media (min-width: 1280px) {
+  :root { --margin-col: 120px; }
+}
+
+/* Under 600px: --fs-ui is 17px */
+@media (max-width: 599px) {
+  :root { --fs-ui: 1.0625rem; }
+}

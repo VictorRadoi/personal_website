@@ -1,0 +1,151 @@
+---
+/**
+ * The custom cursor layer (design-system §12). OWNER: Agent B (+ cursor.ts, magnetic.ts).
+ * One fixed, aria-hidden div; cursor.ts shows it via html.has-cursor (or .is-touch-loupe for the
+ * touch loupe), moves it with transform (CSSOM, CSP-safe) and sets data-state:
+ * idle | link | open (stamp; also "visit") | zoom (loupe) | cta | native | mirror (egg).
+ * Labels come from content (site.cursor, site.egg).
+ * The global block at the bottom holds the interaction states other components' markup relies on
+ * (magnetic CTA offsets, touch press of the pen circle); zero specificity so owners can override.
+ */
+import { getSite } from '../../lib/content';
+
+const site = await getSite();
+---
+<div
+  class="cursor"
+  aria-hidden="true"
+  data-state="idle"
+  data-label-open={site.cursor.open}
+  data-label-visit={site.cursor.visit}
+>
+  <div class="cursor__loupe"></div>
+  <div class="cursor__stamp"><span class="cursor__label">{site.cursor.open}</span></div>
+  <div class="cursor__blot"></div>
+  <div class="cursor__dot"></div>
+  <div class="cursor__hint">{site.cursor.zoomHint}</div>
+  <div class="cursor__uhoh">{site.egg.uhoh}</div>
+</div>
+
+<style>
+  .cursor {
+    position: fixed;
+    inset: 0 auto auto 0;
+    inline-size: 0;
+    block-size: 0;
+    z-index: var(--z-cursor);
+    pointer-events: none;
+    display: none;
+    transform: translate3d(-200px, -200px, 0);
+    transition: opacity 120ms linear;
+  }
+  :global(html.has-cursor) .cursor,
+  .cursor.is-touch-loupe { display: block; }
+  .cursor.is-away { opacity: 0; }
+  .cursor.snapback { transition: transform 220ms var(--ease-settle), opacity 120ms linear; }
+
+  .cursor > * { position: absolute; inset: 0 auto auto 0; translate: -50% -50%; }
+
+  /* dot: 10px ink, 6px ballpoint on links, red in the egg */
+  .cursor__dot {
+    inline-size: 10px;
+    block-size: 10px;
+    border-radius: 50%;
+    background: var(--ink);
+    transition:
+      inline-size var(--dur-quick) var(--ease-spring),
+      block-size var(--dur-quick) var(--ease-spring),
+      background-color 120ms linear,
+      opacity 120ms linear,
+      scale var(--dur-instant) linear;
+  }
+  .cursor[data-state="link"] .cursor__dot { inline-size: 6px; block-size: 6px; background: var(--ballpoint); }
+  .cursor.on-night .cursor__dot { background: var(--night-text); }
+  .cursor[data-state="mirror"] .cursor__dot { background: var(--stamp); }
+  .cursor.on-night[data-state="mirror"] .cursor__dot { background: var(--stamp-night); }
+  .cursor:is([data-state="open"], [data-state="zoom"], [data-state="cta"], [data-state="native"]) .cursor__dot { opacity: 0; }
+  .cursor.snapback .cursor__dot { animation: cursor-squash 220ms var(--ease-settle); }
+
+  /* rubber stamp: open → / visit ↗ */
+  .cursor__stamp {
+    inline-size: 88px;
+    block-size: 88px;
+    display: grid;
+    place-items: center;
+    border: 2px solid var(--ballpoint);
+    border-radius: 50%;
+    background: var(--card-92);
+    rotate: -8deg;
+    opacity: 0;
+    scale: .6;
+    transition: opacity 120ms linear, scale var(--dur-quick) var(--ease-spring);
+  }
+  .cursor__label {
+    padding-inline: 8px;
+    font-family: var(--font-hand);
+    font-size: 15px;
+    line-height: 1.1;
+    color: var(--ballpoint);
+    text-align: center;
+  }
+  .cursor[data-state="open"] .cursor__stamp { opacity: 1; scale: 1; }
+
+  /* press feedback */
+  .cursor.is-down .cursor__dot { scale: .7; }
+  .cursor.is-down .cursor__stamp { scale: .94; }
+  .cursor__blot { inline-size: 10px; block-size: 10px; border: 1.5px solid var(--ballpoint); border-radius: 50%; opacity: 0; }
+  .cursor.blot .cursor__blot { animation: cursor-blot var(--dur-base) var(--ease-press); }
+
+  /* loupe (project pages): 152px with the mouse, 120px above the finger on touch */
+  .cursor__loupe {
+    inline-size: 152px;
+    block-size: 152px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    box-shadow: var(--shadow-pinned);
+    background-color: var(--card);
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 120ms linear;
+  }
+  .cursor.is-touch-loupe .cursor__loupe { inline-size: 120px; block-size: 120px; }
+  .cursor[data-state="zoom"] .cursor__loupe { opacity: 1; }
+
+  .cursor__hint,
+  .cursor__uhoh {
+    font-family: var(--font-hand);
+    font-size: 1rem;
+    line-height: 1;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity var(--dur-quick) linear;
+  }
+  .cursor > .cursor__hint { color: var(--ballpoint); translate: -50% 96px; }
+  .cursor[data-state="zoom"].show-hint:not(.is-touch-loupe) .cursor__hint { opacity: 1; }
+  .cursor > .cursor__uhoh { color: var(--stamp-night); translate: 14px -28px; }
+  .cursor.show-uhoh .cursor__uhoh { opacity: 1; }
+
+  @keyframes cursor-blot {
+    from { opacity: .3; inline-size: 10px; block-size: 10px; }
+    to { opacity: 0; inline-size: 34px; block-size: 34px; }
+  }
+  @keyframes cursor-squash {
+    from { scale: 1.3; }
+  }
+</style>
+
+<style is:global>
+  /* Magnetic CTAs (magnetic.ts writes --mx/--my/--lx/--ly; design-system §12.4). Zero specificity:
+     Button.astro may restate these, but must keep `translate` in its transition list. */
+  :where([data-magnetic]) {
+    translate: var(--mx, 0px) var(--my, 0px);
+    transition: translate 500ms var(--ease-spring);
+  }
+  :where([data-magnetic].is-tracking) { transition-duration: 80ms; transition-timing-function: linear; }
+  :where([data-magnetic]) > :where(.btn__label) {
+    translate: var(--lx, 0px) var(--ly, 0px);
+    transition: inherit;
+  }
+  /* Touch press: the pen circle draws in 180ms (magnetic.ts adds .is-pressed). */
+  .is-pressed.is-circled > .pen-circle path { transition-duration: 180ms; }
+</style>

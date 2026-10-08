@@ -1,0 +1,152 @@
+---
+/**
+ * OWNER: Agent C. The phone/tablet menu (site-spec §2): a native popover (#menu) opened by the header's
+ * "Menu" button. Esc, light dismiss and focus return come with the Popover API; the close button carries
+ * `autofocus`, which the popover focusing steps honour when it opens. Full-screen index-card sheet: a top
+ * row that mirrors the header (so "Close" sits where "Menu" was), section links in Young Serif 40px,
+ * the three CTAs full width, and the local-time line. nav.ts closes it when a link is followed.
+ * Never shown on desktop (≥1024) or in browsers without the Popover API (the header hides "Menu" there).
+ */
+import CtaGroup from '../controls/CtaGroup.astro';
+import Icon from '../layout/Icon.astro';
+import LocalTime from './LocalTime.astro';
+import { getSite } from '../../lib/content';
+import { trackAttrs, type NavTarget } from '../../lib/track';
+
+const site = await getSite();
+const links: { target: Exclude<NavTarget, 'home'>; label: string }[] = [
+  { target: 'ventures', label: site.nav.ventures },
+  { target: 'services', label: site.nav.services },
+  { target: 'work', label: site.nav.work },
+  { target: 'contact', label: site.nav.contact },
+];
+---
+<div id="menu" popover class="mobile-menu surface-card">
+  <div class="mobile-menu__top">
+    <a class="mobile-menu__wordmark" href="/" data-cursor="link" {...trackAttrs('nav_click', { target: 'home', location: 'menu' })}>
+      {site.nav.wordmark}
+    </a>
+    <button
+      type="button"
+      class="mobile-menu__close"
+      popovertarget="menu"
+      popovertargetaction="hide"
+      data-cursor="link"
+      autofocus
+    >
+      <Icon name="close" />
+      <span>{site.nav.menuClose}</span>
+    </button>
+  </div>
+  <div class="mobile-menu__body">
+    <nav aria-label={site.nav.menuLabel}>
+      <ul class="mobile-menu__links" role="list">
+        {
+          links.map((l) => (
+            <li>
+              <a href={`/#${l.target}`} data-cursor="link" {...trackAttrs('nav_click', { target: l.target, location: 'menu' })}>
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <CtaGroup location="menu" stack />
+    <p class="meta mobile-menu__time"><LocalTime /></p>
+  </div>
+</div>
+
+<style>
+  .mobile-menu {
+    /* Hidden by default; only the Popover API can show it (see the @supports block). */
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-menu);
+    inline-size: 100%;
+    max-inline-size: none;
+    block-size: 100%;
+    max-block-size: none;
+    margin: 0;
+    padding: env(safe-area-inset-top, 0px) 0 calc(var(--s7) + env(safe-area-inset-bottom, 0px));
+    border: 0;
+    color: var(--ink);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  @supports selector(:popover-open) {
+    .mobile-menu:popover-open {
+      display: flex;
+      flex-direction: column;
+      opacity: 1;
+      transition: opacity var(--dur-quick) linear;
+    }
+    @starting-style {
+      .mobile-menu:popover-open { opacity: 0; }
+    }
+  }
+  .mobile-menu::backdrop { background: transparent; }
+
+  .mobile-menu__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s4);
+    min-block-size: var(--header-h);
+    padding-inline: var(--gutter-x);
+    border-block-end: 1px solid var(--rule);
+  }
+  .mobile-menu__wordmark {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    line-height: 1.1;
+    color: var(--ink);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .mobile-menu__close {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s2);
+    min-block-size: 44px;
+    padding-inline: 14px;
+    border: 1.5px solid var(--ink);
+    border-radius: var(--r2);
+    background: transparent;
+    color: var(--ink);
+    font-size: var(--fs-ui);
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .mobile-menu__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s7);
+    inline-size: 100%;
+    max-inline-size: 34rem;
+    padding: var(--s7) var(--gutter-x) 0;
+  }
+  .mobile-menu__links { display: flex; flex-direction: column; gap: var(--s5); }
+  .mobile-menu__links a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    line-height: 1.1;
+    letter-spacing: -.01em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .mobile-menu__links a:hover { color: var(--ballpoint); }
+  .mobile-menu__time { margin-block-start: calc(-1 * var(--s4)); }
+
+  @media (min-width: 64em) {
+    .mobile-menu { display: none !important; }
+  }
+</style>

@@ -1,0 +1,104 @@
+---
+/**
+ * STUB (Foundation; image pipeline wired) — OWNER: Agent A.
+ * Picks the frame from shot.kind: raw → PhoneFrame, marketing → Printout, tablet → TabletFrame.
+ * Images: <Picture formats avif+webp, widths [w, 2w] clamped to the original>.
+ * zoomable: wraps the picture in <a href={large webp}> (works without JS) carrying the §8 zoom contract:
+ *   data-zoom, data-zoom-src, data-gallery, data-gallery-index, data-image-id, data-cursor="zoom".
+ * A shot without src renders nothing (launch rule: omit missing screenshots).
+ * Valid widths: raw 150|160|220|230|260|320, marketing 150|160|260|300, tablet 300|420.
+ */
+import { Picture, getImage } from 'astro:assets';
+import PhoneFrame from './PhoneFrame.astro';
+import TabletFrame from './TabletFrame.astro';
+import Printout from './Printout.astro';
+import Tape from '../paper/Tape.astro';
+import { getSite, type Shot } from '../../lib/content';
+import { resolveTilt, tiltClass, type TiltClass } from '../../lib/tilt';
+import { PICTURE_FORMATS, pictureSizes, pictureWidths, zoomWidth } from '../../lib/images';
+import { fill } from '../../lib/format';
+
+interface Props {
+  shot: Shot;
+  width: number;
+  tilt?: TiltClass | 'auto';
+  tape?: 'top' | 'none';
+  zoomable?: boolean;
+  gallery?: string;
+  galleryIndex?: number;
+  eager?: boolean;
+  /** e.g. "shot-dream-pivot" → class vt-shot-dream-pivot (base.css). */
+  vtName?: string;
+  /** Adds data-reveal="place" + data-reveal-id. */
+  revealId?: string;
+  /** Extra classes (optional, additive). */
+  class?: string;
+}
+
+const {
+  shot,
+  width,
+  tilt,
+  tape = 'top',
+  zoomable = false,
+  gallery,
+  galleryIndex,
+  eager = false,
+  vtName,
+  revealId,
+  class: className,
+} = Astro.props;
+
+const site = await getSite();
+const src = shot.src;
+const zoom = src && zoomable ? await getImage({ src, width: zoomWidth(src), format: 'webp' }) : undefined;
+const tiltCls = tiltClass(resolveTilt(tilt, shot.id));
+// Frame by kind. Width unions differ per frame; Screenshot callers pass a valid width (see header).
+const Frame = (shot.kind === 'raw' ? PhoneFrame : shot.kind === 'tablet' ? TabletFrame : Printout) as typeof Printout;
+const pictureProps = src && {
+  src,
+  formats: [...PICTURE_FORMATS],
+  widths: pictureWidths(src, width),
+  sizes: pictureSizes(width),
+  alt: shot.alt,
+  loading: eager ? ('eager' as const) : ('lazy' as const),
+  fetchpriority: eager ? ('high' as const) : undefined,
+  decoding: 'async' as const,
+  fallbackFormat: 'webp' as const,
+};
+---
+{
+  pictureProps && (
+    <div
+      class:list={['shot', `shot--${shot.kind}`, tiltCls, vtName && `vt-${vtName}`, className]}
+      data-reveal={revealId ? 'place' : undefined}
+      data-reveal-id={revealId}
+    >
+      {tape === 'top' && <Tape placement="top" seed={shot.id} />}
+      <Frame width={width as 300}>
+        {zoom ? (
+          <a
+            class="shot__zoom"
+            href={zoom.src}
+            data-zoom
+            data-zoom-src={zoom.src}
+            data-gallery={gallery}
+            data-gallery-index={galleryIndex}
+            data-image-id={shot.id}
+            data-cursor="zoom"
+            aria-label={fill(site.ui.a11y.screenshotOpen, { alt: shot.alt })}
+          >
+            <Picture {...pictureProps} />
+          </a>
+        ) : (
+          <Picture {...pictureProps} />
+        )}
+      </Frame>
+    </div>
+  )
+}
+
+<style>
+  .shot { position: relative; inline-size: fit-content; max-inline-size: 100%; }
+  .shot__zoom { display: block; }
+</style>

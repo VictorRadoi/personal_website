@@ -1,0 +1,81 @@
+---
+/**
+ * One native <dialog id="lightbox"> per project page (rendered by Base.astro when page="project").
+ * OWNER: Agent B. lightbox.ts fills [data-lightbox-stage] from the clicked a[data-zoom] (href = large
+ * image, so the link still works without JS), showModal(), ←/→ and the prev/next buttons walk the same
+ * data-gallery, Esc closes (native), focus returns to the link. Also boots loupe.ts.
+ */
+import Icon from '../layout/Icon.astro';
+import { getSite } from '../../lib/content';
+
+const a11y = (await getSite()).ui.a11y;
+---
+<dialog id="lightbox" class="lightbox" aria-label={a11y.lightboxLabel}>
+  <form method="dialog" class="lightbox__bar">
+    <button type="submit" class="lightbox__btn" data-cursor="link">
+      <Icon name="close" size={16} />{a11y.lightboxClose}
+    </button>
+  </form>
+  <div class="lightbox__stage" data-lightbox-stage></div>
+  <div class="lightbox__nav">
+    <button type="button" class="lightbox__btn lightbox__prev" data-lightbox-prev data-cursor="link" hidden>
+      <Icon name="arrow-right" size={16} />{a11y.lightboxPrev}
+    </button>
+    <button type="button" class="lightbox__btn" data-lightbox-next data-cursor="link" hidden>
+      {a11y.lightboxNext}<Icon name="arrow-right" size={16} />
+    </button>
+  </div>
+</dialog>
+
+<script>
+  import { init as initLightbox } from '../../scripts/lightbox';
+  import { init as initLoupe } from '../../scripts/loupe';
+
+  initLightbox();
+  initLoupe();
+</script>
+
+<style>
+  .lightbox {
+    inline-size: fit-content;
+    max-inline-size: min(100vw - 32px, 1100px);
+    max-block-size: calc(100dvh - 32px);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+  }
+  .lightbox::backdrop { background: var(--backdrop); }
+  .lightbox__bar { display: flex; justify-content: flex-end; margin-block-end: 10px; }
+  .lightbox__stage :global(img) {
+    display: block;
+    inline-size: auto;
+    block-size: auto;
+    max-inline-size: min(100vw - 32px, 1100px);
+    max-block-size: calc(100dvh - 160px);
+    margin-inline: auto;
+    border-radius: var(--r3);
+    box-shadow: var(--shadow-lift);
+  }
+  .lightbox__nav { display: flex; justify-content: space-between; gap: 10px; margin-block-start: 10px; }
+  .lightbox__nav:not(:has(:not([hidden]))) { display: none; }
+  .lightbox__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-block-size: 44px;
+    padding-inline: 14px;
+    border: 0;
+    border-radius: var(--r2);
+    background: var(--card);
+    color: var(--ink);
+    font-size: var(--fs-meta);
+    font-weight: 600;
+  }
+  .lightbox__btn:hover { background: var(--shade); }
+  .lightbox__prev :global(.icon) { scale: -1 1; }
+  .lightbox :focus-visible { outline-color: var(--ballpoint-night); }
+
+  /* Zoomable screenshots (Screenshot.astro): native fallback cursor, no iOS callout on long-press. */
+  :global(:where([data-zoom])) { cursor: zoom-in; -webkit-touch-callout: none; }
+</style>

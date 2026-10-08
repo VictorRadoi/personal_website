@@ -1,0 +1,123 @@
+---
+/**
+ * STUB (Foundation) — OWNER: Agent A. <a> when href is set, else <button>.
+ * magnetic: adds data-magnetic + data-cursor="cta" + a PenCircle (only the contact CTAs, §12.4).
+ * track: data attributes from lib/track.ts trackAttrs(), spread on the element.
+ * External links open in a new tab with a visually-hidden "(opens in a new tab)".
+ */
+import Icon from '../layout/Icon.astro';
+import PenCircle from '../ink/PenCircle.astro';
+import { getSite } from '../../lib/content';
+import type { IconName } from '../../lib/icons';
+
+interface Props {
+  variant: 'primary' | 'secondary' | 'quiet';
+  href?: string;
+  size?: 'small' | 'regular' | 'block';
+  icon?: IconName;
+  onNight?: boolean;
+  magnetic?: boolean;
+  external?: boolean;
+  track?: Record<string, string>;
+  ariaLabel?: string;
+  /** <button> type (optional, additive). */
+  type?: 'button' | 'submit';
+  /** Extra classes (optional, additive). */
+  class?: string;
+}
+
+const {
+  variant,
+  href,
+  size = 'regular',
+  icon,
+  onNight = false,
+  magnetic = false,
+  external = false,
+  track = {},
+  ariaLabel,
+  type = 'button',
+  class: className,
+} = Astro.props;
+const site = await getSite();
+const Tag = href ? 'a' : 'button';
+---
+<Tag
+  href={href}
+  type={href ? undefined : type}
+  target={href && external ? '_blank' : undefined}
+  rel={href && external ? 'noopener' : undefined}
+  class:list={['btn', `btn--${variant}`, `btn--${size}`, { 'btn--night': onNight }, className]}
+  data-magnetic={magnetic ? '' : undefined}
+  data-cursor={magnetic ? 'cta' : 'link'}
+  aria-label={ariaLabel}
+  {...track}
+>
+  {magnetic && <PenCircle />}
+  <span class="btn__label">
+    {icon && <Icon name={icon} />}
+    <slot />
+    {href && external && <span class="visually-hidden"> {site.ui.external}</span>}
+  </span>
+</Tag>
+
+<style>
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-block-size: 52px;
+    padding-inline: 22px;
+    border: 1.5px solid var(--ink);
+    border-radius: var(--r2);
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--font-text);
+    font-size: var(--fs-ui);
+    font-weight: 600;
+    line-height: var(--lh-ui);
+    letter-spacing: var(--tr-ui);
+    text-decoration: none;
+    cursor: pointer;
+    translate: var(--mx, 0px) var(--my, 0px);
+    transition:
+      translate 500ms var(--ease-spring),
+      scale 120ms var(--ease-press),
+      background-color var(--dur-quick),
+      color var(--dur-quick);
+  }
+  /* magnetic.ts: while the pointer is near, the button follows it tightly */
+  .btn:global(.is-tracking) { transition: translate var(--dur-instant) linear, background-color var(--dur-quick), color var(--dur-quick); }
+  .btn:active { scale: .98; }
+  .btn--primary { background: var(--ink); color: var(--card); }
+  .btn--quiet { border-color: transparent; padding-inline: 12px; min-block-size: 44px; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .22em; }
+  .btn--small { min-block-size: 40px; padding-inline: 16px; font-size: var(--fs-small); }
+  .btn--block { inline-size: 100%; }
+  .btn__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    translate: var(--lx, 0px) var(--ly, 0px);
+    transition: inherit;
+  }
+  .btn :global(svg.icon) { inline-size: 20px; block-size: 20px; flex: none; }
+
+  @media (hover: hover) {
+    .btn:hover { color: var(--ink); background: var(--card); }
+    .btn--primary:hover { background: var(--ink-press); color: var(--card); }
+    .btn--quiet:hover { background: transparent; color: var(--ballpoint); }
+  }
+
+  .btn--night { border-color: var(--night-text); color: var(--night-text); }
+  .btn--night.btn--primary { background: var(--night-text); color: var(--ink); }
+  .btn--night.btn--quiet { border-color: transparent; }
+  .btn--night :global(.pen-circle) { color: var(--ballpoint-night); }
+  @media (hover: hover) {
+    .btn--night:hover { background: var(--night-2); color: var(--night-text); }
+    .btn--night.btn--primary:hover { background: var(--card); color: var(--ink); }
+    .btn--night.btn--quiet:hover { background: transparent; color: var(--ballpoint-night); }
+  }
+  .btn--night:focus-visible { outline-color: var(--ballpoint-night); }
+</style>

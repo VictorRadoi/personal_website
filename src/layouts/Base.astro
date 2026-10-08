@@ -1,0 +1,218 @@
+---
+/**
+ * Page shell (site-spec §2, §6). DOM order: SkipLink → ConsentSlip → Header → <main id="main"> →
+ * back cover (<footer>, slot "backcover", default CompactBackCover) → [Lightbox on project pages] → CursorRoot.
+ * <main> gets the analytics hooks from `page`/`slug`: project → data-slug + data-track-depth,
+ * notFound → data-not-found. Owned by Foundation.
+ */
+import '../styles/tokens.css';
+import '../styles/fonts.css';
+import '../styles/base.css';
+
+import SkipLink from '../components/chrome/SkipLink.astro';
+import ConsentSlip from '../components/chrome/ConsentSlip.astro';
+import Header from '../components/chrome/Header.astro';
+import CompactBackCover from '../components/chrome/CompactBackCover.astro';
+import CursorRoot from '../components/chrome/CursorRoot.astro';
+import Lightbox from '../components/media/Lightbox.astro';
+import {
+  SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION, JOB_TITLE, EMAIL, GITHUB_URL, LINKEDIN_URL,
+  GA_MEASUREMENT_ID, DEFAULT_OG_IMAGE, OG_IMAGE_SIZE, TELEPHONE,
+} from '../config';
+import { inlineScript } from '../lib/csp';
+
+type JsonLdNode = Record<string, unknown>;
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Path such as "/work/foo/". Defaults to the current page. */
+  path?: string;
+  /** OG image path under public/, e.g. "/og/teamboard.png" (1200×630). */
+  ogImage?: string;
+  /** Alias of ogImage (kept from the scaffold API). */
+  image?: string;
+  noindex?: boolean;
+  /** Page type: drives Header `current`, <main> analytics hooks and the Lightbox. */
+  page?: 'home' | 'project' | 'privacy' | 'notFound' | 'other';
+  /** Project slug (page="project"). */
+  slug?: string;
+  /** Extra JSON-LD nodes appended to the @graph (lib/seo.ts). */
+  jsonLd?: JsonLdNode | JsonLdNode[];
+}
+
+const {
+  title = SITE_TITLE,
+  description = SITE_DESCRIPTION,
+  path = Astro.url.pathname,
+  image,
+  noindex = false,
+  page = 'other',
+  slug,
+  jsonLd,
+} = Astro.props;
+const ogPath = Astro.props.ogImage ?? image ?? DEFAULT_OG_IMAGE;
+
+const canonical = new URL(path, SITE_URL).href;
+const ogImage = new URL(ogPath, SITE_URL).href;
+const gaEnabled = /^G-[A-Z0-9]+$/.test(GA_MEASUREMENT_ID);
+const headerCurrent = page === 'home' ? 'home' : page === 'project' ? 'project' : 'other';
+
+// No photo of Victor anywhere, including structured data (owner decision): Person has no image.
+const graph: JsonLdNode[] = [
+  {
+    '@type': 'Person',
+    '@id': `${SITE_URL}/#person`,
+    name: SITE_NAME,
+    jobTitle: JOB_TITLE,
+    url: `${SITE_URL}/`,
+    email: `mailto:${EMAIL}`,
+    telephone: TELEPHONE,
+    sameAs: [GITHUB_URL, LINKEDIN_URL],
+    alumniOf: [
+      { '@type': 'CollegeOrUniversity', name: 'Dublin City University' },
+      { '@type': 'CollegeOrUniversity', name: "King's College London" },
+    ],
+    knowsAbout: ['Mobile app development', 'iOS development', 'Android development', 'Full-stack development', 'Backend development', 'Web development'],
+  },
+  {
+    '@type': 'ProfessionalService',
+    '@id': `${SITE_URL}/#service`,
+    name: `${SITE_NAME} · mobile & full-stack engineering`,
+    url: `${SITE_URL}/`,
+    image: new URL(DEFAULT_OG_IMAGE, SITE_URL).href,
+    founder: { '@id': `${SITE_URL}/#person` },
+    areaServed: [
+      { '@type': 'Place', name: 'European Union' },
+      { '@type': 'Country', name: 'United States' },
+    ],
+    availableLanguage: 'en',
+  },
+  ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []),
+];
+const jsonLdText = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
+
+// Head boot script: html.js for .js-only controls, then GA4 with Consent Mode v2 (site-spec §9, owner rule):
+// everything denied by default and gtag.js is NOT loaded until the visitor says yes, so no request reaches
+// a Google domain before consent. A saved "yes" counts only while younger than 12 months (consent.ts
+// asks again after that). window.loadGtag() is called by consent.ts on a new "yes".
+// Astro does not hash is:inline scripts, so the exact string is hashed here and registered with the
+// route's CSP (lib/csp.ts).
+const headBoot = inlineScript(
+  [
+    `document.documentElement.classList.add('js');`,
+    `var GA_ID = ${JSON.stringify(GA_MEASUREMENT_ID)}, gaEnabled = ${JSON.stringify(gaEnabled)};`,
+    // Local previews never talk to Google (keeps dev hits out of the GA property).
+    `if (/^(localhost|127\\.0\\.0\\.1|\\[::1\\])$/.test(location.hostname)) { gaEnabled = false; document.documentElement.setAttribute('data-analytics', 'off'); }`,
+    `window.dataLayer = window.dataLayer || [];`,
+    `function gtag() { window.dataLayer.push(arguments); }`,
+    `window.gtag = gtag;`,
+    `gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied' });`,
+    `gtag('set', 'ads_data_redaction', true);`,
+    `gtag('js', new Date());`,
+    `gtag('config', GA_ID, { send_page_view: false });`,
+    `window.loadGtag = function () { if (!gaEnabled || window.gtagLoaded) return; window.gtagLoaded = true; var s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_ID); document.head.appendChild(s); };`,
+    `try { var at = new Date(localStorage.getItem('consent_v1_at') || ''); at.setMonth(at.getMonth() + 12); if (localStorage.getItem('consent_v1') === 'granted' && Date.now() < at.getTime()) { gtag('consent', 'update', { analytics_storage: 'granted' }); window.loadGtag(); } } catch (e) {}`,
+  ].join('\n'),
+);
+Astro.csp?.insertScriptHash(headBoot.hash);
+
+const mainAttrs: Record<string, string> = {};
+if (page === 'project' && slug) {
+  mainAttrs['data-slug'] = slug;
+  mainAttrs['data-track-depth'] = '';
+}
+if (page === 'notFound') mainAttrs['data-not-found'] = '';
+---
+<!doctype html>
+<html lang="en" data-analytics={gaEnabled ? 'on' : 'off'} data-page={page}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {!noindex && <link rel="canonical" href={canonical} />}
+    <meta name="robots" content={noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large'} />
+    <meta name="author" content={SITE_NAME} />
+    <meta name="theme-color" content="#F3F0E8" />
+    <meta name="color-scheme" content="light" />
+
+    <link rel="preload" href="/fonts/young-serif-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/schibsted-grotesk-var.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Kalam is above the fold on every page (margin notes, 404 note): preloaded so its swap never shifts layout. -->
+    <link rel="preload" href="/fonts/kalam-400.woff2" as="font" type="font/woff2" crossorigin />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {!noindex && <meta property="og:url" content={canonical} />}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content={String(OG_IMAGE_SIZE.width)} />
+    <meta property="og:image:height" content={String(OG_IMAGE_SIZE.height)} />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-icon-180x180.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="generator" content={Astro.generator} />
+
+    <script type="application/ld+json" set:html={jsonLdText} />
+
+    <!-- html.js + GA4 Consent Mode v2 defaults (hashed for CSP in the frontmatter). -->
+    <script is:inline set:html={headBoot.code} />
+  </head>
+  <body id="top">
+    <svg class="svg-defs" aria-hidden="true" focusable="false">
+      <filter id="rough">
+        <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="1" seed="3" />
+        <feDisplacementMap in="SourceGraphic" scale="1.6" />
+      </filter>
+    </svg>
+
+    <SkipLink />
+    <ConsentSlip />
+    <Header current={headerCurrent} />
+
+    <main id="main" {...mainAttrs}>
+      <slot />
+    </main>
+
+    <slot name="backcover">
+      <CompactBackCover location="contact" />
+    </slot>
+
+    {page === 'project' && <Lightbox />}
+    <CursorRoot />
+
+    <script>
+      import { initAnalytics, track } from '../scripts/analytics';
+      import { consent } from '../scripts/consent';
+      import { init as initConsentSlip } from '../scripts/consent-slip';
+      import { init as initCursor } from '../scripts/cursor';
+      import { init as initMagnetic } from '../scripts/magnetic';
+      import { init as initReveal } from '../scripts/reveal';
+      import { init as initNav } from '../scripts/nav';
+      import { init as initCopy } from '../scripts/copy';
+      import { init as initLocalTime } from '../scripts/localtime';
+
+      // Components can use window.site.track / window.site.consent, or import the modules directly.
+      (window as unknown as { site: unknown }).site = { track, consent };
+      initAnalytics();
+      for (const init of [initConsentSlip, initCursor, initMagnetic, initReveal, initNav, initCopy, initLocalTime]) {
+        try {
+          init();
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    </script>
+  </body>
+</html>

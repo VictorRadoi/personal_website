@@ -1,0 +1,34 @@
+---
+/**
+ * The dark back cover surface (design-system §1.1): flat --night; optional vertical elastic band
+ * (--night-2, 14px wide, 64px from the right edge; hidden under 600px), drawn behind the content.
+ * OWNER: Agent A.
+ */
+interface Props {
+  band?: boolean;
+}
+
+const { band = true } = Astro.props;
+---
+<div class:list={['night-cover', 'surface-night', { 'night-cover--band': band }]}>
+  <div class="night-cover__in"><slot /></div>
+</div>
+
+<style>
+  .night-cover { position: relative; isolation: isolate; }
+  .night-cover__in { position: relative; z-index: 1; }
+  .night-cover--band::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 64px;
+    inline-size: 14px;
+    background: var(--night-2);
+    z-index: 0;
+    display: none;
+    pointer-events: none;
+  }
+  @media (min-width: 600px) {
+    .night-cover--band::before { display: block; }
+  }
+</style>

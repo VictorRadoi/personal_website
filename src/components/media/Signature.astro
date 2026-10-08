@@ -1,0 +1,32 @@
+---
+/**
+ * Sign-off under the contact text (design-system §9.5). OWNER: Agent A.
+ * Phase 1: the name in Kalam + an underlineDouble swash, rotated -3deg.
+ * Phase 2 (owner): src/icons/signature.svg replaces the word; keep the aria-label.
+ */
+import Scribble from '../ink/Scribble.astro';
+
+interface Props {
+  name: string;
+  onNight?: boolean;
+}
+
+const { name, onNight = false } = Astro.props;
+---
+<p class:list={['signature', { 'signature--night': onNight }]}>
+  <span class="signature__name">{name}</span>
+  <Scribble name="underlineDouble" size="divider" box={[120, 14]} onNight={onNight} class="signature__swash" />
+</p>
+
+<style>
+  .signature {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    rotate: -3deg;
+    color: var(--ballpoint);
+  }
+  .signature--night { color: var(--ballpoint-night); }
+  .signature__name { font-family: var(--font-hand); font-size: calc(var(--fs-hand-l) * 1.2); line-height: 1; }
+  .signature :global(.signature__swash) { margin-block-start: 2px; }
+</style>

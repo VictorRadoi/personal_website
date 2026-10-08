@@ -1,0 +1,42 @@
+---
+/**
+ * STUB (Foundation) — OWNER: Agent D. Challenge · Stack · Impact as a <dl>. layout "rows" (home case
+ * panel) or "columns" (project page strip on .surface-card with underlineDouble rules). Stack as tags.
+ */
+import LabelTag from '../ink/LabelTag.astro';
+import { getSite, type Csi } from '../../lib/content';
+
+interface Props {
+  csi: Csi;
+  layout: 'rows' | 'columns';
+}
+
+const { csi, layout } = Astro.props;
+const site = await getSite();
+const labels = site.work.csiLabels;
+---
+<dl class:list={['csi', `csi--${layout}`]}>
+  <div class="csi__item">
+    <dt class="eyebrow">{labels.challenge}</dt>
+    <dd class="small">{csi.challenge}</dd>
+  </div>
+  <div class="csi__item">
+    <dt class="eyebrow">{labels.stack}</dt>
+    <dd>
+      <ul class="csi__tags" role="list">
+        {csi.stack.map((s) => <li><LabelTag label={s} /></li>)}
+      </ul>
+    </dd>
+  </div>
+  <div class="csi__item">
+    <dt class="eyebrow">{labels.impact}</dt>
+    <dd class="small">{csi.impact}</dd>
+  </div>
+</dl>
+
+<style>
+  .csi { display: grid; gap: var(--s4); margin: 0; }
+  .csi__item { display: grid; gap: var(--s1); }
+  .csi__tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  @media (min-width: 800px) { .csi--columns { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s5); } }
+</style>

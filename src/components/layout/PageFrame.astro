@@ -1,0 +1,21 @@
+---
+/**
+ * The notebook frame (design-system §5). Grid + margin rule live in base.css (.frame*), so other
+ * components can place children on the content subgrid: 4 / 8 / 12 columns, lines counted inside
+ * the content area (e.g. `grid-column: 1 / span 8` on desktop). Children span all columns by default.
+ * Slot "margin": the hand-written section label (left column on desktop, above the content below 1024).
+ */
+interface Props {
+  /** Draw the red notebook margin rule (desktop only). Off on night surfaces. */
+  marginRule?: boolean;
+  /** Extra classes on the frame (Section passes its padding preset, e.g. "pad-hero"). */
+  class?: string;
+}
+
+const { marginRule = true, class: className } = Astro.props;
+const hasMargin = Astro.slots.has('margin');
+---
+<div class:list={['frame', { 'frame--rule': marginRule }, className]}>
+  {hasMargin && <div class="frame__margin"><slot name="margin" /></div>}
+  <div class="frame__content"><slot /></div>
+</div>

@@ -1,0 +1,33 @@
+---
+/**
+ * Placeholder for a missing screenshot (design-system §10.5). Launch rule (decisions.md): NOT rendered
+ * on the built site; missing slots are omitted. Kept for development previews only. OWNER: Agent A.
+ */
+import { getSite } from '../../lib/content';
+
+interface Props {
+  note: string;
+  kind: 'raw' | 'marketing' | 'tablet';
+  width: number;
+}
+
+const { note, kind, width } = Astro.props;
+const site = await getSite();
+---
+<div class:list={['tbd-image', `tbd-image--${kind}`, `w-${width}`]}>
+  <p><mark class="tbd">{site.ui.tbdBadge}</mark> {note}</p>
+</div>
+
+<style>
+  .tbd-image {
+    display: grid;
+    place-items: center;
+    text-align: center;
+    aspect-ratio: 1284 / 2778;
+    padding: var(--s4);
+    background: var(--shade);
+    border: 1.5px dashed var(--ink-faint);
+    border-radius: var(--r1);
+  }
+  .tbd-image--tablet { aspect-ratio: 2064 / 2752; }
+</style>

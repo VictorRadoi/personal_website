@@ -1,0 +1,41 @@
+---
+/**
+ * Rubber stamp (design-system §9.1): --fs-stamp uppercase, 2px border in its color, rotate -4deg,
+ * ink texture via the shared #rough filter (defined once in Base.astro). Lands on reveal
+ * (data-reveal="stamp", reveal.ts). Tones: live → --live, shipped → --ballpoint, neutral → --ink-soft.
+ * OWNER: Agent A.
+ */
+import { slugify } from '../../lib/format';
+
+interface Props {
+  label: string;
+  tone: 'live' | 'shipped' | 'neutral';
+}
+
+const { label, tone } = Astro.props;
+---
+<span class:list={['stamp', `stamp--${tone}`]} data-reveal="stamp" data-reveal-id={`stamp-${slugify(label)}`}>{label}</span>
+
+<style>
+  .stamp {
+    display: inline-block;
+    font-size: var(--fs-stamp);
+    font-weight: 700;
+    letter-spacing: var(--tr-stamp);
+    text-transform: uppercase;
+    line-height: 1;
+    padding: 6px 10px;
+    border: 2px solid currentColor;
+    border-radius: var(--r2);
+    rotate: -4deg;
+    opacity: .9;
+    filter: url(#rough);
+    white-space: nowrap;
+  }
+  .stamp--live { color: var(--live); }
+  .stamp--shipped { color: var(--ballpoint); }
+  .stamp--neutral { color: var(--ink-soft); }
+  :global(.surface-night) .stamp--live,
+  :global(.surface-night) .stamp--neutral { color: var(--night-soft); }
+  :global(.surface-night) .stamp--shipped { color: var(--ballpoint-night); }
+</style>

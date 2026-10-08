@@ -1,0 +1,113 @@
+# Teamboard: own venture (copy.md §1, §4.1, §8.2 + decisions.md).
+# Do not mention the Romanian Basketball Federation anywhere. Store frames are used as-is (printouts).
+# App icon lives outside src/assets/work (Foundation may not touch work/teamboard): src/assets/app-icons/.
+order: 2
+kind: venture
+title: "Teamboard"
+subtitle: "The club manager's app: payments, calendar, attendance and stats in one place."
+domain: ["Sports", "Club management"]
+roleLine: "Co-founder · the only full-stack developer · 2022–now"
+marginNote: "co-founded"
+icon: ../../assets/app-icons/teamboard.png
+next: goparty
+
+seo:
+  title: "Teamboard · Victor-Andrei Rădoi"
+  description: "Teamboard is the sports club app I co-founded: payments, calendar, attendance and stats in one place. Almost 200 kids at Blueshark basketball run on it."
+  og: /og/teamboard.png
+
+platforms:
+  - kind: ios
+    label: "iOS · App Store"
+    url: "https://apps.apple.com/ro/app/teamboard/id1601689277"
+    status: live
+    target: app_store
+  - kind: android
+    label: "Android · Google Play"
+    url: "https://play.google.com/store/apps/details?id=com.team_board.team_board"
+    status: live
+    target: google_play
+  - kind: huawei
+    label: "Huawei · AppGallery"
+    url: "https://appgallery.huawei.com/app/C105695019"
+    status: live
+    target: appgallery
+  - kind: web
+    label: "Web · teamboard.ro"
+    url: "https://www.teamboard.ro/"
+    target: website
+
+mainShot:
+  id: tb-main
+  src: ../../assets/work/teamboard/01-iphone-login-digitize-track-perform.png
+  alt: 'Teamboard login screen on an angled phone, under the words "Digitize, track, perform"'
+  kind: marketing
+
+description:
+  - "Teamboard is one app for running a sports club, private or public: payments, the training calendar, attendance and statistics live in one place instead of WhatsApp groups, Excel sheets and paper forms."
+  - "Coaches plan trainings, matches and camps. Athletes and parents say whether they're coming at least a day ahead. Attendance, payments and monthly reports build themselves from that."
+  - "Our main partner is Blueshark, a basketball club with almost 200 kids, which moved its payments, calendar and statistics into Teamboard."
+
+csi:
+  challenge: "Keeping schedules, payments and notifications in sync for a whole club in real time. I restructured the app around Clean Architecture and moved real-time updates to Bloc, so new features stopped breaking old ones."
+  stack: ["Flutter", "Bloc", "Clean Architecture", "Python", "Flask"]
+  impact: "Almost 200 kids at Blueshark basketball club run payments, calendar and stats through it. 500+ installs on Google Play."
+
+features:
+  - name: "Payments, calendar and stats in one place."
+    body: "Blueshark, our main partner, runs almost 200 kids through Teamboard: who paid and who's behind, the training calendar, and game statistics, all in the same app."
+    stat:
+      value: "Almost 200"
+      label: "kids at Blueshark basketball club, on payments, calendar and stats"
+  - name: "The calendar is the center."
+    body: "Trainings, matches and camps, one-off or recurring, per team. Around it sit notes, chat and reminders, so changes reach everyone affected."
+    shots:
+      - id: tb-calendar
+        src: ../../assets/work/teamboard/04-iphone-calendar-core-features.png
+        alt: 'Teamboard calendar for a club team in October 2025, under the caption "More than 8 core features: calendar, notes, chat, reminders"'
+        kind: marketing
+  - name: "Any sport, any club."
+    body: "Basketball, football, athletics, boxing, chess, cycling, dance, fencing, fitness and more, for private and public clubs alike."
+    shots:
+      - id: tb-sports
+        src: ../../assets/work/teamboard/03-iphone-sports-disciplines.png
+        alt: "Teamboard club screen listing sports categories for CS Gladiatorii București"
+        kind: marketing
+  - name: "Easy enough for parents."
+    body: "Athlete and parent accounts are generated automatically, so the club doesn't sign everyone up by hand. Logging in is one screen."
+    shots:
+      - id: tb-login
+        src: ../../assets/work/teamboard/02-iphone-login-easy-to-use.png
+        alt: 'Teamboard login screen on an angled phone, under the words "Easy to use"'
+        kind: marketing
+
+card:
+  role: "Co-founder · the only full-stack developer · 2022–now"
+  stamp: "Live since 2022"
+  stampTone: live
+  problem: "Sports clubs run on WhatsApp groups, Excel sheets and paper folders, and the coach ends up chasing attendance and payments."
+  solution: "Teamboard is one app for private and public clubs: payments, the training calendar, attendance, stats and parent updates in one place."
+  facts: "iOS · Android · Huawei AppGallery"
+  stats:
+    - value: "Almost 200"
+      label: "kids at Blueshark basketball club, our main partner, who moved payments, calendar and stats into the app"
+    - value: "500+"
+      label: "installs on Google Play"
+  links:
+    - label: "teamboard.ro ↗"
+      url: "https://www.teamboard.ro/"
+      target: website
+    - label: "App Store ↗"
+      url: "https://apps.apple.com/ro/app/teamboard/id1601689277"
+      target: app_store
+    - label: "Google Play ↗"
+      url: "https://play.google.com/store/apps/details?id=com.team_board.team_board"
+      target: google_play
+  linkStory: "Read the story →"
+  peek:
+    id: tb-peek
+    src: ../../assets/work/teamboard/04-iphone-calendar-core-features.png
+    alt: ""
+    kind: marketing
+  tilt: n08
+  offset: true

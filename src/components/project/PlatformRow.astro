@@ -1,0 +1,19 @@
+---
+/** STUB (Foundation) — OWNER: Agent D. Row of platform chips (wraps; full-width rows on mobile). */
+import PlatformChip from './PlatformChip.astro';
+import type { Platform } from '../../lib/content';
+
+interface Props {
+  platforms: Platform[];
+  slug: string;
+}
+
+const { platforms, slug } = Astro.props;
+---
+<ul class="platform-row" role="list">
+  {platforms.map((platform) => <li><PlatformChip platform={platform} slug={slug} /></li>)}
+</ul>
+
+<style>
+  .platform-row { display: flex; flex-wrap: wrap; gap: 10px; }
+</style>
