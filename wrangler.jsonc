@@ -9,9 +9,9 @@
     "not_found_handling": "404-page"
   },
   "observability": { "enabled": true },
-  // Custom domains (Workers Custom Domains). The apex rvandrei.com is added once its old
-  // Pages DNS record is gone (see docs/LAUNCH.md, section A).
+  // Custom domains (Workers Custom Domains). Cloudflare manages their DNS records and certificates.
   "routes": [
+    { "pattern": "rvandrei.com", "custom_domain": true },
     { "pattern": "www.rvandrei.com", "custom_domain": true }
   ]
 }
