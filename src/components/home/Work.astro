@@ -1,0 +1,62 @@
+---
+/**
+ * OWNER: Agent C. Selected case studies (site-spec §3.3), id "work": header (cols 1-7), the Dream Pivot
+ * manila folder, the Kalam "Earlier, for other teams" label, three small earlier-work cards and the
+ * credentials line (cols 1-8). Earlier cards: 3 columns on desktop, one per row (horizontal inside) on
+ * tablet, stacked on phones.
+ */
+import Section from '../layout/Section.astro';
+import Eyebrow from '../layout/Eyebrow.astro';
+import Heading from '../layout/Heading.astro';
+import CaseStudyPanel from './CaseStudyPanel.astro';
+import SmallWorkCard from './SmallWorkCard.astro';
+import { getCaseStudies, getEarlier, getSite } from '../../lib/content';
+
+const site = await getSite();
+const cases = await getCaseStudies();
+const earlier = await getEarlier();
+---
+<Section id="work" track="work" padding="work" marginNote={site.work.margin}>
+  <header class="work__head">
+    <Eyebrow text={site.work.eyebrow} />
+    <Heading level={2} size="l" id="work-title">{site.work.h2}</Heading>
+  </header>
+
+  <div class="work__cases">
+    {cases.map((project) => <CaseStudyPanel project={project} />)}
+  </div>
+
+  <p class="work__earlier-label" id="earlier-label">{site.work.earlierLabel}</p>
+  <ul class="work__earlier" role="list" aria-labelledby="earlier-label">
+    {earlier.map((item) => <SmallWorkCard item={item} />)}
+  </ul>
+
+  <p class="work__credentials meta">{site.work.credentials}</p>
+</Section>
+
+<style>
+  .work__head { display: flex; flex-direction: column; gap: var(--s3); }
+  .work__cases { display: grid; gap: var(--s9); margin-block-start: var(--s7); }
+
+  .work__earlier-label {
+    margin-block: var(--s8) var(--s4);
+    font-family: var(--font-hand);
+    font-size: var(--fs-hand-m);
+    line-height: var(--lh-hand-m);
+    color: var(--ballpoint);
+    rotate: -1deg;
+    transform-origin: left center;
+  }
+  .work__earlier { display: grid; gap: var(--s5); }
+  .work__credentials { margin-block-start: var(--s7); max-inline-size: var(--measure); }
+
+  @media (min-width: 600px) {
+    .work__cases { margin-block-start: var(--s8); }
+    .work__earlier-label { margin-block-start: var(--s9); }
+  }
+  @media (min-width: 1024px) {
+    .work__head { grid-column: 1 / span 7; }
+    .work__earlier { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--col-gap); }
+    .work__credentials { grid-column: 1 / span 8; }
+  }
+</style>

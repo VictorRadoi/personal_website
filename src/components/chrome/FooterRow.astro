@@ -1,0 +1,82 @@
+---
+/**
+ * OWNER: Agent C. The last line of the back cover (site-spec §2): © year · Privacy · Cookie settings ·
+ * Cursor: fancy/plain · built with; right-aligned Kalam "last updated {build date}".
+ * - Cookie settings is a real link to the privacy page's inline control (no-JS fallback);
+ *   consent-slip.ts intercepts [data-consent-open] and reopens the slip.
+ * - The cursor toggle is .only-hover + .js-only; cursor.ts swaps the label (data-label-*) + aria-pressed.
+ * Every control is a ≥44px tap target; the row wraps on phones.
+ */
+import { getSite } from '../../lib/content';
+import { currentYear, fill, formatDate, isoDate } from '../../lib/format';
+
+const site = await getSite();
+const f = site.footer;
+---
+<div class="footer-row">
+  <ul class="footer-row__links" role="list">
+    <li class="footer-row__text">{fill(f.copyright, { year: currentYear() })}</li>
+    <li><a href="/privacy/" data-cursor="link">{f.privacy}</a></li>
+    <li><a href="/privacy/#consent-choice" data-consent-open data-cursor="link">{f.cookies}</a></li>
+    <li class="only-hover js-only">
+      <button
+        type="button"
+        data-cursor-toggle
+        data-cursor="link"
+        data-label-fancy={f.cursorFancy}
+        data-label-plain={f.cursorPlain}
+        aria-pressed="true"
+      >{f.cursorFancy}</button>
+    </li>
+    <li class="footer-row__text">{f.builtWith}</li>
+  </ul>
+  <p class="footer-row__updated"><time datetime={isoDate()}>{fill(f.updated, { date: formatDate() })}</time></p>
+</div>
+
+<style>
+  .footer-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s2) var(--s5);
+    padding-block-start: var(--s3);
+    border-block-start: 1px solid var(--night-2);
+    font-size: var(--fs-meta);
+    line-height: var(--lh-meta);
+    color: var(--night-soft);
+  }
+  .footer-row__links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--s5);
+  }
+  .footer-row__text { padding-block: var(--s2); }
+  .footer-row__links :is(a, button) {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--night-soft);
+    font: inherit;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: .2em;
+    cursor: pointer;
+  }
+  .footer-row__links :is(a, button):hover { color: var(--night-text); }
+  .footer-row__updated {
+    font-family: var(--font-hand);
+    font-size: var(--fs-hand-s);
+    line-height: var(--lh-hand-s);
+    color: var(--night-soft);
+    padding-block: var(--s2);
+  }
+  @media (max-width: 599px) {
+    .footer-row { flex-direction: column; align-items: flex-start; }
+  }
+</style>

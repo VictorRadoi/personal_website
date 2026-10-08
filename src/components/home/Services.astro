@@ -1,0 +1,76 @@
+---
+/**
+ * OWNER: Agent C. Consulting & development (site-spec §3.2), id "services".
+ * Desktop: left cols 1-5 sticky (eyebrow, H2, intro, "How it usually goes"); right cols 6-12 one big
+ * index card with the services divided by ballpoint squiggles; below both, the CTA strip.
+ * The sticky column and the card share a wrapper (.services__main) that ends where the card ends: a
+ * sticky element is held inside its PARENT box, so it can never slide down over the CTA strip.
+ * Tablet: one column, process as a 2×2 grid. Phones: one column, process vertical, CTAs stacked.
+ */
+import Section from '../layout/Section.astro';
+import Eyebrow from '../layout/Eyebrow.astro';
+import Heading from '../layout/Heading.astro';
+import IndexCard from '../paper/IndexCard.astro';
+import Scribble from '../ink/Scribble.astro';
+import ContactCta from '../controls/ContactCta.astro';
+import ServiceItem from './ServiceItem.astro';
+import ProcessSteps from './ProcessSteps.astro';
+import { getServices, getSite } from '../../lib/content';
+
+const site = await getSite();
+const services = await getServices();
+---
+<Section id="services" track="services" padding="services" marginNote={site.services.margin}>
+  <div class="services__main">
+  <div class="services__left">
+    <div class="services__head">
+      <Eyebrow text={site.services.eyebrow} />
+      <Heading level={2} size="l" id="services-title">{site.services.h2}</Heading>
+      <p class="lead">{site.services.intro}</p>
+    </div>
+    <ProcessSteps />
+  </div>
+
+  <div class="services__card">
+    <IndexCard>
+      {
+        services.map((s, i) => (
+          <>
+            {i > 0 && <Scribble name="dividerSquiggle" size="divider" class="services__divider" />}
+            <ServiceItem service={s} />
+          </>
+        ))
+      }
+    </IndexCard>
+  </div>
+  </div>
+
+  <div class="services__cta">
+    <ContactCta location="services" />
+  </div>
+</Section>
+
+<style>
+  .services__left { display: flex; flex-direction: column; gap: var(--s7); }
+  .services__head { display: flex; flex-direction: column; gap: var(--s3); }
+  .services__head .lead { margin-block-start: var(--s3); }
+
+  .services__card { margin-block-start: var(--s7); }
+  .services__card :global(.services__divider) { margin-block: 22px 26px; }
+
+  .services__cta { margin-block-start: var(--s7); }
+
+  @media (min-width: 1024px) {
+    .services__main { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: start; }
+    .services__left {
+      grid-column: 1 / span 5;
+      grid-row: 1;
+      align-self: start;
+      position: sticky;
+      inset-block-start: var(--sticky-top);
+      padding-inline-end: var(--s4);
+    }
+    .services__card { grid-column: 6 / -1; grid-row: 1; margin-block-start: 0; }
+    .services__cta { margin-block-start: var(--s7); }
+  }
+</style>

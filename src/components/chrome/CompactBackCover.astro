@@ -1,0 +1,81 @@
+---
+/**
+ * OWNER: Agent C. Night back cover for project, privacy and 404 pages (site-spec §2): contact.h2 at
+ * display-m, Signature, CtaGroup onNight, LinkedIn/GitHub, FooterRow. No Easter egg here (home only).
+ * Base.astro renders it as the default `backcover` slot; it is the page's <footer> landmark.
+ * Desktop: heading + signature on the left (cols 1-7), the CTAs stacked on the right (cols 8-12).
+ * Tablet/phone: one column; CtaGroup stacks full width under 600px by itself.
+ */
+import NightCover from '../paper/NightCover.astro';
+import PageFrame from '../layout/PageFrame.astro';
+import MarginNote from '../layout/MarginNote.astro';
+import Heading from '../layout/Heading.astro';
+import Icon from '../layout/Icon.astro';
+import Signature from '../media/Signature.astro';
+import CtaGroup from '../controls/CtaGroup.astro';
+import TextLink from '../controls/TextLink.astro';
+import FooterRow from './FooterRow.astro';
+import { getSite, type CtaLocation } from '../../lib/content';
+import { githubHref, linkedinHref } from '../../lib/links';
+import { trackAttrs } from '../../lib/track';
+
+interface Props {
+  location: string;
+}
+
+const { location } = Astro.props;
+const site = await getSite();
+const ctaLocation = location as CtaLocation;
+---
+<footer class="back-cover">
+  <NightCover>
+    <PageFrame marginRule={false} class="pad-contact">
+      <MarginNote slot="margin" text={site.contact.margin} onNight />
+      <section class="cbc" aria-labelledby="backcover-title">
+        <div class="cbc__say">
+          <Heading level={2} size="m" id="backcover-title" onNight>{site.contact.h2}</Heading>
+          <Signature name={site.contact.signoff} onNight />
+        </div>
+        <div class="cbc__act">
+          <CtaGroup location={ctaLocation} onNight />
+          <ul class="cbc__social" role="list">
+            <li>
+              <TextLink href={linkedinHref()} external onNight track={trackAttrs('cta_click', { method: 'linkedin', location })}>
+                {site.contact.linkedin}<Icon name="arrow-up-right" size={16} />
+              </TextLink>
+            </li>
+            <li>
+              <TextLink href={githubHref()} external onNight track={trackAttrs('cta_click', { method: 'github', location })}>
+                {site.contact.github}<Icon name="arrow-up-right" size={16} />
+              </TextLink>
+            </li>
+          </ul>
+        </div>
+      </section>
+      <div class="cbc__footer"><FooterRow /></div>
+    </PageFrame>
+  </NightCover>
+</footer>
+
+<style>
+  .cbc {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    row-gap: var(--s7);
+  }
+  .cbc__say,
+  .cbc__act { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: flex-start; gap: var(--s5); }
+  .cbc__act { gap: var(--s4); }
+  .cbc__act :global(.cta-group) { inline-size: 100%; }
+  .cbc__social { display: flex; flex-wrap: wrap; gap: 0 var(--s5); font-weight: 600; }
+  .cbc__social :global(a) { display: inline-flex; align-items: center; gap: 4px; min-block-size: 44px; }
+  .cbc__footer { margin-block-start: var(--s9); }
+
+  @media (min-width: 1024px) {
+    .cbc { align-items: start; }
+    .cbc__say { grid-column: 1 / span 7; }
+    .cbc__act { grid-column: 8 / -1; }
+    .cbc__act :global(.cta-group) { flex-direction: column; align-items: stretch; }
+  }
+</style>

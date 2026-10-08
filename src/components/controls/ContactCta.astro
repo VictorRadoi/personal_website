@@ -1,0 +1,42 @@
+---
+/**
+ * OWNER: Agent A. The CTA strip (site-spec §3.2): .surface-card, 1.5px ink border,
+ * no shadow; H3, body, CtaGroup, Kalam book note, CopyField (email), reply line.
+ */
+import Heading from '../layout/Heading.astro';
+import CtaGroup from './CtaGroup.astro';
+import CopyField from './CopyField.astro';
+import { getSite, type CtaLocation } from '../../lib/content';
+import { EMAIL } from '../../config';
+
+interface Props {
+  location: string;
+}
+
+const { location } = Astro.props;
+const site = await getSite();
+const titleId = `cta-${location}-title`;
+---
+<div class="contact-cta" role="group" aria-labelledby={titleId}>
+  <Heading level={3} size="m" id={titleId}>{site.cta.h3}</Heading>
+  <p>{site.cta.body}</p>
+  <CtaGroup location={location as CtaLocation} />
+  <p class="hand-s">{site.cta.bookNote}</p>
+  <CopyField value={EMAIL} location={location} />
+  <p class="meta">{site.cta.reply}</p>
+</div>
+
+<style>
+  .contact-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    padding: var(--card-pad);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--r1);
+    background: var(--card) var(--paper-tex) 200px 40px / var(--tex-size) repeat;
+  }
+  @media (min-width: 600px) { .contact-cta { padding: var(--s6); } }
+  .contact-cta :global(.cta-group) { inline-size: 100%; }
+</style>

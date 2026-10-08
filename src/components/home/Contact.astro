@@ -1,0 +1,124 @@
+---
+/**
+ * OWNER: Agent C. Home back cover (site-spec §3.5): the page's <footer> landmark, containing
+ * section#contact (data-track-section="contact"), the Easter egg (UpsideDownNote, Agent B) and FooterRow.
+ * Passed to Base.astro as slot="backcover". Full-bleed night surface with the elastic band.
+ * Desktop: cols 1-7 text (H2, lead, signature, the email big and selectable + copy button and phone,
+ * CTAs, LinkedIn/GitHub, availability + local time); the upside-down note in cols 9-12, centred on the
+ * column, ≥64px from any button. Tablet: one column, the note below the links, right-aligned.
+ * Phones: one column, buttons full width, the note right-aligned below the links.
+ */
+import NightCover from '../paper/NightCover.astro';
+import PageFrame from '../layout/PageFrame.astro';
+import MarginNote from '../layout/MarginNote.astro';
+import Heading from '../layout/Heading.astro';
+import Icon from '../layout/Icon.astro';
+import Signature from '../media/Signature.astro';
+import CtaGroup from '../controls/CtaGroup.astro';
+import CopyField from '../controls/CopyField.astro';
+import TextLink from '../controls/TextLink.astro';
+import FooterRow from '../chrome/FooterRow.astro';
+import LocalTime from '../chrome/LocalTime.astro';
+import UpsideDownNote from './UpsideDownNote.astro';
+import { getSite } from '../../lib/content';
+import { githubHref, linkedinHref, telHref } from '../../lib/links';
+import { trackAttrs } from '../../lib/track';
+import { EMAIL } from '../../config';
+
+const site = await getSite();
+const c = site.contact;
+const at = EMAIL.indexOf('@');
+const emailLocal = at > 0 ? EMAIL.slice(0, at + 1) : EMAIL;
+const emailDomain = at > 0 ? EMAIL.slice(at + 1) : '';
+---
+<footer class="back-cover">
+  <NightCover>
+    <section id="contact" aria-labelledby="contact-title" data-track-section="contact">
+      <PageFrame marginRule={false} class="pad-contact">
+        <MarginNote slot="margin" text={c.margin} onNight />
+        <div class="contact__main">
+          <Heading level={2} size="l" id="contact-title" onNight>{c.h2}</Heading>
+          <p class="lead contact__lead">{c.body}</p>
+          <Signature name={c.signoff} onNight />
+          <p class="contact__email selectable" data-cursor="native">{emailLocal}<wbr />{emailDomain}</p>
+          <div class="contact__copy">
+            <CopyField value={EMAIL} location="contact" onNight showValue={false} />
+            <a class="contact__phone" href={telHref()} data-cursor="link">{c.phone}</a>
+          </div>
+          <div class="contact__ctas"><CtaGroup location="contact" onNight /></div>
+          <ul class="contact__social" role="list">
+            <li>
+              <TextLink href={linkedinHref()} external onNight track={trackAttrs('cta_click', { method: 'linkedin', location: 'contact' })}>
+                {c.linkedin}<Icon name="arrow-up-right" size={16} />
+              </TextLink>
+            </li>
+            <li>
+              <TextLink href={githubHref()} external onNight track={trackAttrs('cta_click', { method: 'github', location: 'contact' })}>
+                {c.github}<Icon name="arrow-up-right" size={16} />
+              </TextLink>
+            </li>
+          </ul>
+          <p class="meta">{c.availability} <LocalTime onNight /></p>
+        </div>
+        <div class="contact__egg">
+          <UpsideDownNote />
+        </div>
+        <div class="contact__footer">
+          <FooterRow />
+        </div>
+      </PageFrame>
+    </section>
+  </NightCover>
+</footer>
+
+<style>
+  .contact__main { display: flex; flex-direction: column; align-items: flex-start; gap: 22px; min-inline-size: 0; }
+  .contact__lead { color: var(--night-soft); }
+  .contact__email {
+    max-inline-size: 100%;
+    font-family: var(--font-display);
+    font-size: var(--fs-display-m);
+    line-height: var(--lh-display-m);
+    letter-spacing: var(--tr-display-m);
+    color: var(--night-text);
+    overflow-wrap: anywhere;
+  }
+  .contact__copy { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s5); margin-block-start: calc(-1 * var(--s2)); }
+  .contact__phone {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    font-size: var(--fs-meta);
+    font-weight: 500;
+    letter-spacing: var(--tr-meta);
+    color: var(--night-soft);
+    text-decoration: none;
+  }
+  .contact__phone:hover { color: var(--night-text); text-decoration: underline; }
+  .contact__ctas { inline-size: 100%; margin-block-start: var(--s2); }
+  .contact__social { display: flex; flex-wrap: wrap; gap: 0 var(--s5); font-weight: 600; margin-block: calc(-1 * var(--s2)); }
+  .contact__social :global(a) { display: inline-flex; align-items: center; gap: 4px; min-block-size: 44px; }
+
+  .contact__egg {
+    justify-self: end;
+    margin-block-start: var(--s7);
+    margin-inline-end: var(--s2);
+  }
+  .contact__footer { margin-block-start: var(--s9); }
+
+  @media (min-width: 600px) {
+    .contact__egg { margin-inline-end: var(--s7); }
+  }
+  @media (min-width: 1024px) {
+    .contact__main { grid-column: 1 / span 7; grid-row: 1; }
+    .contact__egg {
+      grid-column: 9 / -1;
+      grid-row: 1;
+      align-self: center;
+      margin: 0;
+      /* keep clear of the elastic band (14px, 64px from the right edge) when the frame reaches the edge */
+      margin-inline-end: max(0px, 54px - max(0px, (100vw - var(--frame-max)) / 2));
+    }
+    .contact__footer { grid-row: 2; }
+  }
+</style>

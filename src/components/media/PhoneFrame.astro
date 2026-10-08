@@ -1,0 +1,54 @@
+---
+/**
+ * Brandless CSS phone around a raw screenshot (design-system §10.1). OWNER: Agent A.
+ * Width via .w-* classes (base.css sets --w); 'fluid' = 100cqw inside a .cq container (callers may
+ * override --w in cqw). Bezel .03w, outer radius .153w, screen radius .123w, camera dot, glass sheen,
+ * power/volume buttons. The image keeps its own aspect ratio (never stretched).
+ */
+interface Props {
+  width: 150 | 160 | 220 | 230 | 260 | 320 | 'fluid';
+}
+
+const { width } = Astro.props;
+---
+<div class:list={['phone', `w-${width}`]}>
+  <span class="phone__btn phone__btn--power" aria-hidden="true"></span>
+  <span class="phone__btn phone__btn--vol1" aria-hidden="true"></span>
+  <span class="phone__btn phone__btn--vol2" aria-hidden="true"></span>
+  <slot />
+</div>
+
+<style>
+  .phone {
+    position: relative;
+    padding: calc(var(--w) * .03);
+    border-radius: calc(var(--w) * .153);
+    background: var(--ink);
+    box-shadow: var(--shadow-device);
+  }
+  .phone :global(img) { display: block; inline-size: 100%; block-size: auto; border-radius: calc(var(--w) * .123); }
+  .phone::before {
+    content: "";
+    position: absolute;
+    inset-block-start: calc(var(--w) * .055);
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    inline-size: 8px;
+    block-size: 8px;
+    border-radius: 50%;
+    background: var(--night-2);
+    z-index: 1;
+  }
+  .phone::after {
+    content: "";
+    position: absolute;
+    inset: calc(var(--w) * .03);
+    border-radius: calc(var(--w) * .123);
+    background: linear-gradient(135deg, var(--white-04), transparent 40%);
+    pointer-events: none;
+  }
+  .phone__btn { position: absolute; inline-size: 3px; background: var(--night-2); border-radius: 1px; }
+  .phone__btn--power { inset-inline-end: -3px; inset-block-start: 22%; block-size: 56px; }
+  .phone__btn--vol1 { inset-inline-start: -3px; inset-block-start: 18%; block-size: 36px; }
+  .phone__btn--vol2 { inset-inline-start: -3px; inset-block-start: 27%; block-size: 36px; }
+</style>

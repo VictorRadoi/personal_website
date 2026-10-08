@@ -1,0 +1,23 @@
+---
+/**
+ * Headings: Young Serif 400, size from the type scale (never faux bold, never all caps).
+ * One <h1> per page; sections use <h2>. Size classes (.h-xl/.h-l/.h-m/.h-title) live in base.css.
+ */
+interface Props {
+  level: 1 | 2 | 3 | 4;
+  size: 'xl' | 'l' | 'm' | 'title';
+  id?: string;
+  onNight?: boolean;
+  /** Extra classes (optional, additive). */
+  class?: string;
+}
+
+const { level, size, id, onNight = false, class: className } = Astro.props;
+const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4';
+---
+<Tag id={id} class:list={['heading', `h-${size}`, { 'heading--night': onNight }, className]}><slot /></Tag>
+
+<style>
+  .heading { color: inherit; }
+  .heading--night { color: var(--night-text); }
+</style>

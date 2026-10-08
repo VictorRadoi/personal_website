@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "victor-radoi-portfolio",
+  "compatibility_date": "2026-10-07",
+  // Asset-only Worker: no "main" script needed.
+  "assets": {
+    "directory": "./dist",
+    // Serve dist/404.html (with a 404 status) for unknown paths.
+    "not_found_handling": "404-page"
+  },
+  "observability": { "enabled": true }
+  // CUSTOM DOMAIN: rvandrei.com is still served by the OLD site (probably a Cloudflare Pages project).
+  // Do NOT uncomment until you are ready to cut over: remove the domain from the Pages project
+  // first (see docs/LAUNCH.md, section A), then uncomment and deploy:
+  // "routes": [
+  //   { "pattern": "rvandrei.com", "custom_domain": true },
+  //   { "pattern": "www.rvandrei.com", "custom_domain": true }
+  // ]
+}

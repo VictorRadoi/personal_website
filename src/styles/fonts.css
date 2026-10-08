@@ -1,0 +1,23 @@
+/* Self-hosted OFL subsets (public/fonts, licenses in public/fonts/LICENSES). Rebuild: scripts/fonts.sh.
+   All three are preloaded in Base.astro (each is above the fold on every page). */
+@font-face {
+  font-family: "Young Serif";
+  src: url(/fonts/young-serif-400.woff2) format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Schibsted Grotesk";
+  src: url(/fonts/schibsted-grotesk-var.woff2) format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Kalam";
+  src: url(/fonts/kalam-400.woff2) format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

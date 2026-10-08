@@ -1,0 +1,38 @@
+---
+/**
+ * Hand-written section label in the notebook margin (design-system §5, §9.1). Decorative: the
+ * section heading says the same thing, so it is hidden from assistive tech.
+ */
+interface Props {
+  text: string;
+  onNight?: boolean;
+}
+
+const { text, onNight = false } = Astro.props;
+---
+<p class:list={['margin-note', { 'margin-note--night': onNight }]} aria-hidden="true">{text}</p>
+
+<style>
+  .margin-note {
+    font-family: var(--font-hand);
+    font-size: var(--fs-hand-l);
+    line-height: var(--lh-hand-l);
+    color: var(--ballpoint);
+    rotate: -2deg;
+    transform-origin: left center;
+    margin-block-end: var(--s3);
+  }
+  .margin-note--night { color: var(--ballpoint-night); }
+  @media (min-width: 1024px) {
+    .margin-note {
+      rotate: -4deg;
+      padding-block-start: 4px;
+      margin-block-end: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+  /* 1024-1279: the margin column is only 88px, so the note writes smaller (two lines at most). */
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    .margin-note { font-size: var(--fs-hand-m); line-height: var(--lh-hand-m); }
+  }
+</style>

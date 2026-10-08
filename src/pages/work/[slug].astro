@@ -1,0 +1,92 @@
+---
+/**
+ * Project page template (site-spec §4): header → main shot + description → Challenge·Stack·Impact →
+ * feature blocks → next project + CTA → compact back cover (Base default). OWNER (Phase 1): Agent D.
+ */
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import Section from '../../components/layout/Section.astro';
+import PageFrame from '../../components/layout/PageFrame.astro';
+import Scribble from '../../components/ink/Scribble.astro';
+import Eyebrow from '../../components/layout/Eyebrow.astro';
+import Screenshot from '../../components/media/Screenshot.astro';
+import ProjectHeader from '../../components/project/ProjectHeader.astro';
+import CsiStrip from '../../components/project/CsiStrip.astro';
+import FeatureBlock from '../../components/project/FeatureBlock.astro';
+import NextProject from '../../components/project/NextProject.astro';
+import { getNextProject, getProjects, getSite, type ProjectEntry } from '../../lib/content';
+import { projectJsonLd } from '../../lib/seo';
+
+export const getStaticPaths = (async () => {
+  const projects = await getProjects();
+  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  project: ProjectEntry;
+}
+
+const { project } = Astro.props;
+const site = await getSite();
+const slug = project.id;
+const p = project.data;
+const next = await getNextProject(project);
+const mainWidth = p.mainShot.kind === 'raw' ? 320 : p.mainShot.kind === 'tablet' ? 420 : 300;
+---
+<Base title={p.seo.title} description={p.seo.description} ogImage={p.seo.og} page="project" slug={slug} jsonLd={projectJsonLd(project, site)}>
+  <ProjectHeader project={project} />
+
+  <Section id="overview" padding="project" labelledBy="overview-title">
+    <div class="project__shot">
+      <Screenshot
+        shot={p.mainShot}
+        width={mainWidth}
+        tilt="auto"
+        eager
+        zoomable
+        gallery={`${slug}-main`}
+        galleryIndex={0}
+        vtName={`shot-${slug}`}
+      />
+    </div>
+    <div class="project__description">
+      <Eyebrow text={site.project.descriptionLabel} id="overview-title" />
+      {p.description.map((para) => <p>{para}</p>)}
+    </div>
+    {p.csi && (
+      <div class="project__csi surface-card">
+        <Scribble name="underlineDouble" size="m" box={[150, 24]} class="project__rule project__rule--top" />
+        <CsiStrip csi={p.csi} layout="columns" />
+        <Scribble name="underlineDouble" size="m" box={[150, 24]} class="project__rule project__rule--bottom" />
+      </div>
+    )}
+  </Section>
+
+  <Section id="features" padding="project" labelledBy="features-title">
+    <Eyebrow text={site.project.featuresLabel} id="features-title" />
+    <div class="project__features">
+      {p.features.map((feature, index) => <FeatureBlock feature={feature} slug={slug} index={index} />)}
+    </div>
+  </Section>
+
+  <PageFrame class="pad-project">
+    <NextProject next={next} slug={slug} />
+  </PageFrame>
+</Base>
+
+<style>
+  .project__description { display: flex; flex-direction: column; gap: var(--s4); max-inline-size: var(--measure); margin-block-start: var(--s7); }
+  .project__csi { margin-block-start: var(--s8); padding: var(--card-pad); display: flex; flex-direction: column; gap: var(--s2); }
+  .project__csi :global(.project__rule) { display: block; inline-size: min(100%, 150px); block-size: auto; margin-block: calc(var(--s1) * -1); color: var(--ink); }
+  .project__csi :global(.project__rule--bottom) { align-self: flex-end; }
+  .project__shot { display: flex; justify-content: center; }
+  @media (min-width: 800px) and (max-width: 1023px) {
+    .project__shot { grid-column: 1 / span 4; justify-content: flex-start; }
+    .project__description { grid-column: 5 / -1; margin-block-start: 0; }
+  }
+  .project__features { display: flex; flex-direction: column; gap: var(--pad-project-t); margin-block-start: var(--s6); }
+  @media (min-width: 1024px) {
+    .project__shot { grid-column: 1 / span 5; }
+    .project__description { grid-column: 7 / -1; margin-block-start: 0; }
+  }
+</style>

@@ -1,0 +1,52 @@
+---
+/**
+ * Inline SVG icon from src/icons/<name>.svg (raw import: inherits currentColor, costs no request).
+ * Always next to a visible text label; decorative (aria-hidden) unless `label` is given.
+ */
+import type { IconName } from '../../lib/icons';
+
+interface Props {
+  name: IconName;
+  size?: 16 | 20 | 24;
+  label?: string;
+  /** Extra classes (optional, additive). */
+  class?: string;
+}
+
+const files = import.meta.glob<string>('../../icons/*.svg', { query: '?raw', import: 'default', eager: true });
+
+const { name, size = 20, label, class: className } = Astro.props;
+const raw = files[`../../icons/${name}.svg`];
+if (!raw) throw new Error(`Icon "${name}" not found in src/icons`);
+
+const open = raw.match(/<svg\b([^>]*)>/)?.[1] ?? '';
+const attr = (key: string) => open.match(new RegExp(`\\s${key}="([^"]*)"`))?.[1];
+const inner = raw.replace(/^[\s\S]*?<svg\b[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+// Presentation attributes copied from the source file (line icons stroke, brand glyphs fill).
+const paint: Record<string, string> = {};
+for (const key of ['fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin']) {
+  const value = attr(key);
+  if (value) paint[key] = value;
+}
+---
+<svg
+  class:list={['icon', className]}
+  xmlns="http://www.w3.org/2000/svg"
+  width={size}
+  height={size}
+  viewBox={attr('viewBox') ?? '0 0 20 20'}
+  {...paint}
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+  set:html={inner}
+/>
+
+<style>
+  .icon {
+    display: inline-block;
+    flex: none;
+    vertical-align: -0.2em;
+  }
+</style>

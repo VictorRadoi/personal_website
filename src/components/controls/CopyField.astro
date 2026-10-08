@@ -1,0 +1,61 @@
+---
+/**
+ * OWNER: Agent A (markup) + copy.ts. Copy-to-clipboard for the email address.
+ * Contract: button[data-copy=<value>][data-copy-location=<location>] with data-copy-done /
+ * data-copy-failed strings; copy.ts fires email_copy { location } on success and selects
+ * .selectable text on failure. The button is .js-only (does nothing without JS).
+ */
+import { getSite } from '../../lib/content';
+
+interface Props {
+  value: string;
+  location: string;
+  onNight?: boolean;
+  /** Render the value next to the button (optional, additive; the contact section shows it big instead). */
+  showValue?: boolean;
+}
+
+const { value, location, onNight = false, showValue = true } = Astro.props;
+const site = await getSite();
+---
+<div class:list={['copy-field', { 'copy-field--night': onNight }]}>
+  {showValue && <span class="copy-field__value selectable" data-cursor="native">{value}</span>}
+  <button
+    type="button"
+    class="copy-field__button js-only"
+    data-copy={value}
+    data-copy-location={location}
+    data-copy-label={site.copy.button}
+    data-copy-done={site.copy.done}
+    data-copy-failed={site.copy.failed}
+    data-cursor="link"
+    aria-label={site.ui.a11y.copyButton}
+  >{site.copy.button}</button>
+  <span class="copy-field__status" role="status" aria-live="polite"></span>
+</div>
+
+<style>
+  .copy-field { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .copy-field__value { font-weight: 600; overflow-wrap: anywhere; user-select: all; }
+  /* Without JS a value-less field is empty (the button is .js-only): drop it so it leaves no gap. */
+  :global(html:not(.js)) .copy-field:not(:has(.copy-field__value)) { display: none; }
+  .copy-field__button {
+    min-block-size: 44px;
+    padding-inline: 16px;
+    border: 1.5px solid currentColor;
+    border-radius: var(--r2);
+    background: transparent;
+    color: inherit;
+    font-size: var(--fs-meta);
+    font-weight: 600;
+    line-height: 1;
+    transition: background-color var(--dur-quick), color var(--dur-quick);
+  }
+  .copy-field__status { flex: 1 1 100%; font-size: var(--fs-meta); color: var(--stamp); }
+  .copy-field__status:empty { display: none; }
+  .copy-field--night .copy-field__status { color: var(--stamp-night); }
+  @media (hover: hover) {
+    .copy-field__button:hover { background: var(--ink); color: var(--card); }
+    .copy-field--night .copy-field__button:hover { background: var(--night-text); color: var(--ink); }
+  }
+</style>

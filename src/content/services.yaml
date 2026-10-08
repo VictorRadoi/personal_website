@@ -1,0 +1,34 @@
+# Service items (copy.md §5.1 + decisions.md: backend stack, store-listing work, fourth "light" service).
+# proofHref: internal /work/ links get data-cs-source="service_proof" (ServiceItem).
+- id: mobile
+  order: 1
+  title: "Mobile apps for iOS and Android"
+  body: "One shared codebase or two native apps, whichever fits the product. I take it from the Figma file through App Store review, then keep shipping updates after launch."
+  typical: "Typical work: offline mode, push notifications, in-app payments, QR scanning, deep links, store submissions, store listings (screenshots and feature graphics), and a privacy policy and terms that meet App Store and Google Play rules."
+  proof: "like GoParty's door scanner →"
+  proofHref: "/work/goparty/"
+
+- id: full-stack
+  order: 2
+  title: "Full-stack product builds"
+  body: "The app plus everything behind it: the API, the database, logins, payments, the admin panel your team will live in, and the website that sells it. One person accountable for all of it."
+  typical: "Typical work: REST or GraphQL APIs, auth, subscriptions, admin dashboards and marketing sites, on NestJS, Firebase, Supabase, Kotlin or Python."
+  proof: "like Teamboard, front to back →"
+  proofHref: "/work/teamboard/"
+
+- id: architecture
+  order: 3
+  title: "Architecture and rescue work"
+  body: "If your codebase gets slower to change every sprint, I can help. I've moved a legacy NFT marketplace onto Riverpod and Freezed, and folded a large web platform into one app for iOS, Android and desktop. I can review what you have, write the plan, or do the migration."
+  typical: "Typical work: code audits, state management cleanups, web-to-native migrations, tests around the scary parts."
+  proof: "like the XOXNO refactor →"
+  proofHref: "/#earlier-xoxno"
+
+- id: websites
+  order: 4
+  weight: light
+  title: "Websites and portfolios"
+  body: "Landing pages, product sites and personal portfolios. Static pages where possible, so they load fast and cost next to nothing to host."
+  typical: "Typical work: launch pages for apps, product sites, portfolios, store badges and share previews, analytics with a consent banner that respects the answer."
+  proof: "like this one →"
+  proofHref: "#top"

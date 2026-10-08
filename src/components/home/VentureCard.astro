@@ -1,0 +1,265 @@
+---
+/**
+ * OWNER: Agent C. One venture index card (site-spec §3.1, style tile). Resting on the page, no tape.
+ * Whole card links to the story via the stretched <h3> link (aria-label "{name}: read the story");
+ * store/site links sit above it (.above) and fire outbound_click; "Read the story →" is the visible
+ * internal link (data-cs-source="venture_card", prefetch). Decorative layers (stamp, pocket printout,
+ * touch stamp) ignore the pointer so a tap anywhere opens the story.
+ * Layout: head row (icon · name + role · stamp; the stamp drops under the name when the card is narrow,
+ * via a container query) → problem ↓ solution → origin → stats → facts → links → "pocket" with a
+ * printout peek cropped by the card's bottom edge.
+ * - 600-1023: body (5 cols) beside the pocket (3 cols), the printout peeking up from the bottom edge.
+ * - <600: links as full-width 48px rows. Touch devices: "tap to open →" stamp bottom-right.
+ */
+import { Image } from 'astro:assets';
+import IndexCard from '../paper/IndexCard.astro';
+import RubberStamp from '../ink/RubberStamp.astro';
+import StatLine from '../ink/StatLine.astro';
+import Scribble from '../ink/Scribble.astro';
+import Screenshot from '../media/Screenshot.astro';
+import TextLink from '../controls/TextLink.astro';
+import { getSite, type VentureEntry } from '../../lib/content';
+import { fill } from '../../lib/format';
+import { trackAttrs } from '../../lib/track';
+
+interface Props {
+  project: VentureEntry;
+}
+
+const { project } = Astro.props;
+const site = await getSite();
+const slug = project.id;
+const p = project.data;
+const card = p.card;
+const href = `/work/${slug}/`;
+---
+<IndexCard
+  as="article"
+  tilt={card.tilt}
+  offset={card.offset}
+  hoverLift
+  cursor="open"
+  cursorLabel={site.cursor.readStory}
+  id={`venture-${slug}`}
+  class="venture-card"
+>
+  <div class="vc">
+    <div class="vc__body">
+      <div class="vc__head">
+        {
+          p.icon && (
+            <Image
+              src={p.icon}
+              width={56}
+              height={56}
+              densities={[1, 2]}
+              alt={fill(site.ui.a11y.appIcon, { name: p.title })}
+              class="vc__icon"
+            />
+          )
+        }
+        <div class="vc__name">
+          <h3 class="h-title">
+            <a
+              class="stretched-link"
+              href={href}
+              data-astro-prefetch
+              data-cs-source="venture_card"
+              data-cursor="open"
+              data-cursor-label={site.cursor.readStory}
+              aria-label={fill(site.ui.a11y.ventureLink, { name: p.title })}
+            >{p.title}</a>
+          </h3>
+          <p class="meta">{card.role}</p>
+        </div>
+        <span class="vc__stamp"><RubberStamp label={card.stamp} tone={card.stampTone} /></span>
+      </div>
+
+      <div class="vc__ps">
+        <p class="vc__problem">{card.problem}</p>
+        <Scribble name="arrowShortDown" size="xs" box={[18, 30]} class="vc__arrow" />
+        <p class="vc__solution">{card.solution}</p>
+      </div>
+      {card.origin && <p class="small vc__origin">{card.origin}</p>}
+
+      <div class="vc__stats">
+        {card.stats.map((s) => <StatLine value={s.value} label={s.label} />)}
+      </div>
+      <p class="meta vc__facts">{card.facts}</p>
+
+      <ul class="vc__links above" role="list">
+        {
+          card.links.map((l) => (
+            <li>
+              <TextLink
+                href={l.url}
+                external
+                cursor="visit"
+                cursorLabel={site.cursor.visit}
+                class="vc__link"
+                track={trackAttrs('outbound_click', { product: slug, target: l.target, location: 'venture_card' })}
+              >
+                {l.label}
+              </TextLink>
+            </li>
+          ))
+        }
+        <li>
+          <TextLink href={href} prefetch csSource="venture_card" class="vc__link vc__story">{card.linkStory}</TextLink>
+        </li>
+      </ul>
+    </div>
+
+    {
+      card.peek && (
+        <div class="vc__pocket" aria-hidden="true">
+          <Screenshot shot={card.peek} width={260} tilt="auto" class="vc__peek" />
+        </div>
+      )
+    }
+  </div>
+  <span class="vc__touch only-touch" aria-hidden="true">{site.cursor.touchStamp}</span>
+</IndexCard>
+
+<style>
+  .vc__body { container-type: inline-size; min-inline-size: 0; }
+
+  /* ---- head ---- */
+  .vc__head {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: var(--s2) 14px;
+    align-items: center;
+  }
+  .vc__head :global(.vc__icon) {
+    inline-size: 56px;
+    block-size: 56px;
+    border-radius: var(--r-icon);
+    box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / .08);
+  }
+  .vc__name { display: flex; flex-direction: column; gap: 2px; min-inline-size: 0; }
+  .vc__name h3 a { color: var(--ink); text-decoration: none; }
+  .vc__name h3 a:hover { color: var(--ink); }
+  .vc__stamp { grid-column: 1 / -1; justify-self: start; pointer-events: none; margin-block-start: var(--s1); }
+  @container (min-width: 27rem) {
+    .vc__head { grid-template-columns: 56px minmax(0, 1fr) auto; }
+    .vc__stamp { grid-column: auto; justify-self: end; align-self: start; margin-block-start: var(--s2); }
+  }
+
+  /* ---- problem ↓ solution ---- */
+  .vc__ps {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: var(--s1) 10px;
+    margin-block-start: 22px;
+  }
+  .vc__problem { grid-column: 1 / -1; color: var(--ink-soft); }
+  .vc__ps :global(.vc__arrow) { margin-block-start: 2px; }
+  .vc__origin { margin-block-start: 14px; }
+
+  /* ---- stats + facts ---- */
+  .vc__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    gap: var(--s4);
+    margin-block-start: 22px;
+  }
+  .vc__facts { margin-block-start: var(--s4); }
+
+  /* ---- links ---- */
+  .vc__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 18px;
+    margin-block-start: var(--s3);
+    font-size: var(--fs-small);
+    font-weight: 600;
+  }
+  .vc__links :global(.vc__link) { display: inline-flex; align-items: center; min-block-size: 44px; }
+  .vc__links :global(.vc__story) { color: var(--ink); }
+  .vc__links :global(.vc__story:hover) { color: var(--ballpoint); }
+  .vc__links li:last-child { flex-basis: 100%; }
+
+  /* ---- pocket: a printout tucked behind the card's bottom edge ---- */
+  .vc__pocket {
+    --tilt-k: .5;
+    display: flex;
+    block-size: 150px;
+    margin: var(--s4) calc(-1 * var(--card-pad)) calc(-1 * var(--card-pad));
+    padding: 22px var(--card-pad) 0;
+    border-block-start: 1px solid var(--manila-edge);
+    overflow: clip;
+    pointer-events: none;
+  }
+  .vc__pocket :global(.vc__peek) { margin-inline: auto 12px; }
+  /* 160px peek (rendered from the 260px image set, so the tablet's larger peek stays sharp) */
+  .vc__pocket :global(.vc__peek .printout) { --w: 160px; }
+  @media (hover: none) {
+    /* leave the bottom-right corner to the touch stamp */
+    .vc__pocket :global(.vc__peek) { margin-inline: 4px auto; }
+  }
+
+  /* ---- touch stamp ---- */
+  .vc__touch {
+    position: absolute;
+    inset-inline-end: 14px;
+    inset-block-end: 14px;
+    z-index: var(--z-tape);
+    display: grid;
+    place-items: center;
+    inline-size: 56px;
+    block-size: 56px;
+    padding: 4px;
+    border: 2px solid var(--ballpoint);
+    border-radius: 50%;
+    background: var(--card-92);
+    color: var(--ballpoint);
+    font-family: var(--font-hand);
+    font-size: .75rem;
+    line-height: 1.05;
+    text-align: center;
+    rotate: -8deg;
+    pointer-events: none;
+  }
+
+  /* ---- phones: links become full-width rows ---- */
+  @media (max-width: 599px) {
+    .vc__links { flex-direction: column; gap: 0; margin-block-start: var(--s4); font-size: var(--fs-ui); }
+    .vc__links li { border-block-start: 1px solid var(--rule); }
+    .vc__links :global(.vc__link) { display: flex; min-block-size: 48px; inline-size: 100%; }
+  }
+
+  /* ---- tablet: body beside the pocket ---- */
+  @media (min-width: 600px) {
+    .vc__pocket { --tilt-k: 1; }
+  }
+  @media (min-width: 600px) and (max-width: 1023px) {
+    .vc {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 3fr);
+      column-gap: var(--s6);
+    }
+    /* the stamp moves to the top of the side pocket */
+    .vc__stamp {
+      position: absolute;
+      inset-block-start: calc(var(--card-pad) + var(--s2));
+      inset-inline-end: var(--card-pad);
+      margin: 0;
+    }
+    /* a full-height side pocket: the printout is tucked in at the bottom, cropped by the card edge */
+    .vc__pocket {
+      align-self: stretch;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      block-size: auto;
+      min-block-size: 0;
+      margin: calc(-1 * var(--card-pad)) calc(-1 * var(--card-pad)) calc(-1 * var(--card-pad)) 0;
+      padding: calc(var(--card-pad) + 88px) var(--s4) 0;
+      border-block-start: 0;
+      border-inline-start: 1px solid var(--manila-edge);
+    }
+    .vc__pocket :global(.vc__peek) { margin: 0 auto -88px; }
+    .vc__pocket :global(.vc__peek .printout) { --w: 220px; }
+  }
+</style>

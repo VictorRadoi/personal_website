@@ -1,0 +1,29 @@
+---
+/**
+ * OWNER: Agent C (+ scripts/localtime.ts). The server renders localTime.fallback (empty by default: the
+ * site never names a country); the script swaps in "It's {time} for me." (asleep variant 23:00-06:59) in
+ * UK time (config TIME_ZONE) from the data-tpl-* templates, with the clock wrapped in <time datetime="HH:MM">.
+ * [data-local-time] is a <span>: a <time> without a valid datetime would be invalid HTML.
+ */
+import { getSite } from '../../lib/content';
+import { TIME_ZONE } from '../../config';
+
+interface Props {
+  onNight?: boolean;
+}
+
+const { onNight = false } = Astro.props;
+const site = await getSite();
+---
+<span
+  class:list={['local-time', { 'local-time--night': onNight }]}
+  data-local-time
+  data-time-zone={TIME_ZONE}
+  data-tpl-base={site.localTime.base}
+  data-tpl-asleep={site.localTime.asleep}
+>{site.localTime.fallback}</span>
+
+<style>
+  .local-time { font-variant-numeric: normal; }
+  .local-time--night { color: var(--night-soft); }
+</style>

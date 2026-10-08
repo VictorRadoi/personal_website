@@ -1,0 +1,131 @@
+---
+/**
+ * OWNER: Agent C. A client case study filed in a manila folder (site-spec §3.3, style tile).
+ * The whole folder links to /work/<slug>/ through the stretched title link (case_panel source,
+ * prefetch). Its accessible name starts with the visible title (WCAG 2.5.3) and ends with the
+ * visually-hidden "Dream Pivot case study". Screenshots here are not zoomable.
+ *
+ * Phones: the first teaser shot sits behind (left), the last in front (right) and carries the
+ * view-transition name shot-<slug>. The shots box is the annotation host (Annotation dp-* presets are
+ * positioned in % of it from 600px up): `.annotation-host.cq`, position relative, 560/640 aspect box.
+ * Under 600px the annotations switch to caption mode, so the box becomes a two-column grid: both phones
+ * overlap in row 1, each caption sits under its own phone in row 2.
+ * Decorative layers ignore the pointer, so a click on a phone opens the case study.
+ */
+import ManilaFolder from '../paper/ManilaFolder.astro';
+import RubberStamp from '../ink/RubberStamp.astro';
+import Annotation from '../ink/Annotation.astro';
+import Screenshot from '../media/Screenshot.astro';
+import TextLink from '../controls/TextLink.astro';
+import CsiStrip from '../project/CsiStrip.astro';
+import { getSite, type CaseStudyEntry } from '../../lib/content';
+
+interface Props {
+  project: CaseStudyEntry;
+}
+
+const { project } = Astro.props;
+const site = await getSite();
+const slug = project.id;
+const t = project.data.teaser;
+const href = `/work/${slug}/`;
+const last = t.shots.length - 1;
+---
+<article class="case-panel" aria-labelledby={`case-${slug}-title`}>
+  <ManilaFolder tab={t.tab} cursor="open" cursorLabel={site.cursor.openCase}>
+    <div class="case">
+      <div class="case__text">
+        <span class="case__stamp"><RubberStamp label={t.stamp} tone={t.stampTone} /></span>
+        <h3 class="h-m case__title" id={`case-${slug}-title`}>
+          <a class="stretched-link" href={href} data-astro-prefetch data-cs-source="case_panel">
+            {t.title}<span class="visually-hidden"> {site.ui.a11y.casePanelLink}</span>
+          </a>
+        </h3>
+        <p class="case__summary">{t.summary}</p>
+        {project.data.csi && <CsiStrip csi={project.data.csi} layout="rows" />}
+        <p class="above case__cta"><TextLink href={href} prefetch csSource="case_panel">{t.cta}</TextLink></p>
+      </div>
+
+      <div class="case__shots annotation-host cq">
+        {
+          t.shots.map((shot, i) => (
+            <Screenshot
+              shot={shot}
+              width={260}
+              tilt={shot.tilt ?? 'auto'}
+              vtName={i === last ? `shot-${slug}` : undefined}
+              revealId={`case-${shot.id}`}
+              class={i === last ? 'case-shot case-shot--front' : 'case-shot case-shot--back'}
+            />
+          ))
+        }
+        {t.notes.map((n) => <Annotation preset={n.preset} note={n.note} revealId={`case-${slug}-${n.preset}`} />)}
+      </div>
+    </div>
+  </ManilaFolder>
+</article>
+
+<style>
+  .case { display: grid; gap: var(--s7); }
+
+  /* ---- text ---- */
+  .case__text { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; min-inline-size: 0; }
+  .case__stamp { pointer-events: none; }
+  .case__title a { color: var(--ink); text-decoration: none; }
+  .case__title a:hover { color: var(--ink); }
+  .case__summary { max-inline-size: var(--measure); }
+  .case__cta { font-weight: 600; }
+  .case__cta :global(a) { display: inline-flex; align-items: center; min-block-size: 44px; }
+
+  /* ---- shots: phones (<600: caption mode) ---- */
+  .case__shots {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--s4);
+    row-gap: var(--s3);
+    align-items: start;
+    pointer-events: none;
+  }
+  .case__shots :global(.annotation__note) { pointer-events: none; }
+  .case__shots :global(.case-shot) { grid-row: 1; grid-column: 1 / -1; }
+  .case__shots :global(.case-shot--back) { justify-self: start; margin-block-start: 10cqw; }
+  .case__shots :global(.case-shot--front) { justify-self: end; z-index: var(--z-raised); }
+  .case__shots :global(.case-shot--back .phone) { --w: 48cqw; }
+  .case__shots :global(.case-shot--front .phone) { --w: 53cqw; }
+  .case__shots :global(.annotation--dp-plan-weeks) { grid-row: 2; grid-column: 1; }
+  .case__shots :global(.annotation--dp-home-task) { grid-row: 2; grid-column: 2; }
+
+  /* ---- shots: the composition (≥600) ---- */
+  @media (min-width: 600px) {
+    .case__shots {
+      display: block;
+      inline-size: 100%;
+      max-inline-size: 560px;
+      aspect-ratio: 560 / 640;
+      justify-self: center;
+    }
+    .case__shots :global(.case-shot) { position: absolute; margin: 0; }
+    .case__shots :global(.case-shot--back) { inset-inline-start: 0; inset-block-start: 11%; }
+    .case__shots :global(.case-shot--front) { inset-inline-start: 30%; inset-block-start: 0; }
+    .case__shots :global(.case-shot--back .phone) { --w: 37.5cqw; }
+    .case__shots :global(.case-shot--front .phone) { --w: 41cqw; }
+  }
+
+  /* ---- desktop: text cols 1-6, phones cols 7-12, spilling over the folder's right/bottom edge ---- */
+  @media (min-width: 1024px) {
+    .case { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--col-gap); align-items: start; }
+    .case__shots {
+      /* the phones stay beside the text while it is read (the text column is the taller one) */
+      position: sticky;
+      inset-block-start: var(--sticky-top);
+      justify-self: end;
+      inline-size: calc(100% + var(--case-spill, 24px));
+      margin-inline-end: calc(-1 * var(--case-spill, 24px));
+      margin-block-end: -32px;
+    }
+  }
+  @media (min-width: 1280px) {
+    .case { --case-spill: 48px; }
+  }
+</style>

@@ -1,0 +1,153 @@
+---
+/**
+ * The Easter egg: "the upside-down note" (design-system §12.6). OWNER: Agent B (+ egg.ts).
+ * A taped sticky note turned 183° with a real "don't press" button, inside a 260×220 zone
+ * (240×204 under 600px). Contract: [data-egg-zone], [data-egg-button], [data-egg-back] (hidden until
+ * found), [data-egg-hint] (aria-live), [data-egg-dot] (touch mirror dot). Strings for egg.ts ride on
+ * the zone as data-egg-*. Home only (back cover); boots egg.ts itself. The hint sits below the zone,
+ * so the parent should leave ~48px under it.
+ */
+import StickyNote from '../paper/StickyNote.astro';
+import { getSite } from '../../lib/content';
+
+const e = (await getSite()).egg;
+---
+<div
+  class="egg"
+  data-egg-zone
+  data-egg-hint-text={e.hint}
+  data-egg-touch-hint={e.touchHint}
+  data-egg-console={e.console}
+>
+  <StickyNote tapeEdge="bottom">
+    <Fragment slot="front">
+      <p class="egg__front">{e.front}</p>
+      <p class="egg__press">
+        <button type="button" class="egg__button" data-egg-button aria-label={e.a11yButton}></button>
+        <span aria-hidden="true">{e.button}</span>
+      </p>
+    </Fragment>
+    <Fragment slot="back">
+      <p class="egg__back" data-egg-back hidden>{e.back}</p>
+      <span class="egg__stamp">{e.foundStamp}</span>
+    </Fragment>
+  </StickyNote>
+  <p class="egg__hint" data-egg-hint aria-live="polite"></p>
+  <span class="egg__dot" data-egg-dot aria-hidden="true"></span>
+</div>
+
+<script>
+  import { init } from '../../scripts/egg';
+
+  init();
+</script>
+
+<style>
+  .egg {
+    position: relative;
+    inline-size: 260px;
+    block-size: 220px;
+    max-inline-size: 100%;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (max-width: 599px) {
+    .egg { inline-size: 240px; block-size: 204px; }
+  }
+
+  .egg :global(.sticky-note) {
+    position: absolute;
+    inset-block-start: 10px;
+    inset-inline-start: 10px;
+    rotate: 183deg;
+    transition: rotate var(--dur-flip) var(--ease-flip);
+  }
+  .egg.is-found :global(.sticky-note) { rotate: 3deg; block-size: auto; min-block-size: 200px; }
+  @media (max-width: 599px) {
+    .egg.is-found :global(.sticky-note) { min-block-size: 184px; }
+  }
+  .egg.no-anim :global(.sticky-note) { transition: none; }
+
+  .egg__front { font-family: var(--font-hand); font-size: 1.1875rem; line-height: 1.25; }
+  .egg__press { display: flex; align-items: center; gap: 10px; margin-block-start: 16px; }
+  .egg__press span { font-family: var(--font-hand); font-size: 1rem; line-height: 1; color: var(--stamp); }
+  .egg__button {
+    flex: none;
+    inline-size: 44px;
+    block-size: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--white-35), transparent 45%), var(--stamp);
+    box-shadow: 0 3px 0 var(--stamp-deep), 0 6px 10px -4px rgb(var(--ink-rgb) / .4);
+  }
+  .egg__button:active { translate: 0 2px; box-shadow: 0 1px 0 var(--stamp-deep), 0 3px 6px -3px rgb(var(--ink-rgb) / .4); }
+  .egg__button:focus-visible { outline: 2px solid var(--ballpoint); outline-offset: 3px; }
+  /* Mirror mode: the zone takes the clicks; only the mirrored dot can "press" the button. */
+  :global(html.has-cursor) .egg.mirror-on .egg__button { pointer-events: none; }
+
+  .egg.is-found .egg__front,
+  .egg.is-found .egg__press { display: none; }
+  .egg__back { font-family: var(--font-hand); font-size: 1rem; line-height: 1.3; }
+  @media (max-width: 599px) {
+    .egg__back { font-size: .9375rem; }
+  }
+  .egg__back:focus { outline: none; }
+
+  .egg__stamp {
+    display: none;
+    inline-size: fit-content;
+    margin: 10px 0 0 auto;
+    padding: 4px 8px;
+    border: 2px solid currentColor;
+    border-radius: var(--r2);
+    color: var(--ballpoint);
+    font-size: var(--fs-stamp);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: var(--tr-stamp);
+    text-transform: uppercase;
+    rotate: -4deg;
+    opacity: .9;
+    filter: url(#rough);
+  }
+  .egg.is-found .egg__stamp { display: block; }
+
+  .egg__hint {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline: -24px;
+    margin-block-start: 8px;
+    font-family: var(--font-hand);
+    font-size: var(--fs-hand-s);
+    line-height: var(--lh-hand-s);
+    color: var(--ballpoint-night);
+    text-align: center;
+    opacity: 0;
+    transition: opacity var(--dur-base) linear;
+  }
+  .egg.show-hint .egg__hint { opacity: 1; }
+
+  /* Touch: the mirrored dot (egg.ts moves it to <body>, so `fixed` is always the viewport). */
+  .egg__dot {
+    position: fixed;
+    inset: 0 auto auto 0;
+    z-index: var(--z-cursor);
+    inline-size: 14px;
+    block-size: 14px;
+    margin: -7px 0 0 -7px;
+    border-radius: 50%;
+    background: var(--stamp-night);
+    box-shadow: var(--shadow-ring);
+    pointer-events: none;
+    display: none;
+  }
+  .egg__dot.is-on { display: block; }
+  .egg__dot.is-returning {
+    opacity: 0;
+    transition: transform 220ms var(--ease-spring), opacity 220ms linear;
+  }
+</style>

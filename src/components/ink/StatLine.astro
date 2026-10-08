@@ -1,0 +1,17 @@
+---
+/** A real number: Young Serif value + meta label. No count-ups. OWNER: Agent A. */
+interface Props {
+  value: string;
+  label: string;
+}
+
+const { value, label } = Astro.props;
+---
+<div class="stat">
+  <p class="stat-value">{value}</p>
+  <p class="meta">{label}</p>
+</div>
+
+<style>
+  .stat { display: flex; flex-direction: column; gap: var(--s1); }
+</style>

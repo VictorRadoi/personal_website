@@ -1,0 +1,44 @@
+---
+/**
+ * The sticky note (design-system §9.1, §12.6; used by the Easter egg only). OWNER: Agent B.
+ * --sticky paper, 240×200 (220×184 under 600px; size "s" is always 220×184), --r1, --shadow-pinned,
+ * one tape strip. Front and back are normal DOM text; any rotation is visual only (set by the user).
+ * tapeEdge "bottom" tapes the note at its lower edge: on a note turned 183° the strip then sits on top.
+ */
+import Tape from './Tape.astro';
+
+interface Props {
+  size?: 'm' | 's';
+  /** Optional, additive: which edge the tape holds (default top). */
+  tapeEdge?: 'top' | 'bottom';
+  /** Optional, additive: extra classes on the note. */
+  class?: string;
+}
+
+const { size = 'm', tapeEdge = 'top', class: className } = Astro.props;
+---
+<div class:list={['sticky-note', `sticky-note--${size}`, `sticky-note--tape-${tapeEdge}`, className]}>
+  <Tape placement="top" seed="sticky-note" />
+  <div class="sticky-note__front"><slot name="front" /></div>
+  <div class="sticky-note__back"><slot name="back" /></div>
+</div>
+
+<style>
+  .sticky-note {
+    position: relative;
+    inline-size: 240px;
+    block-size: 200px;
+    padding: 22px 20px;
+    background: var(--sticky);
+    color: var(--ink);
+    border-radius: var(--r1);
+    box-shadow: var(--shadow-pinned);
+  }
+  .sticky-note--s { inline-size: 220px; block-size: 184px; padding: 18px 16px; }
+  @media (max-width: 599px) {
+    .sticky-note--m { inline-size: 220px; block-size: 184px; padding: 18px 16px; }
+  }
+  .sticky-note--tape-bottom :global(.tape) {
+    inset-block: auto calc(var(--tape-h) / -2);
+  }
+</style>

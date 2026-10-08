@@ -1,0 +1,30 @@
+---
+/**
+ * Label-maker tag (design-system §9.1): --ink fill, --card text, --fs-tag uppercase,
+ * padding 5px 9px, --r-tag, faint top highlight. Inverted on night. OWNER: Agent A.
+ */
+interface Props {
+  label: string;
+  onNight?: boolean;
+}
+
+const { label, onNight = false } = Astro.props;
+---
+<span class:list={['tag', { 'tag--night': onNight }]}>{label}</span>
+
+<style>
+  .tag {
+    display: inline-block;
+    font-size: var(--fs-tag);
+    font-weight: 700;
+    letter-spacing: var(--tr-tag);
+    text-transform: uppercase;
+    line-height: 1;
+    padding: 5px 9px;
+    border-radius: var(--r-tag);
+    background: var(--ink);
+    color: var(--card);
+    box-shadow: inset 0 1px 0 var(--white-12);
+  }
+  .tag--night { background: var(--night-text); color: var(--ink); box-shadow: none; }
+</style>

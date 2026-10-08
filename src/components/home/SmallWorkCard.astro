@@ -1,0 +1,59 @@
+---
+/**
+ * OWNER: Agent C. Earlier work card (site-spec §3.3): plain index card, id="earlier-<id>" (the services
+ * proof anchor). Not a link and no hover lift: proof without a detail page. An optional company link
+ * (XTEL → xtech.ai) sits on its own line under the meta, as a ≥44px target.
+ * Tablet (600-1023): one card per row, horizontal inside (name + meta | body + tags).
+ */
+import IndexCard from '../paper/IndexCard.astro';
+import LabelTag from '../ink/LabelTag.astro';
+import TextLink from '../controls/TextLink.astro';
+import type { EarlierEntry } from '../../lib/content';
+
+interface Props {
+  item: EarlierEntry;
+}
+
+const { item } = Astro.props;
+const e = item.data;
+---
+<IndexCard as="li" padding="s" id={`earlier-${item.id}`} class="small-work">
+  <div class="sw">
+    <div class="sw__id">
+      <h3 class="h-title">{e.name}</h3>
+      <p class="meta">{e.meta}</p>
+      {
+        e.url && e.urlLabel && (
+          <p class="sw__url"><TextLink href={e.url} external>{e.urlLabel}</TextLink></p>
+        )
+      }
+    </div>
+    <div class="sw__what">
+      <p class="small">{e.body}</p>
+      <ul class="sw__tags" role="list">
+        {e.tags.map((tag) => <li><LabelTag label={tag} /></li>)}
+      </ul>
+    </div>
+  </div>
+</IndexCard>
+
+<style>
+  .sw, .sw__id, .sw__what { display: flex; flex-direction: column; gap: 10px; }
+  .sw__id { gap: var(--s1); }
+  .sw__url { font-size: var(--fs-meta); font-weight: 600; margin-block-start: calc(-1 * var(--s2)); margin-block-end: calc(-1 * var(--s2)); }
+  .sw__url :global(a) { display: inline-flex; align-items: center; min-block-size: 44px; }
+  .sw__tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  @media (min-width: 600px) and (max-width: 1023px) {
+    .sw {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      gap: var(--s6);
+      align-items: start;
+    }
+  }
+  @media (min-width: 1024px) {
+    .sw { block-size: 100%; }
+    .sw__what { flex: 1; }
+  }
+</style>

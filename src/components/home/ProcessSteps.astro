@@ -1,0 +1,45 @@
+---
+/**
+ * OWNER: Agent C. "How it usually goes": the only numbered list on the site (it really is a sequence).
+ * Young Serif numerals 28px in --ink-faint (allowed: ≥24px), --fs-small text.
+ * Desktop and phones: one column. Tablet: 2×2 grid.
+ */
+import { getSite } from '../../lib/content';
+
+const site = await getSite();
+---
+<div class="process">
+  <p class="eyebrow" id="process-label">{site.process.label}</p>
+  <ol class="process__list" aria-labelledby="process-label">
+    {site.process.steps.map((step) => <li>{step}</li>)}
+  </ol>
+</div>
+
+<style>
+  .process__list {
+    display: grid;
+    gap: var(--s4);
+    margin-block-start: 14px;
+    counter-reset: step;
+  }
+  .process__list li {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 10px;
+    align-items: baseline;
+    font-size: var(--fs-small);
+    line-height: var(--lh-small);
+    max-inline-size: 34rem;
+  }
+  .process__list li::before {
+    counter-increment: step;
+    content: counter(step);
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    line-height: 1;
+    color: var(--ink-faint);
+  }
+  @media (min-width: 600px) and (max-width: 1023px) {
+    .process__list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s5) var(--s6); }
+  }
+</style>

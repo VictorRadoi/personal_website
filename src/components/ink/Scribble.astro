@@ -1,0 +1,42 @@
+---
+/**
+ * Inline ballpoint stroke (design-system §9.2). OWNER: Agent A.
+ * Path numbers are scaled from the 0-100 library box to the size class's px box at build time and
+ * emitted as viewBox="0 0 w h", so 1 unit = 1px: even stroke widths, pathLength draw-on works.
+ * Never vector-effect: non-scaling-stroke; never stretch with preserveAspectRatio="none".
+ * Two passes (.ink + thinner offset .ink2) give the ballpoint look. Base stroke styles and the
+ * draw-on states are in base.css (.scribble); nothing is armed without JS, so it renders complete.
+ * `box` (optional, additive) overrides the px box for annotation presets / swashes; CSS may then
+ * size the svg fluidly (the viewBox keeps the aspect).
+ */
+import { scribbles, scalePath, scaleHead, SCRIBBLE_BOX, type ScribbleName, type ScribbleSize } from '../../lib/scribbles';
+
+interface Props {
+  name: ScribbleName;
+  size: ScribbleSize;
+  /** Include the arrowhead when the path has one (default true). */
+  arrow?: boolean;
+  onNight?: boolean;
+  class?: string;
+  /** Design px box [w, h] overriding the size class. */
+  box?: readonly [number, number];
+}
+
+const { name, size, arrow = true, onNight = false, class: className, box } = Astro.props;
+const [w, h] = box ?? SCRIBBLE_BOX[size];
+const { d, head } = scribbles[name];
+const main = scalePath(d, w, h);
+const headD = arrow && head ? scaleHead(head, w, h) : null;
+---
+<svg
+  class:list={['scribble', `scribble--${size}`, `scribble--${name}`, { 'scribble--night': onNight }, className]}
+  width={w}
+  height={h}
+  viewBox={`0 0 ${w} ${h}`}
+  aria-hidden="true"
+  focusable="false"
+>
+  <path class="ink" d={main} pathLength="1" />
+  <path class="ink2" d={main} pathLength="1" />
+  {headD && <path class="head" d={headD} pathLength="1" />}
+</svg>

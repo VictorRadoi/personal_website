@@ -1,0 +1,16 @@
+---
+/** Small uppercase label above a heading (design-system §3.3 --fs-eyebrow). Uses .eyebrow from base.css. */
+interface Props {
+  text: string;
+  onNight?: boolean;
+  /** Optional id (e.g. for aria-labelledby on a list it labels). */
+  id?: string;
+}
+
+const { text, onNight = false, id } = Astro.props;
+---
+<p id={id} class:list={['eyebrow', { 'eyebrow--night': onNight }]}>{text}</p>
+
+<style>
+  .eyebrow--night { color: var(--night-soft); }
+</style>

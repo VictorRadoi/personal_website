@@ -1,0 +1,49 @@
+---
+/**
+ * OWNER: Agent C. Current ventures (site-spec §3.1), id "ventures".
+ * Desktop: header cols 1-7; two index cards side by side (Teamboard -0.8° and offset 48px down,
+ * GoParty +0.6°), aligned to the top. Tablet: stacked full width, tilts halved. Phones: stacked, flat.
+ * REQUEST(F): at 1024-1279 the 88px margin column breaks MarginNote "my own stuff" into three lines
+ * ("hire me" into two). Suggest a smaller hand size for .margin-note in that range (e.g. --fs-hand-m)
+ * or letting it run into the column gap.
+ */
+import Section from '../layout/Section.astro';
+import Eyebrow from '../layout/Eyebrow.astro';
+import Heading from '../layout/Heading.astro';
+import VentureCard from './VentureCard.astro';
+import { getSite, getVentures } from '../../lib/content';
+
+const site = await getSite();
+const ventures = await getVentures();
+---
+<Section id="ventures" track="ventures" padding="ventures" marginNote={site.ventures.margin}>
+  <header class="ventures__head">
+    <Eyebrow text={site.ventures.eyebrow} />
+    <Heading level={2} size="l" id="ventures-title">{site.ventures.h2}</Heading>
+    <p class="lead">{site.ventures.intro}</p>
+  </header>
+  <div class="ventures__grid">
+    {ventures.map((project) => <VentureCard project={project} />)}
+  </div>
+</Section>
+
+<style>
+  .ventures__head { display: flex; flex-direction: column; gap: var(--s3); }
+  .ventures__head .lead { margin-block-start: var(--s3); }
+
+  .ventures__grid {
+    /* Phones: cards lie flat (their printouts keep a small tilt, see VentureCard). */
+    --tilt-k: 0;
+    display: grid;
+    gap: var(--s7);
+    margin-block-start: var(--s7);
+    align-items: start;
+  }
+  @media (min-width: 600px) {
+    .ventures__grid { --tilt-k: .5; gap: var(--s8); margin-block-start: var(--s8); }
+  }
+  @media (min-width: 1024px) {
+    .ventures__head { grid-column: 1 / span 7; }
+    .ventures__grid { --tilt-k: 1; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--s6); }
+  }
+</style>

@@ -1,0 +1,35 @@
+---
+/**
+ * A page section: <section id aria-labelledby data-track-section> around a PageFrame.
+ * Convention: the section's heading has id `${id}-title` (pass `labelledBy` to override).
+ * Padding is applied to the frame (not the section) so the margin rule runs continuously.
+ */
+import PageFrame from './PageFrame.astro';
+import MarginNote from './MarginNote.astro';
+
+interface Props {
+  id: string;
+  /** section_view analytics name (home sections: ventures, services, work, contact). */
+  track?: string;
+  padding: 'hero' | 'ventures' | 'services' | 'work' | 'contact' | 'projectHeader' | 'project';
+  surface?: 'paper' | 'night';
+  marginNote?: string;
+  labelledBy?: string;
+  /** Extra classes on the <section> (optional, additive). */
+  class?: string;
+}
+
+const { id, track, padding, surface = 'paper', marginNote, labelledBy, class: className } = Astro.props;
+const onNight = surface === 'night';
+---
+<section
+  id={id}
+  aria-labelledby={labelledBy ?? `${id}-title`}
+  data-track-section={track}
+  class:list={['section', `section--${padding}`, { 'surface-night': onNight }, className]}
+>
+  <PageFrame marginRule={!onNight} class={`pad-${padding}`}>
+    {marginNote && <MarginNote slot="margin" text={marginNote} onNight={onNight} />}
+    <slot />
+  </PageFrame>
+</section>

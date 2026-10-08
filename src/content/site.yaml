@@ -1,0 +1,270 @@
+# Site-wide copy (copy.md §1-3, §4-6 headers, §7, §9-13) with decisions.md (2026-10-07) applied.
+# One entry, id "en". Templates use {placeholders}: {year}, {date}, {time}, {name}, {alt}.
+# Launch rule: no ⟦TBD⟧ here. Missing facts are omitted and listed in omissions.yaml.
+en:
+  seo:
+    home:
+      title: "Victor-Andrei Rădoi · Mobile & full-stack engineer"
+      description: "I build iOS and Android apps, plus the backends and websites behind them. Co-founder of Teamboard, founding engineer at GoParty. Independent, working with EU and US teams."
+    privacy:
+      title: "Privacy · Victor-Andrei Rădoi"
+      description: "What this site collects (only Google Analytics, only if you say yes) and how to change your mind."
+    notFound:
+      title: "Page not found · Victor-Andrei Rădoi"
+      description: "This page moved or never existed."
+    ogImage:
+      headline: "I build mobile apps and the systems behind them."
+      highlight: "the systems behind them"
+      byline: "Victor-Andrei Rădoi · Mobile & full-stack engineer · rvandrei.com"
+
+  nav:
+    skip: "Skip to content"
+    wordmark: "Victor-Andrei Rădoi"
+    label: "Main"
+    ventures: "Ventures"
+    services: "Services"
+    work: "Work"
+    contact: "Contact"
+    cta: "Email me"
+    menuOpen: "Menu"
+    menuClose: "Close"
+    menuLabel: "Menu"
+    backToWork: "← All work"
+
+  cursor:
+    open: "open →"
+    visit: "visit ↗"
+    readStory: "read the story"
+    openCase: "open case"
+    zoomHint: "click to enlarge"
+    touchStamp: "tap to open →"
+
+  localTime:
+    base: "It's {time} for me."
+    asleep: "It's {time} for me, so I'm probably asleep."
+    fallback: ""
+
+  copy:
+    button: "Copy"
+    done: "Copied"
+    failed: "Couldn't copy. Select the address and copy it yourself."
+
+  ui:
+    tbdBadge: "TBD"
+    notePrefix: "Note:"
+    external: "(opens in a new tab)"
+    a11y:
+      emailCta: "Email Andrei"
+      whatsappCta: "Message Andrei on WhatsApp"
+      bookingCta: "Book a free 30-minute call with Andrei"
+      copyButton: "Copy email address"
+      ventureLink: "{name}: read the story"
+      casePanelLink: "Dream Pivot case study"
+      screenshotOpen: "{alt}. Opens a larger view"
+      appIcon: "{name} app icon"
+      lightboxLabel: "Enlarged screenshot"
+      lightboxClose: "Close image"
+      lightboxPrev: "Previous image"
+      lightboxNext: "Next image"
+      cursorToggle: "Fancy cursor"
+      menuButton: "Menu"
+      breadcrumb: "Breadcrumb"
+      nextProject: "Next project"
+
+  hero:
+    margin: "hello,"
+    eyebrow: "Independent · working with teams in the EU and US"
+    h1:
+      kicker: "Mobile & full-stack engineer."
+      main: "I build mobile apps and the systems behind them."
+    highlight: "the systems behind them"
+    note: "apis, databases, admin panels. websites too"
+    lead: "I'm Victor-Andrei Rădoi. Mostly I build mobile apps for iOS and Android. Apps don't run on their own, so I also build the APIs, databases, admin panels and websites around them. I've been shipping to the App Store and Google Play since 2020."
+    focusLabel: "Right now"
+    focus: "Independent and taking on client projects."
+    ctaEmail: "Email me"
+    ctaWhatsApp: "WhatsApp"
+    ctaBook: "Book a 30-min call"
+    ctaWork: "or scroll to the work ↓"
+    reply: "I reply within a day."
+    todo:
+      heading: "lately"
+      items:
+        - text: "shipped Dream Pivot to the app stores"
+          done: true
+        - text: "went independent"
+          done: true
+        - text: "your app →"
+          done: false
+          href: "#contact"
+      a11yCaption: "Andrei's to-do card"
+      donePrefix: "Done:"
+      openNote: "room for one more"
+
+  ventures:
+    margin: "my own stuff"
+    eyebrow: "Current ventures"
+    h2: "Two companies where I'm not the contractor."
+    intro: "I co-founded Teamboard and I'm the founding engineer at GoParty, and I write the code for both. That habit carries into client work: I build things as if I'll be the one maintaining them, because usually I am."
+
+  services:
+    margin: "hire me"
+    eyebrow: "Consulting & development"
+    h2: "What you can hire me for."
+    intro: "I work best with founders and small teams who want one person to own the whole build. You talk to the developer, not to an account manager."
+
+  process:
+    label: "How it usually goes"
+    steps:
+      - "A free 30-minute call. You explain the idea, I ask annoying questions."
+      - "A written plan with scope and milestones. I usually work hourly; short, well-defined jobs can be fixed-price."
+      - "Builds you can install every week, through TestFlight and Google Play testing."
+      - "Launch. After that I stay on for fixes and new features."
+
+  cta:
+    h3: "Tell me what you're building."
+    body: 'Email is best for details. WhatsApp is fine for a quick "is this even possible?". Or grab 30 minutes on my calendar.'
+    email: "Email me"
+    whatsapp: "Message on WhatsApp"
+    book: "Book a 30-min call"
+    bookNote: "free, no prep needed"
+    reply: "I reply within a day."
+    whatsappPrefill: "Hi Andrei, I found your site. I'm working on "
+
+  work:
+    margin: "proof"
+    eyebrow: "Selected case studies"
+    h2: "Recent client work, with the details."
+    earlierLabel: "Earlier, for other teams"
+    credentials: "The paperwork: MSc in Artificial Intelligence, Dublin City University (2023). BSc in Computer Science, King's College London (2021). First place at the PwC Academic Awards (2024)."
+    csiLabels:
+      challenge: "Challenge"
+      stack: "Stack"
+      impact: "Impact"
+
+  contact:
+    margin: "say hi"
+    h2: "Got a project? Write to me."
+    body: "Tell me what you're building, who it's for and when you'd like it live. I'll reply with questions, a rough plan, or an honest \"I'm not the right person for this\"."
+    phone: "+40 764 347 095"
+    email: "Email me"
+    whatsapp: "WhatsApp"
+    book: "Book a 30-min call"
+    linkedin: "LinkedIn"
+    github: "GitHub"
+    availability: "Available for new client projects."
+    signoff: "Andrei"
+
+  egg:
+    front: "If you can read this, you're holding the page wrong."
+    button: "don't press"
+    uhoh: "uh oh"
+    hint: "psst: everything in here is turned 180°"
+    touchHint: "press and hold, then drag"
+    back: "Nice. You just used something built backwards and still made it work. That's most of my job. Say \"upside down\" in your email so I know you found this."
+    foundStamp: "Found"
+    a11yButton: "Upside-down note button"
+    console: "Psst. The sticky note on the back cover is upside down for a reason."
+
+  footer:
+    copyright: "© {year} Victor-Andrei Rădoi"
+    privacy: "Privacy"
+    cookies: "Cookie settings"
+    cursorFancy: "Cursor: fancy"
+    cursorPlain: "Cursor: plain"
+    builtWith: "Built with Astro, hosted on Cloudflare."
+    updated: "last updated {date}"
+
+  project:
+    platformsLabel: "Where to get it"
+    status:
+      live: "Live"
+      review: "In review"
+      soon: "Coming soon"
+      relaunching: "Relaunching"
+    descriptionLabel: "What it is"
+    featuresLabel: "What's inside"
+    next: "Next: {name} →"
+    ctaLine: "Want something like this built?"
+    ctaEmail: "Email me"
+    ctaWhatsApp: "WhatsApp"
+    ctaBook: "Book a 30-min call"
+    swipeHint: "swipe →"
+    breadcrumbHome: "Home"
+    breadcrumbWork: "Work"
+
+  ctaLabels:
+    menu:
+      email: "Email me"
+      whatsapp: "Message on WhatsApp"
+      book: "Book a 30-min call"
+    notFound:
+      email: "Email me instead"
+      whatsapp: "WhatsApp"
+      book: "Book a 30-min call"
+
+  consent:
+    label: "Analytics consent"
+    title: "Can I count your visit?"
+    body: "I use Google Analytics to see which pages get read and roughly where visitors come from. No ads, no selling data. Your choice either way."
+    accept: "Yes, count me"
+    reject: "No, thanks"
+    details: "What gets collected"
+    note: "you can change this later in the footer"
+    statusOn: "Right now: counted"
+    statusOff: "Right now: not counted"
+
+  privacy:
+    h1: "Privacy"
+    blocks:
+      - id: short
+        h: "The short version"
+        p:
+          - "This site counts visits with Google Analytics, and only after you say yes. There are no ads, no ad cookies, no social trackers and no selling of anything. If you say no, or ignore the note, nothing is sent to Google at all."
+      - id: who
+        h: "Who runs this site"
+        p:
+          - "Victor-Andrei Rădoi, an independent developer. I decide why and how the numbers are used, so I am the one responsible for them. Write to me at andreiradoi14@gmail.com."
+      - id: collected
+        h: "What is collected if you say yes"
+        p:
+          - "Google Analytics 4 records how the site is used. Nothing here names you or asks for your details."
+        list:
+          - "the pages you open and how far you scroll on project pages"
+          - "which buttons and links you use, for example email, WhatsApp or booking a call"
+          - "roughly where you are (country and city), worked out from your IP address, which Google does not keep"
+          - "your device, screen size, browser and language"
+          - "which site sent you here"
+      - id: consent-mode
+        h: "How your choice is applied (Consent Mode)"
+        p:
+          - "I use Google Consent Mode, and on top of it the Google Analytics script is not even loaded until you say yes. Before that, and if you say no, your browser sends nothing to Google and nothing is stored on your device for analytics."
+          - "If you say yes, the script loads and sets two cookies, _ga and _ga_D6Y74947LM, which tell your visits apart over time. If you change your mind later, counting stops straight away and those two cookies are deleted."
+          - "I do not use advertising features, so ad storage, ad personalisation and ad data sharing stay denied for everyone. Your choice is kept for 12 months, then the site asks again."
+      - id: retention
+        h: "How long it is kept"
+        p:
+          - "Google Analytics keeps this data for 14 months, then deletes it. I only look at totals and trends, not at individual visitors."
+      - id: local
+        h: "What stays in your browser"
+        p:
+          - "The site also keeps a few small notes on your device: your consent choice and the date you made it, whether you prefer the plain cursor, and whether you found the upside-down note. While a tab is open it remembers which animations already played. None of this is sent anywhere."
+      - id: contact
+        h: "If you contact me"
+        p:
+          - "If you email me, message me on WhatsApp or book a call, those services handle your message under their own rules. I use what you send only to reply and to work with you."
+      - id: rights
+        h: "Your rights"
+        p:
+          - "You can ask what I hold about you, ask me to correct or delete it, or withdraw your consent at any time, using the buttons below or by writing to andreiradoi14@gmail.com. You can also complain to the data protection authority in the EU country where you live or work."
+    changeHeading: "Change your mind"
+    changeBody: "You can switch analytics on or off here at any time. It takes effect straight away."
+    noscript: "The buttons need JavaScript. Without it the site sets nothing and counts nothing, so there is nothing to change."
+    updated: "Last updated: 7 October 2026"
+
+  notFound:
+    h1: "Nothing here."
+    body: "This page moved or never existed. I checked under the keyboard too."
+    home: "Back to the homepage"
+    email: "Email me instead"
+    note: "there's one place on the homepage where everything goes backwards. this isn't it"

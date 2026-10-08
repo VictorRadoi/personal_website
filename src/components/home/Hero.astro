@@ -1,0 +1,137 @@
+---
+/**
+ * OWNER: Agent C. Hero (site-spec §3.0). LCP = the H1 text (no image, no photo of Victor anywhere).
+ * Load sequence (reveal.ts, not scroll): highlight seq 1 → hero note seq 2 → to-do ticks seq 3 →
+ * circle around "your app" seq 4. Complete at rest without JS and with reduced motion.
+ *
+ * Layout on the content subgrid (4 / 8 / 12 columns):
+ * - ≥1024: intro (eyebrow, H1, note) and body (lead, focus, CTAs, links) in cols 1-8; the to-do card
+ *   in cols 9-12, its top level with the H1's second line.
+ * - 600-1023: intro full width; then body cols 1-5 beside the to-do card (cols 6-8, 260px max).
+ * - <600: one column; margin note above the eyebrow, CTAs full width, to-do card last (≤320px, 1.1°).
+ */
+import Section from '../layout/Section.astro';
+import Eyebrow from '../layout/Eyebrow.astro';
+import Highlight from '../ink/Highlight.astro';
+import Annotation from '../ink/Annotation.astro';
+import CtaGroup from '../controls/CtaGroup.astro';
+import TextLink from '../controls/TextLink.astro';
+import TodoCard from '../media/TodoCard.astro';
+import LocalTime from '../chrome/LocalTime.astro';
+import { getSite } from '../../lib/content';
+import { keepHyphenated, splitPhrase } from '../../lib/format';
+
+const site = await getSite();
+const h = site.hero;
+const main = splitPhrase(h.h1.main, h.highlight);
+// "full-stack" never breaks at its hyphen on phones ("full-/stack engineer.").
+const kicker = keepHyphenated(h.h1.kicker);
+---
+<Section id="hero" padding="hero" marginNote={h.margin} class="hero">
+  <div class="hero__intro">
+    <Eyebrow text={h.eyebrow} />
+    <h1 id="hero-title" class="hero__h1">
+      <span class="hero__kicker">{kicker.map((run) => (run.keep ? <span class="nowrap">{run.text}</span> : run.text))}</span>{' '}
+      <span class="hero__main">
+        {main ? <>{main.before}<Highlight onLoad>{main.match}</Highlight>{main.after}</> : h.h1.main}
+      </span>
+    </h1>
+    <Annotation preset="hero-note" note={h.note} revealId="hero-note" />
+  </div>
+
+  <div class="hero__body">
+    <p class="lead">{h.lead}</p>
+    <p class="hero__focus"><span class="eyebrow">{h.focusLabel}</span> {h.focus}</p>
+    <div class="hero__ctas"><CtaGroup location="hero" /></div>
+    <div class="hero__links">
+      <p class="hero__work"><TextLink href="#work">{h.ctaWork}</TextLink></p>
+      <p class="meta">{h.reply} <LocalTime /></p>
+    </div>
+  </div>
+
+  <div class="hero__card">
+    <TodoCard heading={h.todo.heading} items={h.todo.items} openNote={h.todo.openNote} />
+  </div>
+</Section>
+
+<style>
+  /* ---- intro ---- */
+  .hero__intro { display: flex; flex-direction: column; }
+  .hero__intro :global(.eyebrow) { text-wrap: balance; }
+  .hero__h1 {
+    margin-block-start: var(--s3);
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--ink);
+  }
+  .hero__kicker {
+    display: block;
+    margin-block-end: 10px;
+    font-size: var(--fs-display-m);
+    line-height: var(--lh-display-m);
+    letter-spacing: var(--tr-display-m);
+  }
+  .nowrap { white-space: nowrap; }
+  .hero__main {
+    display: block;
+    font-size: var(--fs-display-xl);
+    line-height: var(--lh-display-xl);
+    letter-spacing: var(--tr-display-xl);
+  }
+
+  /* ---- body ---- */
+  .hero__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s5);
+    margin-block-start: var(--s5);
+  }
+  .hero__focus { max-inline-size: var(--measure); }
+  .hero__focus .eyebrow { display: block; margin-block-end: var(--s1); }
+  .hero__ctas { margin-block-start: var(--s2); }
+  .hero__links { display: flex; flex-direction: column; gap: var(--s1); margin-block-start: calc(-1 * var(--s3)); }
+  .hero__work { font-size: var(--fs-meta); font-weight: 500; }
+  .hero__work :global(a) { display: inline-flex; align-items: center; min-block-size: 44px; }
+
+  /* ---- to-do card ---- */
+  .hero__card {
+    align-self: start;
+    justify-self: start;
+    /* room for the corner tape strips and the tilt */
+    inline-size: min(320px, 100% - 24px);
+    margin-block-start: var(--s8);
+    margin-inline-start: 12px;
+  }
+
+  /* ---- phones (<600) ---- */
+  @media (max-width: 599px) {
+    .hero__ctas { margin-block-start: 0; }
+  }
+
+  /* ---- tablet (600-1023) ---- */
+  @media (min-width: 600px) {
+    .hero__body { grid-column: 1 / span 5; grid-row: 2; }
+    .hero__card {
+      grid-column: 6 / -1;
+      grid-row: 2;
+      justify-self: end;
+      inline-size: min(260px, 100% - 16px);
+      margin-block-start: var(--s7);
+      margin-inline: 0 8px;
+    }
+  }
+
+  /* ---- desktop (≥1024) ---- */
+  @media (min-width: 1024px) {
+    .hero__intro { grid-column: 1 / span 8; grid-row: 1; }
+    .hero__body { grid-column: 1 / span 8; grid-row: 2; }
+    .hero__card {
+      grid-column: 9 / -1;
+      grid-row: 1 / span 2;
+      inline-size: min(300px, 100% - 16px);
+      /* top level with the H1's second line: eyebrow + gap + kicker line + its margin */
+      margin-block-start: calc(var(--fs-eyebrow) * var(--lh-eyebrow) + var(--s3) + var(--fs-display-m) * var(--lh-display-m) + 18px);
+      margin-inline: 0 8px;
+    }
+  }
+</style>

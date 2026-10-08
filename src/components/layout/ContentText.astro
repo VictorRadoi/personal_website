@@ -1,0 +1,24 @@
+---
+/**
+ * Renders a content string; ⟦TBD: …⟧ segments become <mark class="tbd">.
+ * Launch rule (decisions.md): content must not contain TBDs. A TBD reaching a production build is
+ * reported at build time so it can be omitted (see src/content/omissions.yaml).
+ */
+import { isTbd, splitTbd } from '../../lib/tbd';
+import { getSite } from '../../lib/content';
+
+interface Props {
+  text: string;
+  as?: 'p' | 'span' | 'li';
+  class?: string;
+}
+
+const { text, as: Tag = 'p', class: className } = Astro.props;
+const segments = splitTbd(text);
+let badge = 'TBD';
+if (isTbd(text)) {
+  badge = (await getSite()).ui.tbdBadge;
+  console.warn(`[ContentText] visible TBD on ${Astro.url.pathname}: ${text}`);
+}
+---
+<Tag class={className}>{segments.map((s) => (s.tbd ? <mark class="tbd">{badge}: {s.text}</mark> : s.text))}</Tag>

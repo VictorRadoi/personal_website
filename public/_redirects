@@ -1,0 +1,12 @@
+# Cloudflare Workers Static Assets redirects (evaluated before assets).
+#
+# Short links for bios and email signatures (site-spec §1).
+/hire /#contact 302
+/hire/ /#contact 302
+/contact /#contact 302
+/contact/ /#contact 302
+
+# The old site was a single-page Flutter web app at "/" with no other public pages. The only file
+# URL that may have been shared is the old CV PDF (Flutter served assets under /assets/assets/).
+/assets/assets/files/CV.pdf / 301
+/assets/files/CV.pdf / 301

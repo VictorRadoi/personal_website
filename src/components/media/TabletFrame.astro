@@ -1,0 +1,46 @@
+---
+/**
+ * Tablet frame for the Dream Pivot iPad shots: same language as PhoneFrame, bezel 0.025 × w,
+ * outer radius 0.06 × w, camera dot centered on the top bezel, no side buttons, --shadow-device.
+ * OWNER: Agent A.
+ */
+interface Props {
+  width: 300 | 420 | 'fluid';
+}
+
+const { width } = Astro.props;
+---
+<div class:list={['tablet', `w-${width}`]}>
+  <slot />
+</div>
+
+<style>
+  .tablet {
+    position: relative;
+    padding: calc(var(--w) * .025);
+    border-radius: calc(var(--w) * .06);
+    background: var(--ink);
+    box-shadow: var(--shadow-device);
+  }
+  .tablet :global(img) { display: block; inline-size: 100%; block-size: auto; border-radius: calc(var(--w) * .035); }
+  .tablet::before {
+    content: "";
+    position: absolute;
+    inset-block-start: calc((var(--w) * .025 - 5px) / 2);
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    inline-size: 5px;
+    block-size: 5px;
+    border-radius: 50%;
+    background: var(--night-2);
+    z-index: 1;
+  }
+  .tablet::after {
+    content: "";
+    position: absolute;
+    inset: calc(var(--w) * .025);
+    border-radius: calc(var(--w) * .035);
+    background: linear-gradient(135deg, var(--white-04), transparent 40%);
+    pointer-events: none;
+  }
+</style>

@@ -1,0 +1,24 @@
+# Earlier work, small cards on home (copy.md §6.2 + decisions.md: XTEL named, linked, meta).
+# Each card renders id="earlier-<id>" (anchor target for the services proof link).
+- id: carturesti
+  order: 3
+  name: "Cărturești"
+  meta: "2021–2022 · at Evolution Labs"
+  body: "The app for Romania's largest bookshop chain, now past 50,000 downloads. I turned Adobe XD designs into app screens, and built an in-store inventory app that talks to Zebra barcode scanners."
+  tags: ["Flutter", "Android SDK", "Zebra"]
+
+- id: xoxno
+  order: 2
+  name: "XOXNO"
+  meta: "2023–2024 · contract"
+  body: "An NFT marketplace on the MultiversX blockchain. I led the refactor of a legacy codebase onto Riverpod and Freezed, and rebuilt navigation with AutoRouter so deep links actually work."
+  tags: ["Flutter", "Riverpod", "Freezed", "AutoRouter"]
+
+- id: xtel
+  order: 1
+  name: "XTEL"
+  meta: "2025–2026 · external engineer via Beenear"
+  body: "Moved a large web platform into one app for iOS, Android and desktop, with a two-way bridge so the old JavaScript and the new native screens talk in real time."
+  tags: ["Flutter", "WebView", "JS bridge"]
+  url: "https://xtech.ai/"
+  urlLabel: "xtech.ai ↗"

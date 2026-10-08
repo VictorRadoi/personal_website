@@ -1,0 +1,112 @@
+---
+/**
+ * "The slip" (design-system §14). OWNER: Agent B (+ consent-slip.ts, consent.ts).
+ * banner: a taped index card, fixed bottom-left (full width on mobile), rendered `hidden` right after
+ *   the skip link; consent-slip.ts shows it 1.2s after load when consent_v1 is missing or older than
+ *   12 months, and again on [data-consent-open] (footer "Cookie settings") with the status line.
+ *   Not modal: no backdrop, no scroll lock, no focus trap.
+ * inline: the privacy page control (#consent-choice), visible with JS only, always shows the status.
+ * Buttons: [data-consent-choice="granted"|"denied"] → consent.grant()/deny(). Equal weight, same style.
+ */
+import Tape from '../paper/Tape.astro';
+import { getSite } from '../../lib/content';
+
+interface Props {
+  mode?: 'banner' | 'inline';
+}
+
+const { mode = 'banner' } = Astro.props;
+const site = await getSite();
+const c = site.consent;
+---
+{
+  mode === 'banner' ? (
+    <section class="slip surface-card" aria-label={c.label} data-consent-slip tabindex="-1" hidden>
+      <Tape placement="top" seed="consent" />
+      <div class="slip__body">
+        <p class="slip__title">{c.title}</p>
+        <p class="small">{c.body}</p>
+        <p class="meta slip__status" data-consent-status data-status-on={c.statusOn} data-status-off={c.statusOff} hidden />
+        <div class="slip__buttons">
+          <button type="button" data-consent-choice="granted" data-cursor="link">{c.accept}</button>
+          <button type="button" data-consent-choice="denied" data-cursor="link">{c.reject}</button>
+        </div>
+        <p class="slip__foot">
+          <a class="meta" href="/privacy/" data-cursor="link">{c.details}</a>
+          <span class="hand-s">{c.note}</span>
+        </p>
+      </div>
+    </section>
+  ) : (
+    <div class="slip-inline js-only" id="consent-choice" role="group" aria-label={c.label}>
+      <p class="meta slip__status" data-consent-status data-status-on={c.statusOn} data-status-off={c.statusOff} role="status" />
+      <div class="slip__buttons">
+        <button type="button" data-consent-choice="granted" data-cursor="link">{c.accept}</button>
+        <button type="button" data-consent-choice="denied" data-cursor="link">{c.reject}</button>
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .slip {
+    position: fixed;
+    z-index: var(--z-slip);
+    inset-inline: 12px;
+    inset-block-end: calc(12px + env(safe-area-inset-bottom, 0px));
+    border-radius: var(--r1);
+    box-shadow: var(--shadow-rest);
+  }
+  /* The body scrolls on short screens; the tape stays outside it so it is never clipped. */
+  .slip__body {
+    max-block-size: 45vh;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: 26px 24px 20px;
+  }
+  @media (min-width: 600px) {
+    .slip {
+      inset-inline: 24px auto;
+      inset-block-end: calc(24px + env(safe-area-inset-bottom, 0px));
+      inline-size: 380px;
+      rotate: -1deg;
+    }
+    .slip__body { max-block-size: none; overflow: visible; }
+  }
+  .slip:focus { outline: none; }
+  .slip:focus-visible { outline: 2px solid var(--ballpoint); outline-offset: 3px; }
+
+  .slip__title { font-family: var(--font-display); font-size: 1.375rem; line-height: 1.2; color: var(--ink); }
+  .slip .small { margin-block-start: 10px; color: var(--ink); }
+  .slip__status { margin-block-start: 10px; }
+
+  .slip__buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-block-start: 18px; }
+  @media (max-width: 359px) { .slip__buttons { grid-template-columns: 1fr; } }
+  .slip__buttons button {
+    min-block-size: 48px;
+    padding-inline: 12px;
+    border: 1.5px solid var(--ink);
+    border-radius: var(--r2);
+    background: var(--card);
+    color: var(--ink);
+    font-size: .9375rem;
+    font-weight: 600;
+    line-height: 1.2;
+    transition: background-color var(--dur-quick) linear;
+  }
+  .slip__buttons button:hover { background: var(--shade); }
+  .slip__buttons button:active { background: var(--shade); }
+
+  .slip__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 12px; margin-block-start: 4px; }
+  .slip__foot .meta { display: inline-flex; align-items: center; min-block-size: 44px; color: var(--ballpoint); }
+
+  /* Entrance 1.2s after load: up 12px + fade, 240ms; exit: down 16px + fade, 200ms. */
+  .slip.is-entering { animation: slip-in var(--dur-base) var(--ease-settle); }
+  .slip.is-leaving { animation: slip-out 200ms var(--ease-press) forwards; pointer-events: none; }
+  @keyframes slip-in { from { translate: 0 12px; opacity: 0; } }
+  @keyframes slip-out { to { translate: 0 16px; opacity: 0; } }
+
+  /* Privacy page inline control */
+  .slip-inline { max-inline-size: 380px; }
+  .slip-inline .slip__buttons { margin-block-start: 12px; }
+</style>

@@ -1,0 +1,15 @@
+# Facts omitted from the built site under the launch rule (decisions.md: zero visible TBD).
+# Never rendered. tests/tbd-report.mjs prints this list for the owner. Remove an entry when the fact
+# is supplied and the copy restored. Owner answers of 2026-10-07 removed the entries they settled.
+- id: dp-metrics
+  where: "projects/dream-pivot.yaml → csi.impact"
+  what: "No numbers for Dream Pivot (owner decision: impact stays qualitative)."
+- id: gp-backend
+  where: "projects/goparty.yaml → csi.stack"
+  what: "GoParty's backend is unknown (owner: omit). Payments: Stripe (shown)."
+- id: gp-screens
+  where: "projects/goparty.yaml → features[3..4]"
+  what: "The scanning and logistics app has no screenshots; its blocks are text-only."
+- id: confirm-goparty-problem
+  where: "projects/goparty.yaml → card.problem"
+  what: "The old problem line was deleted; the card now describes the two apps plainly. Confirm the wording."

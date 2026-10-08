@@ -1,0 +1,62 @@
+---
+/**
+ * STUB (Foundation) — OWNER: Agent A. Text link (ballpoint). prefetch → data-astro-prefetch (hover).
+ * csSource → data-cs-source (analytics.ts remembers it for case_study_open on the next project page).
+ */
+import { getSite } from '../../lib/content';
+
+interface Props {
+  href: string;
+  external?: boolean;
+  cursor?: 'link' | 'visit' | 'open';
+  cursorLabel?: string;
+  onNight?: boolean;
+  prefetch?: boolean;
+  csSource?: string;
+  track?: Record<string, string>;
+  /** Extra classes (optional, additive; e.g. "above", "stretched-link"). */
+  class?: string;
+}
+
+const {
+  href,
+  external = false,
+  cursor = 'link',
+  cursorLabel,
+  onNight = false,
+  prefetch = false,
+  csSource,
+  track = {},
+  class: className,
+} = Astro.props;
+const site = await getSite();
+---
+<a
+  href={href}
+  target={external ? '_blank' : undefined}
+  rel={external ? 'noopener' : undefined}
+  class:list={['text-link', { 'text-link--night': onNight }, className]}
+  data-cursor={cursor}
+  data-cursor-label={cursorLabel}
+  data-astro-prefetch={prefetch ? '' : undefined}
+  data-cs-source={csSource}
+  {...track}
+><slot />{external && <span class="visually-hidden"> {site.ui.external}</span>}</a>
+
+<style>
+  .text-link {
+    color: var(--ballpoint);
+    font-weight: 600;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: .2em;
+    transition: color var(--dur-quick), text-decoration-thickness var(--dur-quick);
+  }
+  @media (hover: hover) {
+    .text-link:hover { color: var(--ballpoint-deep); text-decoration-thickness: 2px; }
+  }
+  .text-link--night { color: var(--ballpoint-night); }
+  @media (hover: hover) {
+    .text-link--night:hover { color: var(--night-text); }
+  }
+</style>

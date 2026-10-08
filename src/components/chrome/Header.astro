@@ -1,0 +1,194 @@
+---
+/**
+ * OWNER: Agent C. Sticky header (site-spec §2). Laid out on the same frame as the page: on desktop the
+ * wordmark starts at the content column and the red margin rule runs through the header, so the
+ * notebook page reads as one sheet from the very top.
+ * - ≥1024: wordmark · nav (Ventures · Services · Work · Contact) · "Email me" (small, not magnetic).
+ * - 600-1023: wordmark · "Email me" · "Menu".   - <600: wordmark · "Menu".
+ * "Menu" opens the native popover #menu (MobileMenu): Esc + light dismiss for free, works without JS.
+ * nav.ts: [data-headroom] → .is-scrolled after 8px (rule line), .is-hidden after 120px of downward
+ * scroll (any upward scroll shows it; never with reduced motion, an open menu or focus inside).
+ * Every nav link fires nav_click { target, location: header }.
+ */
+import Button from '../controls/Button.astro';
+import Icon from '../layout/Icon.astro';
+import MobileMenu from './MobileMenu.astro';
+import { getSite } from '../../lib/content';
+import { mailtoHref } from '../../lib/links';
+import { trackAttrs, type NavTarget } from '../../lib/track';
+
+interface Props {
+  current?: 'home' | 'project' | 'other';
+}
+
+const { current = 'other' } = Astro.props;
+const site = await getSite();
+const links: { target: Exclude<NavTarget, 'home'>; label: string }[] = [
+  { target: 'ventures', label: site.nav.ventures },
+  { target: 'services', label: site.nav.services },
+  { target: 'work', label: site.nav.work },
+  { target: 'contact', label: site.nav.contact },
+];
+---
+<header class="site-header" data-headroom>
+  <div class="site-header__inner">
+    <a
+      class="site-header__wordmark"
+      href="/"
+      aria-current={current === 'home' ? 'page' : undefined}
+      data-cursor="link"
+      {...trackAttrs('nav_click', { target: 'home', location: 'header' })}
+    >{site.nav.wordmark}</a>
+    <div class="site-header__right">
+      <nav class="site-header__nav" aria-label={site.nav.label}>
+        <ul role="list">
+          {
+            links.map((l) => (
+              <li>
+                <a href={`/#${l.target}`} data-cursor="link" {...trackAttrs('nav_click', { target: l.target, location: 'header' })}>
+                  {l.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <Button
+        variant="primary"
+        size="small"
+        href={mailtoHref()}
+        icon="mail"
+        class="site-header__cta"
+        track={trackAttrs('cta_click', { method: 'email', location: 'nav' })}
+      >{site.nav.cta}</Button>
+      <button type="button" class="site-header__menu" popovertarget="menu" data-cursor="link">
+        <Icon name="menu" />
+        <span>{site.nav.menuOpen}</span>
+      </button>
+    </div>
+  </div>
+</header>
+<MobileMenu />
+
+<style>
+  .site-header {
+    position: sticky;
+    inset-block-start: env(safe-area-inset-top, 0px);
+    z-index: var(--z-header);
+    background: var(--paper) var(--paper-tex) 0 0 / var(--tex-size) repeat;
+    transition: translate var(--dur-base) var(--ease-settle);
+  }
+  .site-header:global(.is-hidden) { translate: 0 calc(-100% - env(safe-area-inset-top, 0px)); }
+
+  .site-header__inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s4);
+    min-block-size: var(--header-h);
+    max-inline-size: var(--frame-max);
+    margin-inline: auto;
+    padding-inline: var(--gutter-x);
+  }
+  /* The rule line appears once the page scrolls under the header (content column only). */
+  .site-header__inner::after {
+    content: "";
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: var(--gutter-x);
+    block-size: 1px;
+    background: var(--rule);
+    opacity: 0;
+    transition: opacity var(--dur-quick) linear;
+    pointer-events: none;
+  }
+  .site-header:global(.is-scrolled) .site-header__inner::after { opacity: 1; }
+
+  .site-header__wordmark {
+    flex: 0 1 auto;
+    min-inline-size: 0;
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    line-height: 1.1;
+    letter-spacing: -.005em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .site-header__wordmark:hover { color: var(--ink); }
+
+  .site-header__right { flex: none; display: flex; align-items: center; gap: var(--s3); }
+  .site-header__nav { display: none; }
+  .site-header__nav ul { display: flex; align-items: center; gap: var(--s6); }
+  .site-header__nav a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    color: var(--ink);
+    font-size: var(--fs-ui);
+    font-weight: 600;
+    letter-spacing: var(--tr-ui);
+    text-decoration: none;
+  }
+  .site-header__nav a:hover { color: var(--ballpoint); }
+
+  /* "Email me" lives in the header from tablet up (phones get it in the menu and the hero). */
+  .site-header__right :global(.site-header__cta) { display: none; }
+
+  .site-header__menu {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s2);
+    min-block-size: 44px;
+    padding-inline: 14px;
+    border: 1.5px solid var(--ink);
+    border-radius: var(--r2);
+    background: transparent;
+    color: var(--ink);
+    font-size: var(--fs-ui);
+    font-weight: 600;
+    line-height: 1;
+  }
+  @media (hover: hover) {
+    .site-header__menu:hover { background: var(--card); }
+  }
+  /* Browsers without the Popover API: the sheet can't open, so don't offer the button. */
+  @supports not selector(:popover-open) {
+    .site-header__menu { display: none; }
+  }
+
+  /* Breakpoints that decide what fits in the header are in em, so they follow the reader's text size:
+     with large default text (browser font-size setting) the header keeps the compact Menu layout. */
+  @media (min-width: 37.5em) {
+    .site-header__right :global(.site-header__cta) { display: inline-flex; min-block-size: 44px; }
+    .site-header__wordmark { white-space: nowrap; }
+  }
+
+  @media (min-width: 1024px) {
+    .site-header__wordmark { font-size: 1.375rem; }
+    /* Same frame as the sections: content starts after the margin column; the margin rule continues. */
+    .site-header__inner { padding-inline-start: calc(var(--gutter-x) + var(--margin-col) + var(--col-gap)); }
+    .site-header__inner::before {
+      content: "";
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: calc(var(--gutter-x) + var(--margin-col) + 8px);
+      inline-size: 1.5px;
+      background: var(--margin-rule);
+      pointer-events: none;
+    }
+    .site-header__inner::after { inset-inline-start: calc(var(--gutter-x) + var(--margin-col) + var(--col-gap)); }
+  }
+  @media (min-width: 64em) {
+    .site-header__right { gap: var(--s6); }
+    .site-header__nav { display: block; }
+    .site-header__menu { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header:global(.is-hidden) { translate: none; }
+  }
+</style>

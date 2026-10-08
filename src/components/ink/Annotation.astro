@@ -1,0 +1,118 @@
+---
+/**
+ * Ballpoint note + stroke (design-system §9.2 "Placement"). OWNER: Agent A.
+ * Positions per preset live in THIS component's CSS (no style attributes: CSP); add presets here.
+ *
+ * - hero-note: in flow (flex, right-aligned) under the hero H1; part of the load sequence
+ *   (data-onload-seq, seq 2, driven by reveal.ts).
+ * - dp-home-task / dp-plan-weeks: default is `caption` mode: stroke hidden, the note is a Kalam line under
+ *   the images with `arrowShortDown` rotated 180° (24px) above it, full row width (safe in any flex-wrap
+ *   host). From 600px, when the parent carries the class `annotation-host` (and is `position: relative`
+ *   with a fixed aspect box, 560 x 640 in the tile), the preset positions the stroke and note in percent
+ *   of that box instead. REQUEST(C): CaseStudyPanel's shots container should be `.annotation-host`.
+ * The SVG is aria-hidden; the note is real text after its anchor, prefixed with a visually-hidden "Note:".
+ */
+import Scribble from './Scribble.astro';
+import { getSite } from '../../lib/content';
+import type { ScribbleName } from '../../lib/scribbles';
+
+interface Props {
+  preset: 'hero-note' | 'dp-home-task' | 'dp-plan-weeks';
+  note: string;
+  revealId: string;
+}
+
+const { preset, note, revealId } = Astro.props;
+const site = await getSite();
+const stroke: Record<Props['preset'], { name: ScribbleName; box: readonly [number, number] }> = {
+  'hero-note': { name: 'arrowSwoopLeft', box: [96, 56] },
+  'dp-home-task': { name: 'arrowSwoopLeft', box: [50, 51] },
+  'dp-plan-weeks': { name: 'arrowShortDown', box: [34, 58] },
+};
+const onLoad = preset === 'hero-note';
+const s = stroke[preset];
+---
+<div
+  class:list={['annotation', `annotation--${preset}`]}
+  data-reveal="draw"
+  data-reveal-id={revealId}
+  data-onload-seq={onLoad ? '' : undefined}
+  data-seq={onLoad ? '2' : undefined}
+>
+  <Scribble name={s.name} size="m" box={s.box} class="annotation__stroke" />
+  {/* caption-mode arrow (mobile only for dp presets) */}
+  {!onLoad && <Scribble name="arrowShortDown" size="xs" box={[24, 24]} class="annotation__caption-arrow" />}
+  <p class="annotation__note"><span class="visually-hidden">{site.ui.notePrefix} </span>{note}</p>
+</div>
+
+<style>
+  .annotation { color: var(--ballpoint); pointer-events: none; }
+  .annotation__note {
+    font-family: var(--font-hand);
+    font-size: var(--fs-hand-m);
+    line-height: 1.2;
+    color: var(--ballpoint);
+    pointer-events: auto;
+  }
+  .annotation__caption-arrow { display: none; }
+
+  /* ---- hero-note: in flow, right-aligned, note tucked against the arrow tail ---- */
+  .annotation--hero-note {
+    --draw-delay: 0ms;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 6px;
+    margin-inline-end: 6%;
+  }
+  .annotation--hero-note .annotation__note { max-inline-size: 15rem; translate: 0 10px; }
+  .annotation--hero-note :global(.annotation__stroke) { inline-size: 96px; block-size: 56px; }
+  @media (max-width: 599px) {
+    .annotation--hero-note { margin-inline-end: 0; justify-content: flex-start; }
+    .annotation--hero-note .annotation__note { max-inline-size: none; translate: 0 6px; }
+    .annotation--hero-note :global(.annotation__stroke) { inline-size: 72px; block-size: 42px; }
+  }
+
+  /* ---- dp-* presets: caption mode first (mobile), absolute over the design container from 600px ---- */
+  .annotation--dp-home-task,
+  .annotation--dp-plan-weeks {
+    flex: 0 0 100%;
+    inline-size: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .annotation--dp-home-task { --draw-delay: 300ms; text-align: right; align-items: flex-end; }
+  .annotation--dp-plan-weeks { --draw-delay: 700ms; }
+  .annotation--dp-home-task :global(.annotation__stroke),
+  .annotation--dp-plan-weeks :global(.annotation__stroke) { display: none; }
+  .annotation--dp-home-task :global(.annotation__caption-arrow),
+  .annotation--dp-plan-weeks :global(.annotation__caption-arrow) { display: block; rotate: 180deg; }
+  .annotation--dp-home-task .annotation__note,
+  .annotation--dp-plan-weeks .annotation__note { font-size: var(--fs-hand-s); }
+
+  @media (min-width: 600px) {
+    :global(.annotation-host) > .annotation--dp-home-task,
+    :global(.annotation-host) > .annotation--dp-plan-weeks {
+      position: absolute;
+      inset: 0;
+      flex: none;
+      display: block;
+    }
+    :global(.annotation-host) > .annotation--dp-home-task :global(.annotation__stroke),
+    :global(.annotation-host) > .annotation--dp-plan-weeks :global(.annotation__stroke) { display: block; position: absolute; }
+    :global(.annotation-host) > .annotation--dp-home-task :global(.annotation__caption-arrow),
+    :global(.annotation-host) > .annotation--dp-plan-weeks :global(.annotation__caption-arrow) { display: none; }
+    :global(.annotation-host) > .annotation--dp-home-task .annotation__note,
+    :global(.annotation-host) > .annotation--dp-plan-weeks .annotation__note { position: absolute; font-size: var(--fs-hand-m); line-height: 1.15; text-align: left; }
+
+    /* one task a day: arrow points at the task card on the home screen */
+    :global(.annotation-host) > .annotation--dp-home-task :global(.annotation__stroke) { inset-inline-start: 68%; inset-block-start: 31%; inline-size: 9%; block-size: auto; aspect-ratio: 50 / 51; }
+    :global(.annotation-host) > .annotation--dp-home-task .annotation__note { inset-inline-start: 77%; inset-block-start: 36%; inline-size: 23%; }
+
+    /* the plan is written week by week: arrow rises from below to the plan phone */
+    :global(.annotation-host) > .annotation--dp-plan-weeks :global(.annotation__stroke) { inset-inline-start: 14%; inset-block-start: 82%; inline-size: 6%; block-size: auto; aspect-ratio: 34 / 58; rotate: 180deg; }
+    :global(.annotation-host) > .annotation--dp-plan-weeks .annotation__note { inset-inline-start: 22%; inset-block-start: 88%; inline-size: 46%; }
+  }
+</style>
