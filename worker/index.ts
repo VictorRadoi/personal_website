@@ -1,5 +1,7 @@
 import { EmailMessage } from "cloudflare:email";
 import { Mailbox, createMimeMessage } from "mimetext/browser";
+// The same switch file as the site (wrangler bundles it): briefBuilder false → /api/brief answers 404.
+import { FEATURES } from "../src/features";
 
 const OWNER = "andreiradoi14@gmail.com";
 const FROM_ADDR = "brief@rvandrei.com";
@@ -83,14 +85,22 @@ async function verifyTurnstile(token: string, ip: string | null, secret: string)
 	}
 }
 
+/**
+ * answers (JSON). v1 keys, plus the optional v2 keys users, platforms and tech (the page's "Tech translation"
+ * lines, e.g. "Get reminders and alerts on their phone → push notifications"). Missing keys read as empty,
+ * so v1 and v2 pages and quick messages ("{}") all parse. kind is only sent by v1 pages.
+ */
 interface Answers {
 	building: string[];
+	users: string;
 	stage: string;
 	features: string[];
+	platforms: string[];
 	kind: string[];
 	timing: string;
 	notes: string;
 	link: string;
+	tech: string[];
 }
 
 function parseAnswers(raw: string): Answers | null {
@@ -105,12 +115,15 @@ function parseAnswers(raw: string): Answers | null {
 	const s = (v: unknown, max: number) => (typeof v === "string" ? v.slice(0, max) : "");
 	return {
 		building: strList(o.building),
+		users: oneLine(s(o.users, 80)),
 		stage: oneLine(s(o.stage, 80)),
 		features: strList(o.features),
+		platforms: strList(o.platforms),
 		kind: strList(o.kind),
 		timing: oneLine(s(o.timing, 80)),
 		notes: s(o.notes, 4000),
 		link: oneLine(s(o.link, 500)),
+		tech: strList(o.tech, 40, 240),
 	};
 }
 
@@ -144,7 +157,12 @@ async function handleBrief(request: Request, env: Env): Promise<Response> {
 	const summary = str(form.get("summary"), MAX_SUMMARY);
 	const answersRaw = str(form.get("answers"), 20_000);
 	const token = str(form.get("cf-turnstile-response"), 2048);
-	if (name === null || email === null || company === null || whatsapp === null || summary === null || answersRaw === null || token === null) return fail("invalid", 400);
+	const modeRaw = str(form.get("mode"), 10);
+	if (name === null || email === null || company === null || whatsapp === null || summary === null || answersRaw === null || token === null || modeRaw === null) return fail("invalid", 400);
+	// mode: "quick" = the "Just write to me" message (summary is the message); absent or "brief" = the full brief.
+	if (modeRaw !== "" && modeRaw !== "quick" && modeRaw !== "brief") return fail("invalid", 400);
+	const quick = modeRaw === "quick";
+	if (quick && !summary.trim()) return fail("invalid", 400);
 
 	const cleanName = oneLine(name);
 	const cleanEmail = email.trim();
@@ -173,31 +191,43 @@ async function handleBrief(request: Request, env: Env): Promise<Response> {
 	if (!(await verifyTurnstile(token, ip, env.TURNSTILE_SECRET))) return fail("turnstile", 403);
 
 	const firstBuilding = answers.building[0] ?? "project";
-	const subject = oneLine(`New brief: ${firstBuilding} \u2014 ${cleanName}`).slice(0, 200);
+	const subject = oneLine(quick ? `New message: ${cleanName}` : `New brief: ${firstBuilding} \u2014 ${cleanName}`).slice(0, 200);
+	// The visitor's answers in their own (business) words; then the same picks in technical terms.
 	const rows: [string, string][] = [
 		["Name", cleanName],
 		["Email", cleanEmail],
 		["Company", oneLine(company)],
 		["WhatsApp", oneLine(whatsapp)],
-		["Building", answers.building.join(", ")],
-		["Stage", answers.stage],
-		["Features", answers.features.join(", ")],
+		["Wants to build", answers.building.join(", ")],
+		["For", answers.users],
+		["Where they are", answers.stage],
+		["Needs", answers.features.join(", ")],
+		["Works on", answers.platforms.join(", ")],
 		["Kind", answers.kind.join(", ")],
 		["Timing", answers.timing],
 		["Link", answers.link],
 	];
 	const shown = rows.filter(([, v]) => v);
+	const fallback = quick ? "(no message)" : "(no summary)";
+	const intro = quick ? "Quick message from the brief page (they skipped the questions)." : "";
+	const files = attachments.map((a) => a.filename).join(", ");
 	const text =
-		`${summary || "(no summary)"}\n\n---\n` +
+		(intro ? `${intro}\n\n` : "") +
+		`${summary || fallback}\n\n---\n` +
 		shown.map(([k, v]) => `${k}: ${v}`).join("\n") +
 		(answers.notes ? `\n\nNotes:\n${answers.notes}` : "") +
-		(attachments.length ? `\n\nAttachments: ${attachments.map((a) => a.filename).join(", ")}` : "");
+		(answers.tech.length ? `\n\nTech translation:\n${answers.tech.map((l) => `- ${l}`).join("\n")}` : "") +
+		(files ? `\n\nAttachments: ${files}` : "");
 	const html =
 		`<div style="font-family:system-ui,sans-serif;font-size:15px;line-height:1.5;color:#222">` +
-		`<p style="white-space:pre-wrap">${esc(summary || "(no summary)")}</p><hr>` +
+		(intro ? `<p style="color:#666"><i>${esc(intro)}</i></p>` : "") +
+		`<p style="white-space:pre-wrap">${esc(summary || fallback)}</p><hr>` +
 		`<table cellpadding="4" style="font-size:14px">${shown.map(([k, v]) => `<tr><td><b>${esc(k)}</b></td><td>${esc(v)}</td></tr>`).join("")}</table>` +
 		(answers.notes ? `<p><b>Notes</b></p><p style="white-space:pre-wrap">${esc(answers.notes)}</p>` : "") +
-		(attachments.length ? `<p><i>Attachments: ${esc(attachments.map((a) => a.filename).join(", "))}</i></p>` : "") +
+		(answers.tech.length
+			? `<p><b>Tech translation</b></p><ul style="font-size:14px;padding-left:20px">${answers.tech.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>`
+			: "") +
+		(files ? `<p><i>Attachments: ${esc(files)}</i></p>` : "") +
 		`</div>`;
 
 	try {
@@ -222,7 +252,7 @@ async function handleBrief(request: Request, env: Env): Promise<Response> {
 export default {
 	async fetch(request, env): Promise<Response> {
 		const { pathname } = new URL(request.url);
-		if (pathname === "/api/brief") {
+		if (pathname === "/api/brief" && FEATURES.briefBuilder) {
 			try {
 				return await handleBrief(request, env);
 			} catch {

@@ -26,9 +26,10 @@ const s = brief.steps;
 const progress = fill(brief.progress, { n: index + 1, total });
 const picks: { key: string; label: string; step: number; title: string }[] = [
   { key: 'building', label: s.building.tray, step: 0, title: s.building.title },
+  { key: 'users', label: s.building.usersTray, step: 0, title: s.building.usersTitle },
   { key: 'stage', label: s.stage.tray, step: 1, title: s.stage.title },
-  { key: 'kind', label: s.features.kindTray, step: 2, title: s.features.kindTitle },
   { key: 'features', label: s.features.tray, step: 2, title: s.features.title },
+  { key: 'platforms', label: s.features.platformsTray, step: 2, title: s.features.platformsTitle },
   { key: 'timing', label: s.timing.tray, step: 3, title: s.timing.title },
   { key: 'notes', label: s.notes.tray, step: 4, title: s.notes.title },
   { key: 'attached', label: s.notes.trayAttached, step: 4, title: s.notes.extrasTitle },

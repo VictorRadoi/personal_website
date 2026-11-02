@@ -1,8 +1,9 @@
 /**
  * Cloudflare Turnstile for the brief form, explicit rendering. api.js is injected only when the review
- * step is first shown (never on other pages, never earlier). CSP: script-src + frame-src
- * https://challenges.cloudflare.com (astro.config.mjs). Site key from src/config.ts; on localhost the
- * documented always-pass test key is used (its tokens only verify against the test secret).
+ * step or the quick message panel is first shown (never on other pages, never earlier). CSP: script-src +
+ * frame-src https://challenges.cloudflare.com (astro.config.mjs). Site key from src/config.ts; on localhost
+ * the documented always-pass test key is used (its tokens only verify against the test secret).
+ * One widget at a time: mount() into another slot (review ↔ quick message) removes it from the old one.
  * Tokens are single-use: reset() after every submit attempt that reached the Worker.
  */
 import { TURNSTILE_SITE_KEY, TURNSTILE_TEST_SITE_KEY } from '../../config';
@@ -10,6 +11,7 @@ import { TURNSTILE_SITE_KEY, TURNSTILE_TEST_SITE_KEY } from '../../config';
 interface TurnstileApi {
   render(el: HTMLElement, options: Record<string, unknown>): string | undefined;
   reset(id?: string): void;
+  remove(id: string): void;
 }
 declare global {
   interface Window {
@@ -21,6 +23,8 @@ const SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explic
 
 let loading: Promise<TurnstileApi> | null = null;
 let widget: string | undefined;
+let host: HTMLElement | null = null;
+let wanted: HTMLElement | null = null;
 let token = '';
 let failed = false;
 let waiters: [(t: string) => void, () => void][] = [];
@@ -48,12 +52,24 @@ function settle(ok: boolean): void {
   for (const [resolve, reject] of list) ok ? resolve(token) : reject();
 }
 
-/** Render the widget once into `el` (interaction-only: most visitors never see it). */
+/** Render the widget into `el` (interaction-only: most visitors never see it). The latest call wins. */
 export async function mount(el: HTMLElement): Promise<void> {
-  if (widget !== undefined) return;
+  wanted = el;
+  if (widget !== undefined && host === el) return;
   try {
     const api = await load();
-    if (widget !== undefined) return;
+    if (wanted !== el || (widget !== undefined && host === el)) return;
+    if (widget !== undefined) {
+      try {
+        api.remove(widget);
+      } catch {
+        /* already gone */
+      }
+      widget = undefined;
+      token = '';
+      failed = false;
+    }
+    host = el;
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
     widget = api.render(el, {
       sitekey: local ? TURNSTILE_TEST_SITE_KEY : TURNSTILE_SITE_KEY,

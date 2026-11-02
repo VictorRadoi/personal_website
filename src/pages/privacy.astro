@@ -9,11 +9,13 @@ import Heading from '../components/layout/Heading.astro';
 import ConsentSlip from '../components/chrome/ConsentSlip.astro';
 import { getSite } from '../lib/content';
 import { pageJsonLd } from '../lib/seo';
+import { FEATURES } from '../features';
 
 const site = await getSite();
 const t = site.privacy;
 
-const blocks = t.blocks;
+// The two project-brief sections (ids brief, brief-delivery) only while the brief builder is on (src/features.ts).
+const blocks = t.blocks.filter((b) => FEATURES.briefBuilder || !b.id.startsWith('brief'));
 ---
 <Base
   title={site.seo.privacy.title}

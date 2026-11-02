@@ -337,14 +337,20 @@ const site = defineCollection({
 
 /* ---------------------------------- brief builder (one entry, id "en") ---------------------------------- */
 
-/** A tappable answer. `phrase` reads inside a list sentence, `sentence` stands alone; `unsure` = exclusive "Not sure yet". */
+/**
+ * A tappable answer. `phrase` reads inside a list sentence (and the quick-message prefill), `sentence` stands
+ * alone (and wins in the summary), `phraseIn` picks the feature sentence a phrase joins; `tech` is the
+ * technical name, sent only to the owner's email ("Tech translation"); `unsure` = exclusive "Not sure yet".
+ */
 const briefOption = z.object({
   id: z.string().regex(/^[a-z0-9]+$/),
   label: z.string().max(60),
   note: z.string().optional(),
   icon: z.enum(ICON_NAMES).optional(),
   phrase: z.string().optional(),
+  phraseIn: z.enum(['people', 'me', 'it']).optional(),
   sentence: z.string().optional(),
+  tech: z.string().max(120).optional(),
   unsure: z.boolean().default(false),
 });
 const briefStep = z.object({ title: z.string(), hint: z.string(), tray: z.string() });
@@ -366,14 +372,19 @@ const brief = defineCollection({
     nav: z.object({ back: z.string(), next: z.string(), skip: z.string(), review: z.string() }),
     unsure: z.string(),
     steps: z.object({
-      building: briefStep.extend({ options: z.array(briefOption) }),
+      building: briefStep.extend({
+        options: z.array(briefOption),
+        usersTitle: z.string(),
+        usersNote: z.string(),
+        usersTray: z.string(),
+        users: z.array(briefOption),
+      }),
       stage: briefStep.extend({ options: z.array(briefOption) }),
       features: briefStep.extend({
-        kindTitle: z.string(),
-        kindTray: z.string(),
-        kinds: z.array(briefOption),
-        featuresTitle: z.string(),
         groups: z.array(z.object({ id: z.string(), label: z.string(), options: z.array(briefOption) })),
+        platformsTitle: z.string(),
+        platformsTray: z.string(),
+        platforms: z.array(briefOption),
       }),
       timing: briefStep.extend({ options: z.array(briefOption) }),
       notes: briefStep.extend({
@@ -428,11 +439,29 @@ const brief = defineCollection({
       bookCall: z.string(),
       errors: z.object({ name: z.string(), email: z.string(), emailInvalid: z.string(), summary: z.string(), fix: z.string() }),
     }),
+    quick: z.object({
+      title: z.string(),
+      lead: z.string(),
+      message: z.string(),
+      messagePlaceholder: z.string(),
+      prefill: z.string(),
+      turnstileNote: z.string(),
+      send: z.string(),
+      errorNext: z.string(),
+      otherTitle: z.string(),
+      whatsapp: z.string(),
+      book: z.string(),
+      whatsappIntro: z.string(),
+      back: z.string(),
+      errors: z.object({ message: z.string() }),
+    }),
     summary: z.object({
       build: z.string(),
       features: z.string(),
+      featuresMe: z.string(),
+      featuresIt: z.string(),
       featuresUnsure: z.string(),
-      kind: z.string(),
+      platforms: z.string(),
       link: z.string(),
       sketch: z.string(),
       photo: z.string(),
@@ -441,7 +470,16 @@ const brief = defineCollection({
       andLast: z.string(),
       empty: z.string(),
     }),
-    success: z.object({ title: z.string(), body: z.string(), book: z.string(), home: z.string(), sentTitle: z.string(), again: z.string() }),
+    tech: z.object({ line: z.string(), combo: z.string() }),
+    success: z.object({
+      title: z.string(),
+      body: z.string(),
+      quickBody: z.string(),
+      book: z.string(),
+      home: z.string(),
+      sentTitle: z.string(),
+      again: z.string(),
+    }),
     error: z.object({
       title: z.string(),
       reasons: z.object({

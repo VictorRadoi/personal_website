@@ -17,9 +17,10 @@ const { brief } = Astro.props;
 const s = brief.steps;
 const rows: { key: string; label: string }[] = [
   { key: 'building', label: s.building.tray },
-  { key: 'kind', label: s.features.kindTray },
+  { key: 'users', label: s.building.usersTray },
   { key: 'stage', label: s.stage.tray },
   { key: 'features', label: s.features.tray },
+  { key: 'platforms', label: s.features.platformsTray },
   { key: 'timing', label: s.timing.tray },
   { key: 'notes', label: s.notes.tray },
   { key: 'attached', label: s.notes.trayAttached },

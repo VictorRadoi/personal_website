@@ -4,7 +4,8 @@
  * multi:  a hand-drawn box that gets a ballpoint tick when picked (like the hero to-do card).
  * single: a hand-drawn bubble + tick, and the whole card gets circled in ballpoint (PenCircle; magnetic.ts
  *         fits the circle to the card's measured box). `unsure` options are exclusive in multi groups.
- * Variants: card (label + 3-word note + optional icon) and pill (label only, the "It's a kind of…" row).
+ * Variants: card (outcome label + one plain line + optional icon) and pill (label only: the "Who will use it?"
+ * and "Where should it work?" rows).
  */
 import Scribble from '../ink/Scribble.astro';
 import PenCircle from '../ink/PenCircle.astro';
@@ -13,7 +14,7 @@ import type { BriefOption } from '../../lib/content';
 
 interface Props {
   option: BriefOption;
-  group: 'building' | 'stage' | 'kind' | 'features' | 'timing';
+  group: 'building' | 'users' | 'stage' | 'features' | 'platforms' | 'timing';
   mode: 'multi' | 'single';
   variant?: 'card' | 'pill';
 }
@@ -110,7 +111,7 @@ const single = mode === 'single';
   .chip :global(.chip__icon) { margin-inline-start: auto; color: var(--ink-soft); align-self: center; }
   .chip[aria-pressed="true"] :global(.chip__icon) { color: var(--ink); }
 
-  /* pill: the "It's a kind of…" row */
+  /* pill: the "Who will use it?" / "Where should it work?" rows */
   .chip--pill {
     display: inline-flex;
     inline-size: auto;

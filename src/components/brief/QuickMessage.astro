@@ -1,0 +1,233 @@
+---
+/**
+ * "Just write to me" (/start/, brief builder v2): the in-page quick message behind the "Just email me
+ * instead" link. builder.ts swaps it in for the steps (URL #message, so the browser's Back returns to the
+ * step) and back again with every answer kept. A pinned index card: name, email, a ruled message box that
+ * starts with a plain sentence of whatever was already picked, the consent line, the Turnstile slot and
+ * Send → the same POST /api/brief with mode=quick. Below: the address with a copy button, WhatsApp and the
+ * booking link (both carry the message; builder.ts rewrites their hrefs), and "Back to the questions".
+ * Same data-* hooks as the review step (data-contact, data-submit, data-error-panel, …): builder.ts reads
+ * them inside [data-quick], so the two forms never mix.
+ */
+import Button from '../controls/Button.astro';
+import CopyField from '../controls/CopyField.astro';
+import Icon from '../layout/Icon.astro';
+import Tape from '../paper/Tape.astro';
+import type { Brief } from '../../lib/content';
+import { bookingHref, whatsappHref } from '../../lib/links';
+import { trackAttrs } from '../../lib/track';
+import { EMAIL } from '../../config';
+
+interface Props {
+  brief: Brief;
+}
+
+const { brief } = Astro.props;
+const q = brief.quick;
+const r = brief.review;
+const fields = [
+  { id: 'name', label: r.name, type: 'text', autocomplete: 'name', max: 100 },
+  { id: 'email', label: r.email, type: 'email', autocomplete: 'email', max: 200 },
+] as const;
+---
+<section class="quick" aria-labelledby="quick-title" data-quick hidden>
+  <form class="quick__card" novalidate data-quick-form>
+    <Tape placement="top" seed="brief-quick" />
+    <h2 class="quick__title" id="quick-title" tabindex="-1">{q.title}</h2>
+    <p class="quick__lead">{q.lead}</p>
+
+    <div class="quick__who">
+      {
+        fields.map((f) => (
+          <div class="field">
+            <label class="field__label" for={`quick-${f.id}`}>{f.label}</label>
+            <input
+              class="field__input"
+              id={`quick-${f.id}`}
+              name={f.id}
+              type={f.type}
+              autocomplete={f.autocomplete}
+              maxlength={f.max}
+              required
+              aria-required="true"
+              aria-describedby={`quick-${f.id}-error`}
+              inputmode={f.type === 'email' ? 'email' : undefined}
+              spellcheck={f.id === 'name' ? 'false' : undefined}
+              data-contact={f.id}
+            />
+            <p class="field__error" id={`quick-${f.id}-error`} data-error-for={f.id} />
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="field quick__message">
+      <label class="field__label" for="quick-message">{q.message}</label>
+      <textarea
+        class="quick__text"
+        id="quick-message"
+        name="message"
+        rows="6"
+        maxlength="4000"
+        required
+        aria-required="true"
+        aria-describedby="quick-message-error"
+        placeholder={q.messagePlaceholder}
+        data-message
+      ></textarea>
+      <p class="field__error" id="quick-message-error" data-error-for="message"></p>
+    </div>
+
+    <!-- Honeypot: people never see or reach it; bots fill it in (the Worker drops non-empty values). -->
+    <div class="quick__hp" aria-hidden="true">
+      <label for="quick-website">{r.honeypot}</label>
+      <input id="quick-website" name="website" type="text" tabindex="-1" autocomplete="off" data-honeypot />
+    </div>
+
+    <p class="quick__consent">
+      {r.consent} <a href="/privacy/#privacy-brief" data-cursor="link">{r.privacyLink}</a>
+    </p>
+    <div class="quick__turnstile" data-turnstile></div>
+    <p class="quick__turnstile-note meta">{q.turnstileNote}</p>
+
+    <div class="quick__error" role="alert" data-error-panel hidden tabindex="-1">
+      <p class="quick__error-title">{brief.error.title}</p>
+      <p class="quick__error-reason" data-error-reason></p>
+      <p class="quick__error-next">{q.errorNext}</p>
+      <div>
+        <Button variant="secondary" size="small" type="button" track={{ 'data-retry': '' }}>{brief.error.retry}</Button>
+      </div>
+    </div>
+
+    <Button variant="primary" type="submit" class="quick__submit" track={{ 'data-submit': '' }}>
+      <span data-submit-label>{q.send}</span>
+      <Icon name="arrow-right" />
+    </Button>
+    <p class="visually-hidden" role="status" aria-live="polite" data-send-status></p>
+  </form>
+
+  <div class="quick__other" role="group" aria-labelledby="quick-other-title">
+    <p class="quick__other-title" id="quick-other-title">{q.otherTitle}</p>
+    <CopyField value={EMAIL} location="brief_quick" />
+    <div class="quick__links">
+      <Button
+        variant="secondary"
+        size="small"
+        href={whatsappHref()}
+        icon="whatsapp"
+        external
+        track={{ ...trackAttrs('cta_click', { method: 'whatsapp', location: 'brief_quick' }), 'data-fallback': 'whatsapp' }}
+      >{q.whatsapp}</Button>
+      <Button
+        variant="secondary"
+        size="small"
+        href={bookingHref()}
+        icon="calendar"
+        external
+        track={{ ...trackAttrs('cta_click', { method: 'booking', location: 'brief_quick' }), 'data-fallback': 'booking' }}
+      >{q.book}</Button>
+    </div>
+    <button type="button" class="quick__back" data-quick-back data-cursor="link">
+      <Icon name="arrow-left" size={16} />{q.back}
+    </button>
+  </div>
+</section>
+
+<style>
+  .quick { display: flex; flex-direction: column; gap: var(--s6); padding-block: var(--s5) var(--s7); }
+  @media (min-width: 1024px) { .quick { grid-column: 1 / span 8; } }
+
+  /* a pinned index card, like the "sent" card */
+  .quick__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s4);
+    max-inline-size: 44rem;
+    padding: var(--s6) var(--card-pad) var(--s5);
+    border-radius: var(--r1);
+    box-shadow: var(--shadow-pinned);
+    background: var(--card) var(--paper-tex) 37px 91px / var(--tex-size) repeat;
+  }
+  .quick__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--fs-display-m);
+    line-height: var(--lh-display-m);
+    letter-spacing: var(--tr-display-m);
+    text-wrap: balance;
+  }
+  .quick__title:focus { outline: none; }
+  .quick__lead { color: var(--ink-soft); }
+  .quick__who { display: grid; gap: var(--s4); }
+  @media (min-width: 600px) { .quick__who { grid-template-columns: 1fr 1fr; } }
+
+  /* the message: ruled lines you write on, like the brief on the review step */
+  .quick__text {
+    display: block;
+    inline-size: 100%;
+    min-block-size: 12rem;
+    max-block-size: 30rem;
+    padding: 0 2px;
+    border: 0;
+    border-block-start: 1px solid var(--margin-rule);
+    background: repeating-linear-gradient(to bottom, transparent 0 31px, var(--rule) 31px 32px) 0 0 / 100% 32px local;
+    color: var(--ink);
+    font-family: var(--font-text);
+    font-size: max(16px, var(--fs-body)); /* ≥16px: iOS does not zoom on focus */
+    line-height: 32px;
+    resize: vertical;
+    field-sizing: content;
+  }
+  .quick__text::placeholder { color: var(--ink-soft); opacity: 1; }
+  .quick__text:focus-visible { outline: 2px solid var(--ballpoint); outline-offset: 6px; }
+  .quick__text[aria-invalid="true"] { border-block-start: 2px solid var(--stamp); }
+
+  .quick__hp { position: absolute; inset-inline-start: -10000px; inline-size: 1px; block-size: 1px; overflow: hidden; }
+  .quick__consent { font-size: var(--fs-small); color: var(--ink); }
+  .quick__consent a { font-weight: 600; }
+  .quick__turnstile:empty { display: none; }
+  .quick__turnstile-note { margin-block-start: calc(-1 * var(--s2)); }
+
+  .quick__error {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+    padding: var(--s4);
+    border: 1.5px dashed var(--stamp);
+    border-radius: var(--r1);
+    background: var(--paper);
+  }
+  .quick__error:focus { outline: none; }
+  .quick__error:focus-visible { outline: 2px solid var(--ballpoint); outline-offset: 3px; }
+  .quick__error-title { font-family: var(--font-display); font-size: var(--fs-title); line-height: var(--lh-title); }
+  .quick__error-reason { font-weight: 600; color: var(--stamp); }
+  .quick__error-next { font-size: var(--fs-small); }
+
+  .quick__card :global(.quick__submit) { align-self: flex-start; }
+  .quick__card :global(.quick__submit[aria-busy="true"]) { cursor: progress; opacity: .85; }
+  @media (max-width: 599px) { .quick__card :global(.quick__submit) { align-self: stretch; } }
+
+  .quick__other { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); max-inline-size: 44rem; }
+  .quick__other-title { font-family: var(--font-display); font-size: var(--fs-title); line-height: var(--lh-title); }
+  .quick__links { display: flex; flex-wrap: wrap; gap: var(--s2); }
+  @media (max-width: 599px) {
+    .quick__links { flex-direction: column; align-items: stretch; inline-size: 100%; }
+    .quick__links :global(.btn) { min-block-size: 48px; }
+  }
+  .quick__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-block-size: 44px;
+    margin-block-start: var(--s2);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ballpoint);
+    font-size: var(--fs-small);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: .2em;
+  }
+</style>

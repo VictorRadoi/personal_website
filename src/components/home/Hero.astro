@@ -20,9 +20,15 @@ import TodoCard from '../media/TodoCard.astro';
 import LocalTime from '../chrome/LocalTime.astro';
 import { getSite } from '../../lib/content';
 import { keepHyphenated, splitPhrase } from '../../lib/format';
+import { FEATURES } from '../../features';
 
 const site = await getSite();
 const h = site.hero;
+// "your app →" opens the brief builder (/start/); while it is switched off (src/features.ts) it goes to the
+// contact section, as it did before the builder existed.
+const todoItems = h.todo.items.map((item) =>
+  !FEATURES.briefBuilder && item.href?.startsWith('/start/') ? { ...item, href: '#contact' } : item,
+);
 const main = splitPhrase(h.h1.main, h.highlight);
 // "full-stack" never breaks at its hyphen on phones ("full-/stack engineer.").
 const kicker = keepHyphenated(h.h1.kicker);
@@ -50,7 +56,7 @@ const kicker = keepHyphenated(h.h1.kicker);
   </div>
 
   <div class="hero__card">
-    <TodoCard heading={h.todo.heading} items={h.todo.items} openNote={h.todo.openNote} />
+    <TodoCard heading={h.todo.heading} items={todoItems} openNote={h.todo.openNote} />
   </div>
 </Section>
 

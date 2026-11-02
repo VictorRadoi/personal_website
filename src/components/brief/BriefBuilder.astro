@@ -11,19 +11,23 @@
  * fixed dock that also carries Back / Next. The dock lives in the steps column, so a growing tray never
  * shifts the Next button. The review step spans the full width.
  * The napkin sketch sheet is static markup here; its code is import()ed on first open (sketch.ts).
+ * v2 (owner feedback 2026-10-08): every card speaks business outcomes (the technical names stay in the
+ * content file as `tech` and only reach the owner's email), and "Just email me instead" opens the in-page
+ * quick message (QuickMessage.astro, #message) instead of a mailto: link.
  */
 import './brief.css';
 import BriefChip from './BriefChip.astro';
 import BriefTray from './BriefTray.astro';
 import BriefReview from './BriefReview.astro';
 import SketchSheet from './SketchSheet.astro';
+import QuickMessage from './QuickMessage.astro';
 import Button from '../controls/Button.astro';
 import TextLink from '../controls/TextLink.astro';
 import Icon from '../layout/Icon.astro';
 import Tape from '../paper/Tape.astro';
 import Scribble from '../ink/Scribble.astro';
 import { getBrief, type BriefOption } from '../../lib/content';
-import { bookingHref, mailtoHref } from '../../lib/links';
+import { bookingHref } from '../../lib/links';
 import { trackAttrs } from '../../lib/track';
 import { fill } from '../../lib/format';
 
@@ -42,16 +46,19 @@ const strip = (o: BriefOption) => ({
   id: o.id,
   label: o.label,
   ...(o.phrase ? { phrase: o.phrase } : {}),
+  ...(o.phraseIn ? { phraseIn: o.phraseIn } : {}),
   ...(o.sentence ? { sentence: o.sentence } : {}),
+  ...(o.tech ? { tech: o.tech } : {}),
   ...(o.unsure ? { unsure: true } : {}),
 });
 const data = {
   steps: stepIds,
   groups: {
     building: s.building.options.map(strip),
+    users: s.building.users.map(strip),
     stage: s.stage.options.map(strip),
-    kind: s.features.kinds.map(strip),
     features: featureOptions.map(strip),
+    platforms: s.features.platforms.map(strip),
     timing: s.timing.options.map(strip),
   },
   t: {
@@ -62,10 +69,11 @@ const data = {
     trayCount: brief.tray.count,
     trayZero: brief.tray.countZero,
     send: brief.review.send,
+    quickSend: brief.quick.send,
     sending: brief.review.sending,
     verifying: brief.review.verifying,
     nothing: brief.review.nothing,
-    errors: brief.review.errors,
+    errors: { ...brief.review.errors, ...brief.quick.errors },
     reasons: brief.error.reasons,
     sketch: s.notes.attachedSketch,
     photo: s.notes.attachedPhoto,
@@ -73,6 +81,8 @@ const data = {
     photoError: s.notes.photoError,
   },
   sum: brief.summary,
+  tech: brief.tech,
+  quick: { prefill: brief.quick.prefill, whatsappIntro: brief.quick.whatsappIntro, body: brief.success.quickBody },
   fb: brief.fallback,
 };
 const json = JSON.stringify(data).replace(/</g, '\\u003c');
@@ -88,12 +98,7 @@ const json = JSON.stringify(data).replace(/</g, '\\u003c');
           {stepIds.map((_, i) => <li class:list={['progress__seg', { 'is-current': i === 0 }]} data-seg />)}
         </ol>
       </div>
-      <a
-        class="brief__escape"
-        href={mailtoHref()}
-        data-cursor="link"
-        {...trackAttrs('cta_click', { method: 'email', location: 'brief' })}
-      ><Icon name="mail" size={16} />{brief.page.escape}</a>
+      <a class="brief__escape" href="#message" data-quick-open data-cursor="link"><Icon name="mail" size={16} />{brief.page.escape}</a>
     </div>
 
     <div class="brief__layout">
@@ -107,6 +112,12 @@ const json = JSON.stringify(data).replace(/</g, '\\u003c');
           <div class="chips chips--cards">
             {s.building.options.map((o) => <BriefChip option={o} group="building" mode="multi" />)}
           </div>
+          <fieldset class="sub">
+            <legend class="sub__title">{s.building.usersTitle} <span class="sub__note">{s.building.usersNote}</span></legend>
+            <div class="chips chips--pills chips--pills-single">
+              {s.building.users.map((o) => <BriefChip option={o} group="users" mode="single" variant="pill" />)}
+            </div>
+          </fieldset>
         </fieldset>
 
         <!-- 2 -->
@@ -126,26 +137,23 @@ const json = JSON.stringify(data).replace(/</g, '\\u003c');
             <h2 class="step__title" id="step-features-title" tabindex="-1"><span class="visually-hidden">{progress(2)}: </span>{s.features.title}</h2>
           </legend>
           <p class="step__hint" id="step-features-hint">{s.features.hint}</p>
+          {
+            s.features.groups.map((g) => (
+              <fieldset class="group">
+                <legend class="group__title">{g.label}</legend>
+                <div class="chips chips--cards">
+                  {g.options.map((o) => <BriefChip option={o} group="features" mode="multi" />)}
+                </div>
+              </fieldset>
+            ))
+          }
+          <div class="chips chips--cards group group--unsure">
+            <BriefChip option={featureUnsure} group="features" mode="multi" />
+          </div>
           <fieldset class="sub">
-            <legend class="sub__title">{s.features.kindTitle}</legend>
+            <legend class="sub__title">{s.features.platformsTitle}</legend>
             <div class="chips chips--pills">
-              {s.features.kinds.map((o) => <BriefChip option={o} group="kind" mode="multi" variant="pill" />)}
-            </div>
-          </fieldset>
-          <fieldset class="sub">
-            <legend class="sub__title">{s.features.featuresTitle}</legend>
-            {
-              s.features.groups.map((g) => (
-                <fieldset class="group">
-                  <legend class="group__title">{g.label}</legend>
-                  <div class="chips chips--cards">
-                    {g.options.map((o) => <BriefChip option={o} group="features" mode="multi" />)}
-                  </div>
-                </fieldset>
-              ))
-            }
-            <div class="chips chips--cards group group--unsure">
-              <BriefChip option={featureUnsure} group="features" mode="multi" />
+              {s.features.platforms.map((o) => <BriefChip option={o} group="platforms" mode="multi" variant="pill" />)}
             </div>
           </fieldset>
         </fieldset>
@@ -269,7 +277,7 @@ const json = JSON.stringify(data).replace(/</g, '\\u003c');
       <Tape placement="top" seed="brief-done" />
       <span class="done__tick" aria-hidden="true"><Scribble name="check" size="s" box={[56, 52]} /></span>
       <h2 class="done__title" id="brief-done-title" tabindex="-1">{brief.success.title}</h2>
-      <p class="done__body">{brief.success.body}</p>
+      <p class="done__body" data-done-body>{brief.success.body}</p>
       <div class="done__actions">
         <Button
           variant="primary"
@@ -285,6 +293,8 @@ const json = JSON.stringify(data).replace(/</g, '\\u003c');
       <button type="button" class="done__again" data-restart data-cursor="link">{brief.success.again}</button>
     </div>
   </section>
+
+  <QuickMessage brief={brief} />
 
   <SketchSheet brief={brief} />
 </div>

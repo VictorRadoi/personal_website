@@ -250,7 +250,7 @@ en:
       - id: local
         h: "What stays in your browser"
         p:
-          - "The site also keeps a few small notes on your device: your consent choice and the date you made it, whether you prefer the plain cursor, and whether you found the upside-down note. While a tab is open it remembers which animations already played and, on the Start a project page, your unsent answers. None of this is sent anywhere, and the answers only leave your browser if you press Send brief."
+          - "The site also keeps a few small notes on your device: your consent choice and the date you made it, whether you prefer the plain cursor, and whether you found the upside-down note. While a tab is open it remembers which animations already played and, on the Start a project page, your unsent answers. None of this is sent anywhere, and the answers only leave your browser if you press Send."
       - id: contact
         h: "If you contact me"
         p:
@@ -258,16 +258,16 @@ en:
       - id: brief
         h: "If you send a project brief"
         p:
-          - "The Start a project page turns your answers into a short brief. When you press Send brief, it goes to my inbox as an email. Nothing is saved on this website or in a database. What gets sent:"
+          - "The Start a project page turns your answers into a short brief, or lets you write me a quick message instead. When you press Send, it goes to my inbox as an email. Nothing is saved on this website or in a database. What gets sent:"
         list:
-          - "the options you picked and the brief text, as you left it"
+          - "the options you picked, and the brief text or your message, as you left it"
           - "your name and email, plus your company and WhatsApp number if you add them"
           - "a napkin sketch or a photo, only if you add one"
       - id: brief-delivery
         h: "How the brief reaches me"
         p:
           - "This site runs on Cloudflare, which passes the brief on to my email inbox (Gmail). I use it only to reply and to work with you, like any other email you send me."
-          - "To keep out spam, the last step of the brief uses Cloudflare Turnstile. It looks at technical signals from your browser and your IP address to tell people from bots, and Cloudflare handles that under its own privacy policy. It runs without asking for your yes, because without it the form would fill up with spam."
+          - "To keep out spam, the last step of the brief and the quick message use Cloudflare Turnstile. It looks at technical signals from your browser and your IP address to tell people from bots, and Cloudflare handles that under its own privacy policy. It runs without asking for your yes, because without it the form would fill up with spam."
           - "While you fill in the brief, your answers stay in that browser tab so a reload doesn't lose them. They are cleared when the brief is sent or the tab is closed. If you choose to send it by email or WhatsApp instead, it goes through that app, under its own rules."
       - id: rights
         h: "Your rights"

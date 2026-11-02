@@ -2,7 +2,7 @@
 /**
  * OWNER: Agent A. The CTA strip (site-spec §3.2): .surface-card, 1.5px ink border,
  * no shadow; H3, body, CtaGroup, Kalam book note, the "Start a project" link (→ /start/, the brief
- * builder), CopyField (email), reply line.
+ * builder; only while FEATURES.briefBuilder is on, src/features.ts), CopyField (email), reply line.
  */
 import Heading from '../layout/Heading.astro';
 import CtaGroup from './CtaGroup.astro';
@@ -12,6 +12,7 @@ import Icon from '../layout/Icon.astro';
 import { getBrief, getSite, type CtaLocation } from '../../lib/content';
 import { trackAttrs } from '../../lib/track';
 import { EMAIL } from '../../config';
+import { FEATURES } from '../../features';
 
 interface Props {
   location: string;
@@ -27,11 +28,15 @@ const titleId = `cta-${location}-title`;
   <p>{site.cta.body}</p>
   <CtaGroup location={location as CtaLocation} />
   <p class="hand-s">{site.cta.bookNote}</p>
-  <p class="contact-cta__start">
-    <TextLink href={`/start/?from=${location}`} track={trackAttrs('cta_click', { method: 'brief', location })}>
-      {brief.ctaLink}<Icon name="arrow-right" size={16} />
-    </TextLink>
-  </p>
+  {
+    FEATURES.briefBuilder && (
+      <p class="contact-cta__start">
+        <TextLink href={`/start/?from=${location}`} track={trackAttrs('cta_click', { method: 'brief', location })}>
+          {brief.ctaLink}<Icon name="arrow-right" size={16} />
+        </TextLink>
+      </p>
+    )
+  }
   <CopyField value={EMAIL} location={location} />
   <p class="meta">{site.cta.reply}</p>
 </div>

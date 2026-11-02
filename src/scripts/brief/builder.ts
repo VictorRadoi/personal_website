@@ -13,19 +13,40 @@
  * - "Your brief" tray + dock count follow every pick. Review: generated summary (editable), picks with
  *   "Change", reply details, Turnstile (loaded only here), honeypot, Send → POST /api/brief (submit.ts).
  *   Failure keeps everything and offers mailto / wa.me / cal.com links carrying the summary.
+ * - "Just email me instead" (v2) swaps the steps for the quick message panel (QuickMessage.astro): a history
+ *   entry with #message, so Back (browser or "Back to the questions") returns to the same step with every
+ *   answer kept. Its message starts as a plain sentence of the picks; name/email are shared with the review
+ *   step. Send → the same endpoint with mode=quick (summary = the message, answers = the picks or {}).
+ * - Every send carries answers.tech: the "Tech translation" lines for the owner's email (summary.ts).
  * - Napkin sketch (sketch.ts) and photo downscaling (photo.ts) are import()ed on first use.
  * - Analytics (track(), consent-gated, production hosts only): brief_start {source}, brief_step {step, name}
- *   (first time each step is reached), sketch_open {device}, photo_attach, brief_submit {method: form}
- *   (fallback links carry data-track brief_submit {method}), brief_error {error}. Never any answers or PII.
+ *   (first time each step is reached), brief_quick_open {step}, sketch_open {device}, photo_attach,
+ *   brief_submit {method: form|quick} (fallback links carry data-track brief_submit {method}),
+ *   brief_error {error, mode}. Never any answers or PII.
  */
 import { track } from '../analytics';
 import { BOOKING_URL, EMAIL, WHATSAPP } from '../../config';
-import { GROUPS, SINGLE, emptyAnswers, fill, labels, summarize, type Answers, type Data, type Group } from './summary';
+import {
+  AUTO,
+  GROUPS,
+  SINGLE,
+  anyPicked,
+  emptyAnswers,
+  fill,
+  labels,
+  quickPrefill,
+  summarize,
+  techLines,
+  type Answers,
+  type Data,
+  type Group,
+} from './summary';
 import { send, type SendError } from './submit';
 import * as turnstile from './turnstile';
 
 type ContactKey = 'name' | 'email' | 'company' | 'whatsapp';
 type Contact = Record<ContactKey, string>;
+type Mode = 'brief' | 'quick';
 interface Draft {
   v: 1;
   step: number;
@@ -33,6 +54,24 @@ interface Draft {
   summary: string;
   edited: boolean;
   c: Contact;
+  /** The quick message; `edited` = typed by the visitor (otherwise it follows the picks). */
+  q: { message: string; edited: boolean };
+}
+/** The review step's form or the quick message: same data-* hooks, looked up inside each. */
+interface Panel {
+  mode: Mode;
+  el: HTMLElement;
+  keys: string[];
+  input: (key: string) => HTMLInputElement | HTMLTextAreaElement;
+  contacts: HTMLInputElement[];
+  honeypot: HTMLInputElement;
+  ts: HTMLElement;
+  error: HTMLElement;
+  reason: HTMLElement;
+  btn: HTMLButtonElement;
+  label: HTMLElement;
+  status: HTMLElement;
+  sendText: string;
 }
 interface Attachment {
   blob: Blob;
@@ -115,15 +154,36 @@ export function init(): void {
   const summaryEl = q<HTMLTextAreaElement>('[data-summary]');
   const regen = q<HTMLButtonElement>('[data-regenerate]');
   const pickEls = new Map(qa('[data-pick]').map((e) => [e.dataset.pick!, e]));
-  const contactEls = qa<HTMLInputElement>('[data-contact]');
-  const honeypot = q<HTMLInputElement>('[data-honeypot]');
-  const tsSlot = q('[data-turnstile]');
-  const errorPanel = q('[data-error-panel]');
-  const errorReason = q('[data-error-reason]');
-  const submitBtn = q<HTMLButtonElement>('[data-submit]');
-  const submitLabel = q('[data-submit-label]');
-  const sendStatus = q('[data-send-status]');
   const done = q('[data-done]');
+  const doneBody = q('[data-done-body]');
+  const doneBodyBrief = doneBody.textContent ?? '';
+  const quickEl = q('[data-quick]');
+  const quickForm = q<HTMLFormElement>('[data-quick-form]');
+  const quickTitle = q('#quick-title');
+
+  function panel(mode: Mode, el: HTMLElement, keys: string[], sendText: string): Panel {
+    const one = <T extends HTMLElement = HTMLElement>(sel: string) => el.querySelector<T>(sel)!;
+    const contacts = [...el.querySelectorAll<HTMLInputElement>('[data-contact]')];
+    const text = one<HTMLTextAreaElement>('[data-summary], [data-message]');
+    return {
+      mode,
+      el,
+      keys,
+      contacts,
+      sendText,
+      input: (key) => (key === 'summary' || key === 'message' ? text : contacts.find((e) => e.dataset.contact === key)!),
+      honeypot: one<HTMLInputElement>('[data-honeypot]'),
+      ts: one('[data-turnstile]'),
+      error: one('[data-error-panel]'),
+      reason: one('[data-error-reason]'),
+      btn: one<HTMLButtonElement>('[data-submit]'),
+      label: one('[data-submit-label]'),
+      status: one('[data-send-status]'),
+    };
+  }
+  const review = panel('brief', q('[data-step="review"]'), ['summary', 'name', 'email'], t.send);
+  const quick = panel('quick', quickEl, ['name', 'email', 'message'], t.quickSend);
+  const messageEl = quick.input('message') as HTMLTextAreaElement;
   const sketchBtn = q<HTMLButtonElement>('[data-sketch-open]');
   const photoBtn = q<HTMLButtonElement>('[data-photo-pick]');
   const photoInput = q<HTMLInputElement>('[data-photo-input]');
@@ -141,6 +201,7 @@ export function init(): void {
     summary: '',
     edited: false,
     c: { name: '', email: '', company: '', whatsapp: '' },
+    q: { message: '', edited: false },
   });
 
   /** Only known ids and plain strings survive a reload (the stored draft is untrusted input). */
@@ -157,6 +218,8 @@ export function init(): void {
     for (const k of CONTACT) st.c[k] = String(x.c?.[k] ?? '').slice(0, 200);
     st.summary = String(x.summary ?? '').slice(0, 4000);
     st.edited = Boolean(x.edited) && Boolean(st.summary.trim());
+    st.q.message = String(x.q?.message ?? '').slice(0, 4000);
+    st.q.edited = Boolean(x.q?.edited) && Boolean(st.q.message.trim());
     st.step = Math.min(REVIEW, Math.max(0, Math.trunc(Number(x.step)) || 0));
     return st;
   }
@@ -212,11 +275,11 @@ export function init(): void {
   const answered = (i: number): boolean => {
     switch (d.steps[i]) {
       case 'building':
-        return st.a.building.length > 0;
+        return st.a.building.length + st.a.users.length > 0;
       case 'stage':
         return st.a.stage.length > 0;
       case 'features':
-        return st.a.features.length + st.a.kind.length > 0;
+        return st.a.features.length + st.a.platforms.length > 0;
       case 'timing':
         return st.a.timing.length > 0;
       default:
@@ -264,6 +327,10 @@ export function init(): void {
   let current = -1;
   let autoT = 0;
   let finished = false;
+  /** The quick message panel is showing (the steps are hidden, not reset). */
+  let quickOpen = false;
+  /** This page pushed the #message history entry, so "Back to the questions" can simply go back. */
+  let quickPushed = false;
 
   function reached(i: number): void {
     if (i === 0) return;
@@ -280,6 +347,7 @@ export function init(): void {
   }
 
   function show(i: number, opts: { push?: boolean; focus?: boolean } = {}): void {
+    if (quickOpen) return;
     const { push = true, focus = true } = opts;
     i = Math.min(REVIEW, Math.max(0, i));
     window.clearTimeout(autoT);
@@ -297,7 +365,7 @@ export function init(): void {
     if (i === REVIEW) enterReview();
     save();
     if (!changed) return;
-    if (push) history.pushState({ ...(history.state ?? {}), brief: i }, '');
+    if (push) history.pushState({ ...(history.state ?? {}), brief: i, quick: false }, '');
     if (focus) {
       scrollToStep();
       steps[i].querySelector<HTMLElement>('.step__title')?.focus({ preventScroll: true });
@@ -314,10 +382,10 @@ export function init(): void {
   let lastWheel = -1e9;
   addEventListener('wheel', () => (lastWheel = performance.now()), { passive: true });
   let unhold: (() => void) | null = null;
-  function scrollToStep(): void {
+  function scrollToStep(to: HTMLElement = top): void {
     unhold?.();
     const pad = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
-    const target = Math.max(0, Math.round(top.getBoundingClientRect().top + scrollY - pad));
+    const target = Math.max(0, Math.round(to.getBoundingClientRect().top + scrollY - pad));
     const jump = () => {
       if (Math.abs(scrollY - target) > 2) window.scrollTo({ top: target, behavior: 'instant' });
     };
@@ -356,7 +424,9 @@ export function init(): void {
     const v = chip.dataset.value ?? '';
     const cur = st.a[g];
     let next: string[];
-    if (SINGLE.has(g)) next = [v]; // radio: tapping the chosen card again confirms it (and moves on)
+    // Radio. On a whole-step question, tapping the chosen card again confirms it (and moves on); on an
+    // optional row ("Who will use it?") it un-ticks it.
+    if (SINGLE.has(g)) next = cur.includes(v) && !AUTO.has(g) ? [] : [v];
     else if (cur.includes(v)) next = cur.filter((x) => x !== v);
     else if (exclusive(g, v)) next = [v];
     else next = [...cur.filter((x) => !exclusive(g, x)), v];
@@ -367,7 +437,7 @@ export function init(): void {
     paintNav();
     save();
     window.clearTimeout(autoT);
-    if (SINGLE.has(g) && next.length && pointer) autoT = window.setTimeout(() => show(st.step + 1), AUTO_ADVANCE);
+    if (AUTO.has(g) && next.length && pointer) autoT = window.setTimeout(() => show(st.step + 1), AUTO_ADVANCE);
   }
 
   /* ------------------------------- tray sheet (below 1024) ------------------------------- */
@@ -426,21 +496,27 @@ export function init(): void {
         el.append(tag);
       }
     }
-    for (const el of contactEls) el.value = st.c[el.dataset.contact as ContactKey];
-    void turnstile.mount(tsSlot);
+    for (const el of review.contacts) el.value = st.c[el.dataset.contact as ContactKey];
+    void turnstile.mount(review.ts);
     refreshLinks();
   }
 
-  /** Fallback links carry the brief: email app, WhatsApp, and the booking page with notes prefilled. */
-  function hrefs(): Record<'email' | 'whatsapp' | 'booking', string> {
+  /**
+   * Fallback links carry the brief (or the quick message): email app, WhatsApp, and the booking page with
+   * notes prefilled.
+   */
+  function hrefs(mode: Mode = 'brief'): Record<'email' | 'whatsapp' | 'booking', string> {
     const name = st.c.name.trim();
     const email = st.c.email.trim();
-    const brief = (st.step === REVIEW && st.summary.trim() ? st.summary : summarize(d, st.a, has())).trim();
+    const brief = (
+      mode === 'quick' ? st.q.message : st.step === REVIEW && st.summary.trim() ? st.summary : summarize(d, st.a, has())
+    ).trim();
     const sign = name && email ? fill(d.fb.signoff, { name, email }) : name || email;
     const extra = files.sketch || files.photo ? d.fb.attachments : '';
     const body = [clip(brief, 1400), sign, extra].filter(Boolean).join('\n\n').replace(/\n/g, '\r\n');
     const subject = name ? fill(d.fb.subject, { name }) : d.fb.subjectNoName;
-    const wa = [d.fb.whatsappIntro, clip(brief, 1300), sign].filter(Boolean).join('\n\n');
+    const intro = mode === 'quick' ? d.quick.whatsappIntro : d.fb.whatsappIntro;
+    const wa = [intro, clip(brief, 1300), sign].filter(Boolean).join('\n\n');
     const cal = new URLSearchParams();
     if (name) cal.set('name', name);
     if (EMAIL_RE.test(email)) cal.set('email', email);
@@ -452,115 +528,177 @@ export function init(): void {
     };
   }
   function refreshLinks(): void {
-    const h = hrefs();
+    const h = { brief: hrefs('brief'), quick: hrefs('quick') };
     for (const a of root.querySelectorAll<HTMLAnchorElement>('a[data-fallback]')) {
-      const k = a.dataset.fallback as keyof typeof h;
-      if (h[k]) a.href = h[k];
+      const set = a.closest('[data-quick]') ? h.quick : h.brief;
+      const k = a.dataset.fallback as keyof typeof set;
+      if (set[k]) a.href = set[k];
     }
   }
 
-  function inputFor(key: string): HTMLElement {
-    return key === 'summary' ? summaryEl : contactEls.find((e) => e.dataset.contact === key)!;
-  }
   function problem(key: string): string {
     if (key === 'summary') return st.summary.trim() ? '' : t.errors.summary;
+    if (key === 'message') return st.q.message.trim() ? '' : t.errors.message;
     if (key === 'name') return st.c.name.trim() ? '' : t.errors.name;
     const email = st.c.email.trim();
     return !email ? t.errors.email : EMAIL_RE.test(email) ? '' : t.errors.emailInvalid;
   }
-  function mark(key: string, msg: string): void {
-    const p = root.querySelector<HTMLElement>(`[data-error-for="${key}"]`);
-    if (p) p.textContent = msg;
-    const el = inputFor(key);
+  function mark(p: Panel, key: string, msg: string): void {
+    const err = p.el.querySelector<HTMLElement>(`[data-error-for="${key}"]`);
+    if (err) err.textContent = msg;
+    const el = p.input(key);
     if (msg) el.setAttribute('aria-invalid', 'true');
     else el.removeAttribute('aria-invalid');
   }
-  function validate(): HTMLElement | null {
+  function validate(p: Panel): HTMLElement | null {
     let first: HTMLElement | null = null;
-    for (const key of ['summary', 'name', 'email']) {
+    for (const key of p.keys) {
       const msg = problem(key);
-      mark(key, msg);
-      if (msg && !first) first = inputFor(key);
+      mark(p, key, msg);
+      if (msg && !first) first = p.input(key);
     }
     return first;
+  }
+
+  /* ------------------------------- quick message ("Just email me instead") ------------------------------- */
+
+  function openQuick(opts: { push?: boolean } = {}): void {
+    const { push = true } = opts;
+    if (finished) return;
+    window.clearTimeout(autoT);
+    toggleTray(false);
+    // Until the visitor types in it, the message follows the picks.
+    if (!st.q.edited || !st.q.message.trim()) {
+      const pre = quickPrefill(d, st.a);
+      st.q.message = pre ? `${pre}\n\n` : '';
+      st.q.edited = false;
+    }
+    messageEl.value = st.q.message;
+    for (const el of quick.contacts) el.value = st.c[el.dataset.contact as ContactKey];
+    const was = quickOpen;
+    quickOpen = true;
+    form.hidden = true;
+    quickEl.hidden = false;
+    root.classList.add('is-quick');
+    save();
+    void turnstile.mount(quick.ts);
+    refreshLinks();
+    if (push) {
+      history.pushState({ ...(history.state ?? {}), brief: st.step, quick: true }, '', '#message');
+      quickPushed = true;
+    }
+    if (was) return;
+    scrollToStep(quickEl);
+    quickTitle.focus({ preventScroll: true });
+    track('brief_quick_open', { step: st.step + 1 });
+  }
+
+  /** Back to the step the panel was opened from, answers untouched. */
+  function closeQuick(): void {
+    if (!quickOpen) return;
+    quickOpen = false;
+    quickEl.hidden = true;
+    form.hidden = false;
+    root.classList.remove('is-quick');
+    current = -1; // repaint, scroll to and focus the step again
+    show(st.step, { push: false });
+  }
+
+  function leaveQuick(): void {
+    if (quickPushed && (history.state as { quick?: unknown } | null)?.quick) return history.back(); // popstate closes it
+    // Opened from a #message link (no step entry behind it): drop the hash in place.
+    history.replaceState({ ...(history.state ?? {}), brief: st.step, quick: false }, '', location.pathname + location.search);
+    closeQuick();
   }
 
   /* ------------------------------- send ------------------------------- */
 
   let sending = false;
-  function busy(label: string | null): void {
-    submitLabel.textContent = label ?? t.send;
-    if (label) submitBtn.setAttribute('aria-busy', 'true');
-    else submitBtn.removeAttribute('aria-busy');
-    sendStatus.textContent = label ?? '';
+  function busy(p: Panel, label: string | null): void {
+    p.label.textContent = label ?? p.sendText;
+    if (label) p.btn.setAttribute('aria-busy', 'true');
+    else p.btn.removeAttribute('aria-busy');
+    p.status.textContent = label ?? '';
   }
 
-  function fail(error: Fail): void {
-    errorReason.textContent = t.reasons[error] ?? t.reasons.network;
+  function fail(p: Panel, error: Fail): void {
+    p.reason.textContent = t.reasons[error] ?? t.reasons.network;
     refreshLinks();
-    errorPanel.hidden = false;
-    errorPanel.focus({ preventScroll: true });
-    errorPanel.scrollIntoView({ block: 'nearest', behavior: reduce.matches ? 'auto' : 'smooth' });
-    track('brief_error', { error });
+    p.error.hidden = false;
+    p.error.focus({ preventScroll: true });
+    p.error.scrollIntoView({ block: 'nearest', behavior: reduce.matches ? 'auto' : 'smooth' });
+    track('brief_error', { error, mode: p.mode });
   }
 
   function payload(): Record<string, string | string[]> {
     return {
       building: labels(d, st.a, 'building'),
+      users: labels(d, st.a, 'users')[0] ?? '',
       stage: labels(d, st.a, 'stage')[0] ?? '',
       features: labels(d, st.a, 'features'),
-      kind: labels(d, st.a, 'kind'),
+      platforms: labels(d, st.a, 'platforms'),
+      kind: [], // the v1 "It's a kind of…" row is gone; the key stays for the contract
       timing: labels(d, st.a, 'timing')[0] ?? '',
       notes: st.a.notes.trim().slice(0, 2000),
       link: st.a.link.trim().slice(0, 300),
+      tech: techLines(d, st.a),
     };
   }
 
-  async function submit(): Promise<void> {
+  async function submit(p: Panel): Promise<void> {
     if (sending) return;
-    const bad = validate();
+    const bad = validate(p);
     if (bad) {
-      sendStatus.textContent = t.errors.fix;
+      p.status.textContent = t.errors.fix;
       bad.focus();
       return;
     }
     sending = true;
-    errorPanel.hidden = true;
-    busy(t.verifying);
+    p.error.hidden = true;
+    busy(p, t.verifying);
     let token: string;
     try {
       token = await turnstile.getToken(45_000);
     } catch {
       sending = false;
-      busy(null);
-      fail('turnstile_load');
+      busy(p, null);
+      fail(p, 'turnstile_load');
       return;
     }
-    busy(t.sending);
+    busy(p, t.sending);
+    const isQuick = p.mode === 'quick';
     const body = new FormData();
-    body.append('answers', JSON.stringify(payload()));
-    body.append('summary', st.summary.trim().slice(0, 4000));
+    if (isQuick) body.append('mode', 'quick');
+    // A quick message sends whatever was picked so far, or {} when nothing was.
+    const answers = !isQuick || anyPicked(st.a) || st.a.notes.trim() || st.a.link.trim() ? payload() : {};
+    body.append('answers', JSON.stringify(answers));
+    body.append('summary', (isQuick ? st.q.message : st.summary).trim().slice(0, 4000));
     for (const k of CONTACT) body.append(k, st.c[k].trim());
     if (files.sketch) body.append('sketch', files.sketch.blob, 'sketch.png');
     if (files.photo) body.append('photo', files.photo.blob, 'photo.jpg');
     body.append('cf-turnstile-response', token);
-    body.append('website', honeypot.value);
+    body.append('website', p.honeypot.value);
     const res = await send(body);
     sending = false;
-    busy(null);
-    turnstile.reset(tsSlot); // tokens are single-use, success or not
-    if (res.ok) succeed();
-    else fail(res.error);
+    busy(p, null);
+    turnstile.reset(p.ts); // tokens are single-use, success or not
+    if (res.ok) succeed(p.mode);
+    else fail(p, res.error);
   }
 
-  function succeed(): void {
+  function succeed(mode: Mode): void {
     finished = true;
-    track('brief_submit', { method: 'form' });
-    const h = hrefs();
-    q('[data-done-sent]').textContent = st.summary.trim();
+    track('brief_submit', { method: mode === 'quick' ? 'quick' : 'form' });
+    const h = hrefs(mode);
+    doneBody.textContent = mode === 'quick' ? d.quick.body : doneBodyBrief;
+    q('[data-done-sent]').textContent = (mode === 'quick' ? st.q.message : st.summary).trim();
     q<HTMLAnchorElement>('[data-done-book]').href = h.booking;
     form.hidden = true;
+    quickEl.hidden = true;
+    quickOpen = false;
+    root.classList.remove('is-quick');
     done.hidden = false;
+    if (location.hash) history.replaceState(history.state, '', location.pathname + location.search);
     ss.del(KEY);
     done.scrollIntoView({ block: 'start', behavior: reduce.matches ? 'auto' : 'smooth' });
     q('#brief-done-title').focus({ preventScroll: true });
@@ -572,11 +710,14 @@ export function init(): void {
     delete files.sketch;
     delete files.photo;
     for (const k of ['sketch', 'photo'] as Kind[]) clearThumb(k);
-    notes.value = link.value = '';
-    for (const el of contactEls) el.value = '';
-    for (const k of ['summary', 'name', 'email']) mark(k, '');
-    errorPanel.hidden = true;
+    notes.value = link.value = messageEl.value = '';
+    for (const p of [review, quick]) {
+      for (const el of p.contacts) el.value = '';
+      for (const k of p.keys) mark(p, k, '');
+      p.error.hidden = true;
+    }
     done.hidden = true;
+    doneBody.textContent = doneBodyBrief;
     form.hidden = false;
     shownRows = {};
     paintChips();
@@ -679,6 +820,11 @@ export function init(): void {
     if (chip) return pick(chip, (e as MouseEvent).detail > 0);
     const fb = el.closest<HTMLAnchorElement>('a[data-fallback]');
     if (fb) return refreshLinks(); // the click's navigation uses the fresh href
+    if (el.closest('[data-quick-open]')) {
+      e.preventDefault(); // #message is only the URL; the panel is opened (and the history entry pushed) here
+      return openQuick();
+    }
+    if (el.closest('[data-quick-back]')) return leaveQuick();
     const goto = el.closest<HTMLElement>('[data-goto]');
     if (goto) return show(Number(goto.dataset.goto));
     if (el.closest('[data-back]')) return show(st.step - 1);
@@ -693,14 +839,15 @@ export function init(): void {
       st.edited = false;
       summaryEl.value = st.summary;
       regen.hidden = true;
-      mark('summary', '');
+      mark(review, 'summary', '');
       save();
       summaryEl.focus();
       return;
     }
     if (el.closest('[data-retry]')) {
-      turnstile.reset(tsSlot);
-      return void submit();
+      const p = el.closest('[data-quick]') ? quick : review;
+      turnstile.reset(p.ts);
+      return void submit(p);
     }
     if (el.closest('[data-sketch-open]')) return void openSketch();
     if (el.closest('[data-photo-pick]')) return photoInput.click();
@@ -712,7 +859,11 @@ export function init(): void {
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     if (st.step < REVIEW) show(st.step + 1); // Enter in the link field = Next
-    else void submit();
+    else void submit(review);
+  });
+  quickForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    void submit(quick);
   });
 
   notes.value = st.a.notes;
@@ -729,24 +880,46 @@ export function init(): void {
     st.summary = summaryEl.value;
     st.edited = true;
     regen.hidden = false;
-    if (summaryEl.hasAttribute('aria-invalid')) mark('summary', problem('summary'));
+    if (summaryEl.hasAttribute('aria-invalid')) mark(review, 'summary', problem('summary'));
     save(true);
   });
-  for (const el of contactEls) {
-    const k = el.dataset.contact as ContactKey;
-    el.addEventListener('input', () => {
-      st.c[k] = el.value;
-      if (el.hasAttribute('aria-invalid')) mark(k, problem(k));
-      save(true);
-    });
-    el.addEventListener('blur', () => {
-      if ((k === 'email' || k === 'name') && el.value.trim()) mark(k, problem(k));
-    });
+  messageEl.addEventListener('input', () => {
+    st.q.message = messageEl.value;
+    st.q.edited = true;
+    if (messageEl.hasAttribute('aria-invalid')) mark(quick, 'message', problem('message'));
+    save(true);
+  });
+  // Name and email are shared by both forms (one draft); each form marks its own fields.
+  for (const p of [review, quick]) {
+    for (const el of p.contacts) {
+      const k = el.dataset.contact as ContactKey;
+      el.addEventListener('input', () => {
+        st.c[k] = el.value;
+        if (el.hasAttribute('aria-invalid')) mark(p, k, problem(k));
+        save(true);
+      });
+      el.addEventListener('blur', () => {
+        if ((k === 'email' || k === 'name') && el.value.trim()) mark(p, k, problem(k));
+      });
+    }
   }
 
   addEventListener('popstate', (e) => {
-    const s = (e.state as { brief?: unknown } | null)?.brief;
-    if (!finished && typeof s === 'number') show(s, { push: false });
+    if (finished) return;
+    const s = (e.state ?? {}) as { brief?: unknown; quick?: unknown };
+    if (s.quick) return openQuick({ push: false });
+    if (quickOpen) {
+      quickPushed = false;
+      if (typeof s.brief === 'number') st.step = Math.min(REVIEW, Math.max(0, s.brief));
+      return closeQuick();
+    }
+    if (typeof s.brief === 'number') show(s.brief, { push: false });
+  });
+  // Someone typed or followed a #message link while on the page.
+  addEventListener('hashchange', () => {
+    if (finished || quickOpen || location.hash !== '#message') return;
+    history.replaceState({ ...(history.state ?? {}), brief: st.step, quick: true }, '');
+    openQuick({ push: false });
   });
   addEventListener('pagehide', () => save());
 
@@ -761,5 +934,9 @@ export function init(): void {
   // Rows already filled at load are not "new": no tick animation on restore.
   for (const row of trayRows.values()) row.classList.remove('is-new');
   show(st.step, { push: false, focus: false });
+  if (location.hash === '#message') {
+    history.replaceState({ ...(history.state ?? {}), brief: st.step, quick: true }, '');
+    openQuick({ push: false });
+  }
   root.classList.add('is-ready');
 }

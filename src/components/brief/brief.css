@@ -21,7 +21,7 @@
    pin the view to whatever was under the pointer (the dock, the footer). builder.ts scrolls explicitly. */
 html:has(.brief) { overflow-anchor: none; }
 
-/* ---------------- top: progress + escape link ---------------- */
+/* ---------------- top: progress + "Just email me instead" (opens the quick message) ---------------- */
 .brief__top {
   display: flex;
   flex-wrap: wrap;
@@ -81,9 +81,11 @@ html:has(.brief) { overflow-anchor: none; }
 .chips--cards { grid-template-columns: repeat(auto-fill, minmax(min(100%, 14.5rem), 1fr)); }
 .chips--single { grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: 18px 16px; padding-inline: 4px; }
 .chips--pills { display: flex; flex-wrap: wrap; gap: 8px; }
+/* pick-one pills get a pen circle when chosen: room for it */
+.chips--pills-single { gap: 14px 16px; padding: 4px; }
 
+/* the small extra rows under a step's cards ("Who will use it?", "Where should it work?") */
 .sub { margin-block-start: var(--s6); }
-.sub:first-of-type { margin-block-start: 0; }
 .sub__title {
   margin-block-end: var(--s3);
   font-family: var(--font-display);
@@ -91,6 +93,7 @@ html:has(.brief) { overflow-anchor: none; }
   line-height: var(--lh-title);
   color: var(--ink);
 }
+.sub__note { margin-inline-start: 6px; font-family: var(--font-hand); font-size: var(--fs-hand-s); color: var(--ballpoint); }
 .group { margin-block-start: var(--s5); }
 .group__title {
   margin-block-end: var(--s2);
@@ -101,7 +104,6 @@ html:has(.brief) { overflow-anchor: none; }
   text-transform: uppercase;
   color: var(--ink-soft);
 }
-.sub > .group:first-of-type { margin-block-start: 0; }
 
 /* ---------------- fields (step 5 + review) ---------------- */
 .brief .field { display: flex; flex-direction: column; gap: 6px; }

@@ -1,8 +1,11 @@
 /**
  * POST /api/brief (multipart/form-data), the contract shared with the Worker (worker/**):
+ *   mode      optional: "quick" = the "Just write to me" message; absent (or "brief") = the full brief
  *   answers   JSON { building: string[], stage: string, features: string[], kind: string[], timing: string,
- *             notes: string, link: string } — values are the visible option labels
- *   summary   the (edited) plain-language brief, ≤ 4000 chars
+ *             notes: string, link: string } — values are the visible option labels. Optional since v2:
+ *             users: string, platforms: string[], tech: string[] (the "Tech translation" lines, printed only
+ *             in the owner's email). kind is always [] since v2. Quick messages send "{}" when nothing is picked.
+ *   summary   the (edited) plain-language brief, or the quick message, ≤ 4000 chars
  *   name, email (required) · company, whatsapp (optional)
  *   sketch    optional PNG (≤ 1.5 MB) · photo  optional JPEG (≤ 2 MB, downscaled client-side)
  *   cf-turnstile-response · website (honeypot, empty)

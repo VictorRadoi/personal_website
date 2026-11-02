@@ -1,19 +1,27 @@
 ---
 /**
- * /start/ — "Start a project": the tap-first brief builder (owner spec 2026-10-08). Indexable, in the
- * sitemap (Astro sitemap picks it up). Copy: src/content/brief.yaml. Without JS the builder is hidden and
- * the page offers the direct contact buttons instead (no broken form).
+ * /start/ — "Start a project": the tap-first brief builder (owner spec 2026-10-08, v2 the same day).
+ * Indexable, in the sitemap (Astro sitemap picks it up). Copy: src/content/brief.yaml. Without JS the
+ * builder is hidden and the page offers the direct contact buttons instead (no broken form).
  * Share image: the home card (no page-specific OG image is rendered for this page).
+ *
+ * Feature switch: this is a rest route only so the page can be switched off. getStaticPaths returns the one
+ * path /start/ (rest param undefined) while FEATURES.briefBuilder is true (src/features.ts), and nothing
+ * when it is false: then no dist/start/ is built, the sitemap skips it and Cloudflare serves the 404 page.
  */
-import Base from '../layouts/Base.astro';
-import Section from '../components/layout/Section.astro';
-import Eyebrow from '../components/layout/Eyebrow.astro';
-import Heading from '../components/layout/Heading.astro';
-import CtaGroup from '../components/controls/CtaGroup.astro';
-import BriefBuilder from '../components/brief/BriefBuilder.astro';
-import { getBrief } from '../lib/content';
-import { pageJsonLd } from '../lib/seo';
-import { DEFAULT_OG_IMAGE } from '../config';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import Section from '../../components/layout/Section.astro';
+import Eyebrow from '../../components/layout/Eyebrow.astro';
+import Heading from '../../components/layout/Heading.astro';
+import CtaGroup from '../../components/controls/CtaGroup.astro';
+import BriefBuilder from '../../components/brief/BriefBuilder.astro';
+import { getBrief } from '../../lib/content';
+import { pageJsonLd } from '../../lib/seo';
+import { DEFAULT_OG_IMAGE } from '../../config';
+import { FEATURES } from '../../features';
+
+export const getStaticPaths = (() => (FEATURES.briefBuilder ? [{ params: { index: undefined } }] : [])) satisfies GetStaticPaths;
 
 const brief = await getBrief();
 const p = brief.page;
