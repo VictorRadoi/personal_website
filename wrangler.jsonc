@@ -1,15 +1,28 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "victor-radoi-portfolio",
+  "main": "worker/index.ts",
   "compatibility_date": "2026-10-07",
-  // Asset-only Worker: no "main" script needed.
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     // Serve dist/404.html (with a 404 status) for unknown paths.
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    // The Worker only runs for the API; everything else is served straight from assets.
+    "run_worker_first": ["/api/*"]
   },
+  // Brief builder: emails go only to the verified owner address.
+  "send_email": [{ "name": "BRIEF_MAIL", "destination_address": "andreiradoi14@gmail.com" }],
+  "ratelimits": [
+    { "name": "BRIEF_LIMITER", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } }
+  ],
+  // Secret (not in this file): TURNSTILE_SECRET. Public site key: 0x4AAAAAAFRXSoXlNlwqquTv
   "observability": { "enabled": true },
   // Custom domains (Workers Custom Domains). Cloudflare manages their DNS records and certificates.
+  // Custom domains turn workers.dev off by default; keep it off (no duplicate of production) but
+  // keep preview URLs on, so PRs and shareable demos (versions upload --preview-alias) work.
+  "workers_dev": false,
+  "preview_urls": true,
   "routes": [
     { "pattern": "rvandrei.com", "custom_domain": true },
     { "pattern": "www.rvandrei.com", "custom_domain": true }

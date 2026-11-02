@@ -1,0 +1,285 @@
+# Brief builder copy (/start/, the home contact teaser and the "Start a project" links).
+# One entry, id "en". Templates use {placeholders}: {n}, {total}, {list}, {name}, {email}, {link}, {label}, {tech}.
+# Owner rules (brief-builder spec v1 + v2): plain first person, business words only on screen (no "API",
+# "backend", "push notifications", "SaaS", "MVP", "admin panel", "integrations", "offline mode"…), no prices /
+# sizes / weeks, no third-party brand comparisons ("like X"), no exclamation marks. Visitors are often business
+# owners: every card says what people can DO, not what gets built.
+# Option ids are stable (sessionStorage, ?b= links); what the Worker receives in `answers` is each picked
+# option's visible label.
+# phrase   = how a pick reads inside a list sentence ("I'd like to build {list}.") and in the quick message
+#            prefill ("So far I picked: {list}."). Without one, the prefill uses the label, first letter lowercased.
+# sentence = a whole sentence for the summary (wins over phrase there); omitted = only the phrase is used.
+# phraseIn = which feature sentence a phrase joins: people (default) · me · it (see summary.features*).
+# tech     = the technical name for the pick. Never shown on screen: it goes to Andrei only, in the email's
+#            "Tech translation" section (sent as answers.tech).
+en:
+  seo:
+    title: "Start a project · Victor-Andrei Rădoi"
+    description: "Tell me about your idea in six quick questions, mostly by tapping. You see it in plain words before anything is sent, and I reply within a day."
+
+  page:
+    margin: "start here"
+    eyebrow: "Project brief"
+    h1: "Tell me about your project."
+    lead: "Six quick questions, mostly tapping. Skip anything you're unsure about. At the end you'll see your brief in plain words and can change it before it reaches me. I read every one myself."
+    escape: "Just email me instead"
+    nojsTitle: "This page needs JavaScript."
+    nojsBody: "The tap-through brief runs in your browser, so it needs JavaScript. You can still reach me directly, and I reply within a day."
+
+  progress: "Step {n} of {total}"
+  nav:
+    back: "Back"
+    next: "Next"
+    skip: "Skip"
+    review: "See my brief"
+  unsure: "Not sure yet"
+
+  steps:
+    building:
+      title: "What do you want to build?"
+      hint: "Pick as many as fit."
+      tray: "what"
+      options:
+        - { id: customers, label: "An app for my customers", note: "for the people who buy from you", phrase: "an app for my customers", tech: "customer-facing app (B2C)" }
+        - { id: team, label: "A tool for my team", note: "to replace spreadsheets, paper or busywork", phrase: "a tool for my team", tech: "internal tool / back-office app" }
+        - { id: platform, label: "A platform that connects people", note: "buyers and sellers, clients and pros", phrase: "a platform that connects people, such as buyers and sellers", tech: "two-sided marketplace" }
+        - { id: website, label: "A website that brings in clients", note: "so people find you and get in touch", phrase: "a website that brings in clients", tech: "marketing website / lead generation (SEO, contact forms)" }
+        - { id: improve, label: "Improve something I already have", note: "it works, but it could be better", sentence: "I already have something and I'd like to make it better.", tech: "existing product: fixes, new features or a rebuild" }
+        - { id: unsure, label: "Not sure yet, help me figure it out", note: "we'll work it out together", sentence: "I'm not sure yet what I need, so I'd like help figuring it out.", tech: "needs discovery / scoping", unsure: true }
+      usersTitle: "Who will use it?"
+      usersNote: "optional"
+      usersTray: "for"
+      users:
+        - { id: customers, label: "My customers", phrase: "for my customers", sentence: "It's for my customers.", tech: "end users: customers (B2C)" }
+        - { id: staff, label: "My staff", phrase: "for my staff", sentence: "It's for my staff.", tech: "end users: staff (internal / B2B)" }
+        - { id: both, label: "Both", phrase: "for my customers and my staff", sentence: "It's for both my customers and my staff.", tech: "two audiences: customer app + staff tools" }
+        - { id: unsure, label: "Not sure yet", unsure: true }
+
+    stage:
+      title: "Where are you now?"
+      hint: "Pick one."
+      tray: "now"
+      options:
+        - { id: idea, label: "Just an idea", phrase: "just an idea", sentence: "Right now it's just an idea.", tech: "idea stage: discovery + first version (MVP)" }
+        - { id: designs, label: "I have sketches or designs", phrase: "I have sketches or designs", sentence: "I already have sketches or designs.", tech: "designs ready: UI/UX → build" }
+        - { id: needswork, label: "I have something, but it needs work", phrase: "I have something, but it needs work", sentence: "I have something already, but it needs work.", tech: "existing prototype / no-code / codebase to fix or rebuild" }
+        - { id: live, label: "It's live and I need help growing it", phrase: "it's live and I need help growing it", sentence: "It's live, and I need help growing it.", tech: "live product: growth, scaling, new features" }
+        - { id: team, label: "I need an extra developer on my team", phrase: "I need an extra developer on my team", sentence: "I need an extra developer on my team.", tech: "team augmentation (contract developer)" }
+        - { id: unsure, label: "Not sure yet", unsure: true }
+
+    features:
+      title: "What should people be able to do?"
+      hint: "Tap what you already know you'll need. Skip the rest, we can work it out together."
+      tray: "needs"
+      groups:
+        - id: start
+          label: "Sign up, pay and book"
+          options:
+            - { id: signin, label: "Create an account and sign in", note: "so their details and history are saved", icon: f-key, phrase: "create an account and sign in", tech: "user accounts / authentication" }
+            - { id: pay, label: "Pay or subscribe", note: "one-off payments or a monthly plan", icon: f-card, phrase: "pay or subscribe", tech: "payments & subscriptions (in-app purchases where required)" }
+            - { id: book, label: "Book appointments or reserve a spot", note: "pick a time that's still free", icon: calendar, phrase: "book appointments or reserve a spot", tech: "booking / scheduling (availability, calendar)" }
+        - id: touch
+          label: "Stay in touch"
+          options:
+            - { id: remind, label: "Get reminders and alerts on their phone", note: "even when the app is closed", icon: f-bell, phrase: "get reminders and alerts on their phone", tech: "push notifications" }
+            - { id: message, label: "Message you or each other", note: "a conversation inside the app", icon: f-chat, phrase: "message us or each other", tech: "in-app chat / real-time messaging" }
+        - id: go
+          label: "On the go"
+          options:
+            - { id: map, label: "See things on a map or track a delivery", note: "places, distance, where things are", icon: f-pin, phrase: "see things on a map or track a delivery", tech: "maps & geolocation / live tracking" }
+            - { id: upload, label: "Upload photos or documents", note: "from their camera or their files", icon: f-camera, phrase: "upload photos or documents", tech: "camera & file uploads / cloud storage" }
+            - { id: offline, label: "Keep working without internet", note: "and catch up once they're back online", icon: f-offline, phrase: "keep working without internet", tech: "offline mode / local sync" }
+        - id: run
+          label: "Running the business"
+          options:
+            - { id: dashboard, label: "You manage everything from one dashboard", note: "people, orders and content in one place", icon: f-sliders, phrase: "manage everything from one dashboard", phraseIn: me, tech: "admin panel / back office" }
+            - { id: reports, label: "See reports on sales and usage", note: "the numbers that matter, at a glance", icon: f-chart, phrase: "see reports on sales and usage", phraseIn: me, tech: "analytics & reporting dashboards" }
+            - { id: connect, label: "Connect to tools you already use", note: "your calendar, accounting or CRM", icon: f-plug, phrase: "connect to the tools I already use", phraseIn: it, tech: "third-party integrations / APIs (calendar, accounting, CRM)" }
+            - { id: roles, label: "Different access for staff and customers", note: "everyone sees only what they need", icon: f-users, phrase: "give staff and customers different access", phraseIn: it, tech: "roles & permissions" }
+        - id: extra
+          label: "Extras"
+          options:
+            - { id: ai, label: "Get smart suggestions (AI)", note: "answers, summaries, recommendations", icon: f-chip, phrase: "get smart suggestions (AI)", tech: "AI / LLM features" }
+            - { id: languages, label: "Several languages", note: "for customers in other countries", icon: globe, phrase: "work in several languages", phraseIn: it, tech: "localisation (i18n)" }
+      platformsTitle: "Where should it work?"
+      platformsTray: "works on"
+      platforms:
+        - { id: iphone, label: "iPhone", phrase: "iPhone", tech: "iOS app" }
+        - { id: android, label: "Android", phrase: "Android", tech: "Android app" }
+        - { id: browser, label: "In the browser", phrase: "the web", tech: "web app" }
+        - { id: advise, label: "You advise me", sentence: "I'd like your advice on where it should work.", tech: "platform open: native, cross-platform or web", unsure: true }
+
+    timing:
+      title: "When do you need it?"
+      hint: "Pick one. A rough guess is fine."
+      tray: "when"
+      options:
+        - { id: asap, label: "As soon as possible", sentence: "I'd like to get going as soon as possible." }
+        - { id: m1, label: "In 1–3 months", sentence: "I'd like it ready in the next 1–3 months." }
+        - { id: m3, label: "In 3–6 months", sentence: "I'd like it ready in 3–6 months." }
+        - { id: norush, label: "No rush", sentence: "There's no rush." }
+        - { id: unsure, label: "Not sure yet", unsure: true }
+
+    notes:
+      title: "Anything else I should know?"
+      hint: "Optional. A few lines is plenty."
+      tray: "notes"
+      notesLabel: "In your own words"
+      notesPlaceholder: "Who it's for, what the first version has to do, what already exists. Whatever's on your mind."
+      linkLabel: "A link, if you have one"
+      linkHint: "Your website, a design or a document."
+      linkPlaceholder: "https://"
+      extrasTitle: "Easier to show than tell?"
+      extrasNote: "both optional"
+      sketchAdd: "Add a napkin sketch"
+      sketchEdit: "Edit sketch"
+      photoAdd: "Upload a photo of your sketch"
+      photoReplace: "Use a different photo"
+      remove: "Remove"
+      removeSketch: "Remove sketch"
+      removePhoto: "Remove photo"
+      sketchAlt: "Your napkin sketch"
+      photoAlt: "Your photo"
+      photoBusy: "Shrinking the photo…"
+      photoError: "Couldn't read that image. Try a JPEG or PNG photo."
+      attachedSketch: "napkin sketch"
+      attachedPhoto: "photo"
+      trayAttached: "attached"
+
+  review:
+    title: "Here's your brief."
+    hint: "This is what I'll read. Change anything that's off."
+    summaryLabel: "Your brief, in plain words"
+    summaryNote: "edit freely"
+    regenerate: "Rewrite it from my answers"
+    picksTitle: "What you picked"
+    change: "Change"
+    changeA11y: "Change: {step}"
+    nothing: "Skipped"
+    contactTitle: "Where should I reply?"
+    name: "Your name"
+    email: "Email"
+    company: "Company"
+    whatsapp: "WhatsApp number"
+    optional: "(optional)"
+    honeypot: "Leave this field empty"
+    consent: "I'll only use this to reply to you. Nothing is stored on the site."
+    privacyLink: "How your details are handled"
+    turnstileNote: "A quick spam check by Cloudflare runs on this step."
+    send: "Send brief"
+    sending: "Sending…"
+    verifying: "Checking you're not a bot…"
+    or: "or"
+    whatsappIt: "WhatsApp it"
+    bookCall: "book a call"
+    errors:
+      name: "Add your name so I know who I'm writing to."
+      email: "Add your email so I can reply."
+      emailInvalid: "That email address doesn't look right. Check it for typos."
+      summary: "Add a line or two about your project."
+      fix: "Check the highlighted fields."
+
+  # "Just email me instead": the in-page quick message (same POST /api/brief, mode=quick).
+  quick:
+    title: "Just write to me."
+    lead: "No more questions. Tell me what's on your mind in your own words and it lands straight in my inbox. I reply within a day."
+    message: "Your message"
+    messagePlaceholder: "What you'd like to build or fix, and anything else I should know."
+    prefill: "So far I picked: {list}."
+    turnstileNote: "A quick spam check by Cloudflare runs when you send."
+    send: "Send message"
+    errorNext: "Your message is still here. Try again, or reach me another way below."
+    otherTitle: "Or reach me another way"
+    whatsapp: "WhatsApp"
+    book: "Book a 30-min call"
+    whatsappIntro: "Hi Andrei,"
+    back: "Back to the questions"
+    errors:
+      message: "Write a few words so I know what it's about."
+
+  summary:
+    build: "I'd like to build {list}."
+    features: "People should be able to {list}."
+    featuresMe: "I'd like to {list}."
+    featuresIt: "It should {list}."
+    featuresUnsure: "I'm not sure yet what it should do, so I'd like your ideas."
+    platforms: "It should work on {list}."
+    link: "Link: {link}"
+    sketch: "I've added a napkin sketch."
+    photo: "I've added a photo of my sketch."
+    both: "I've added a napkin sketch and a photo of my sketch."
+    and: " and "
+    andLast: ", and "
+    empty: "I'd like to talk about a project."
+
+  # Tech translation lines for Andrei's email (never on screen). {build} / {platforms} = picked labels.
+  tech:
+    line: "{label} → {tech}"
+    combo: "{build} + {platforms} → {tech}"
+
+  success:
+    title: "Got it. I'll reply within a day."
+    body: "Your brief is in my inbox. If you'd rather talk it through, grab 30 minutes on my calendar. Your name, email and brief are already filled in there."
+    quickBody: "Your message is in my inbox. If you'd rather talk it through, grab 30 minutes on my calendar. Your name, email and message are already filled in there."
+    book: "Book a 30-min call"
+    home: "Back to the homepage"
+    sentTitle: "What you sent"
+    again: "Start a new brief"
+
+  error:
+    title: "That didn't go through."
+    reasons:
+      invalid: "Something in the form didn't look right to the server."
+      turnstile: "The spam check didn't pass."
+      rate_limited: "Too many messages from this connection in a short time. Wait a minute before trying again."
+      email_failed: "My mail service didn't accept it."
+      network: "I couldn't reach the server. Check your connection."
+      turnstile_load: "The spam check couldn't load. An ad blocker can cause this."
+    next: "Your brief is still here. Try again, or send it another way:"
+    retry: "Try again"
+    email: "Send from my email app"
+    whatsapp: "Send on WhatsApp"
+    booking: "Book a call instead"
+
+  fallback:
+    subject: "Project brief from {name}"
+    subjectNoName: "Project brief"
+    whatsappIntro: "Hi Andrei, here's my project brief:"
+    signoff: "{name} · {email}"
+    attachments: "I also made a sketch or photo. I'll send it when you reply."
+
+  tray:
+    title: "your brief"
+    empty: "nothing picked yet"
+    toggle: "Your brief"
+    count: "{n} picked"
+    countZero: "nothing yet"
+
+  sketch:
+    title: "Napkin sketch"
+    hint: "Boxes and arrows are perfect. Ugly is fine."
+    canvasLabel: "Sketch area. Optional: the text box on the form works just as well."
+    toolsLabel: "Drawing tools"
+    pen: "Pen"
+    eraser: "Eraser"
+    rect: "Box"
+    arrow: "Arrow"
+    text: "Label"
+    framesLabel: "Phone frames"
+    frame1: "1 screen"
+    frame2: "2 screens"
+    frame3: "3 screens"
+    undo: "Undo"
+    clear: "Clear"
+    done: "Done"
+    close: "Close"
+    textLabel: "Label text"
+    textPlaceholder: "type, then Enter"
+
+  teaser:
+    title: "Rather tap than type?"
+    body: "Six quick questions about your idea, mostly tapping. You see it in plain words before anything is sent."
+    chipsLabel: "Start with what you want to build:"
+    cta: "Start a project"
+    note: "about a minute"
+  ctaLink: "Not sure how to put it? Start a project in six taps"

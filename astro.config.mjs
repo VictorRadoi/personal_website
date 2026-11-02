@@ -22,6 +22,8 @@ export default defineConfig({
   security: {
     // Stable CSP: Astro hashes its own scripts/styles and emits a <meta http-equiv> policy.
     // The static (non-hashable) directives are in public/_headers. GA4 hosts are allowed here.
+    // Cloudflare Turnstile (spam check on /start/ only; its script is injected there on the review step)
+    // needs its script host and an iframe from the same host. The brief posts same-origin (connect-src 'self').
     // Consequence: no style="" attributes and no <style define:vars> anywhere (site-spec, top).
     csp: {
       algorithm: 'SHA-256',
@@ -30,11 +32,13 @@ export default defineConfig({
           "'self'",
           'https://www.googletagmanager.com',
           'https://*.google-analytics.com',
+          'https://challenges.cloudflare.com',
         ],
       },
       directives: [
         "default-src 'self'",
         "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
+        "frame-src https://challenges.cloudflare.com",
         "img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com",
         "font-src 'self' data:",
         "object-src 'none'",

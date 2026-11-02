@@ -1,0 +1,100 @@
+---
+/**
+ * "Rather tap than type?" — the brief builder teaser on the home back cover (contact section), under the
+ * Email / WhatsApp / Book buttons (which stay the primary ways in). An index card taped onto the night
+ * cover. The step-1 answers are plain links: /start/?b=<id> opens the builder with that card already
+ * ticked (builder.ts), so the first tap happens here. Zero JS on the home page.
+ */
+import Button from '../controls/Button.astro';
+import Tape from '../paper/Tape.astro';
+import Scribble from '../ink/Scribble.astro';
+import { getBrief } from '../../lib/content';
+import { trackAttrs } from '../../lib/track';
+
+const brief = await getBrief();
+const t = brief.teaser;
+const options = brief.steps.building.options;
+---
+<div class="teaser surface-card" role="group" aria-labelledby="start-teaser-title">
+  <Tape placement="top" seed="start-teaser" />
+  <h3 class="teaser__title" id="start-teaser-title">{t.title}</h3>
+  <p class="teaser__body">{t.body}</p>
+  <p class="teaser__label" id="start-teaser-label">{t.chipsLabel}</p>
+  <ul class="teaser__chips" role="list" aria-labelledby="start-teaser-label">
+    {
+      options.map((o) => (
+        <li>
+          <a
+            class="teaser__chip"
+            href={`/start/?from=contact&b=${o.id}`}
+            data-cursor="link"
+            {...trackAttrs('cta_click', { method: 'brief', location: 'contact_chip' })}
+          >
+            <span class="teaser__box" aria-hidden="true"><Scribble name="box" size="xs" box={[16, 16]} /></span>
+            {o.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <div class="teaser__cta">
+    <Button
+      variant="primary"
+      href="/start/?from=contact"
+      track={trackAttrs('cta_click', { method: 'brief', location: 'contact' })}
+    >{t.cta}<svg class="teaser__arrow" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M3.5 10h13M11.5 5l5 5-5 5" /></svg></Button>
+    <span class="teaser__note">{t.note}</span>
+  </div>
+</div>
+
+<style>
+  .teaser {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+    inline-size: 100%;
+    max-inline-size: 36rem;
+    margin-block: var(--s4) var(--s2);
+    padding: 28px var(--card-pad) var(--card-pad);
+    border-radius: var(--r1);
+    box-shadow: var(--shadow-lift);
+    color: var(--ink);
+  }
+  .teaser__title { font-family: var(--font-display); font-size: var(--fs-title); line-height: var(--lh-title); color: var(--ink); }
+  .teaser__body { font-size: var(--fs-small); color: var(--ink); }
+  .teaser__label { margin-block-start: var(--s2); font-size: var(--fs-meta); font-weight: 600; color: var(--ink-soft); }
+  .teaser__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .teaser__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-block-size: 44px;
+    padding: 6px 12px 6px 10px;
+    border: 1.5px solid var(--ink-faint);
+    border-radius: var(--r1);
+    background: var(--card);
+    color: var(--ink);
+    font-size: var(--fs-small);
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: border-color var(--dur-quick) linear, translate var(--dur-base) var(--ease-settle);
+  }
+  .surface-night .teaser .teaser__chip { color: var(--ink); }
+  @media (hover: hover) {
+    .surface-night .teaser .teaser__chip:hover { color: var(--ink); border-color: var(--ballpoint); translate: 0 -2px; }
+  }
+  .surface-night .teaser .teaser__chip:focus-visible { outline-color: var(--ballpoint); }
+  .teaser__box { flex: none; inline-size: 16px; block-size: 16px; }
+  .teaser__box :global(.scribble) { color: var(--ink); }
+  .teaser__box :global(.scribble .ink) { stroke-width: 1.5px; }
+
+  .teaser__cta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s4); margin-block-start: var(--s3); }
+  .teaser__arrow path { fill: none; stroke: currentColor; stroke-width: 1.75px; stroke-linecap: round; stroke-linejoin: round; }
+  .teaser__note { font-family: var(--font-hand); font-size: var(--fs-hand-s); color: var(--ballpoint); rotate: -2deg; }
+  .teaser :focus-visible { outline-color: var(--ballpoint); }
+  @media (max-width: 599px) {
+    .teaser__cta :global(.btn) { inline-size: 100%; }
+  }
+</style>

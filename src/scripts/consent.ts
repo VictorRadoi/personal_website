@@ -12,7 +12,7 @@ declare global {
   interface Window {
     dataLayer: unknown[];
     gtag?: Gtag;
-    /** Defined by Base.astro's head boot: injects gtag.js once (no-op on localhost / without a GA ID). */
+    /** Defined by Base.astro's head boot: injects gtag.js once (no-op off the production hosts / without a GA ID). */
     loadGtag?: () => void;
   }
 }
