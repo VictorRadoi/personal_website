@@ -4,10 +4,10 @@
 en:
   seo:
     home:
-      title: "Victor-Andrei Rădoi · Mobile & full-stack engineer"
-      description: "I build iOS and Android apps, plus the backends and websites behind them. Co-founder of Teamboard, founding engineer at GoParty. Independent, working with EU and US teams."
+      title: "Freelance Flutter & mobile app developer · Victor-Andrei Rădoi"
+      description: "Freelance Flutter developer building iOS and Android apps plus the backends, admin panels and websites behind them. Co-founder of Teamboard. Working with EU and US teams."
     privacy:
-      title: "Privacy · Victor-Andrei Rădoi"
+      title: "Privacy policy · Victor-Andrei Rădoi"
       description: "What this site collects (only Google Analytics, only if you say yes) and how to change your mind."
     notFound:
       title: "Page not found · Victor-Andrei Rădoi"
@@ -75,7 +75,7 @@ en:
     margin: "hello,"
     eyebrow: "Independent · working with teams in the EU and US"
     h1:
-      kicker: "Mobile & full-stack engineer."
+      kicker: "Freelance Flutter & full-stack engineer."
       main: "I build mobile apps and the systems behind them."
     highlight: "the systems behind them"
     note: "apis, databases, admin panels. websites too"
