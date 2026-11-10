@@ -4,8 +4,8 @@
 en:
   seo:
     home:
-      title: "Freelance Flutter & mobile app developer · Victor-Andrei Rădoi"
-      description: "Freelance Flutter developer building iOS and Android apps plus the backends, admin panels and websites behind them. Co-founder of Teamboard. Working with EU and US teams."
+      title: "Freelance mobile app developer for startups · Victor-Andrei Rădoi"
+      description: "Contract developer building mobile apps end to end: iOS and Android, backend, admin panel and website. From idea to App Store for founders in the EU and US."
     privacy:
       title: "Privacy policy · Victor-Andrei Rădoi"
       description: "What this site collects (only Google Analytics, only if you say yes) and how to change your mind."
@@ -75,7 +75,7 @@ en:
     margin: "hello,"
     eyebrow: "Independent · working with teams in the EU and US"
     h1:
-      kicker: "Freelance Flutter & full-stack engineer."
+      kicker: "Freelance mobile app & product developer."
       main: "I build mobile apps and the systems behind them."
     highlight: "the systems behind them"
     note: "apis, databases, admin panels. websites too"

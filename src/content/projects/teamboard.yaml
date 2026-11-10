@@ -12,8 +12,8 @@ icon: ../../assets/app-icons/teamboard.png
 next: goparty
 
 seo:
-  title: "Teamboard: sports club management app in Flutter · Victor-Andrei Rădoi"
-  description: "The sports club management app I co-founded and built in Flutter: payments, calendar, attendance and stats in one place. Almost 200 kids at Blueshark basketball use it."
+  title: "Teamboard: sports club management app · Victor-Andrei Rădoi"
+  description: "The sports club management app I co-founded and built end to end: payments, calendar, attendance and stats in one place. Almost 200 kids at Blueshark basketball use it."
   og: /og/teamboard.png
 
 platforms:

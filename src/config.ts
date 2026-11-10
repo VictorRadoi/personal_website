@@ -2,10 +2,10 @@
 export const SITE_URL = 'https://rvandrei.com';
 export const SITE_NAME = 'Victor-Andrei Rădoi';
 /** = copy.md seo.home.title / seo.home.description (also in src/content/site.yaml → seo.home). */
-export const SITE_TITLE = 'Freelance Flutter & mobile app developer · Victor-Andrei Rădoi';
+export const SITE_TITLE = 'Freelance mobile app developer for startups · Victor-Andrei Rădoi';
 export const SITE_DESCRIPTION =
-  'Freelance Flutter developer building iOS and Android apps plus the backends, admin panels and websites behind them. Co-founder of Teamboard. Working with EU and US teams.';
-export const JOB_TITLE = 'Freelance Flutter & full-stack engineer';
+  'Contract developer building mobile apps end to end: iOS and Android, backend, admin panel and website. From idea to App Store for founders in the EU and US.';
+export const JOB_TITLE = 'Freelance mobile app & product developer';
 
 export const EMAIL = 'andreiradoi14@gmail.com';
 export const EMAIL_SUBJECT = 'Project enquiry';

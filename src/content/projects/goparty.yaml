@@ -12,8 +12,8 @@ icon: ../../assets/work/goparty/brand/app-icon.png
 next: dream-pivot
 
 seo:
-  title: "GoParty: event ticketing & QR scanner apps in Flutter · Victor-Andrei Rădoi"
-  description: "GoParty is two Flutter apps: one to find events and buy tickets, one for organizers to scan tickets and handle logistics. I'm the founding engineer and built both."
+  title: "GoParty: event ticketing & QR scanner apps · Victor-Andrei Rădoi"
+  description: "GoParty is two mobile apps: one to find events and buy tickets, one for organizers to scan tickets and handle logistics. I'm the founding engineer and built both."
   og: /og/goparty.png
 
 platforms:
